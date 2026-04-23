@@ -193,6 +193,19 @@ CREATE TABLE IF NOT EXISTS user_badges (
   PRIMARY KEY (user_id, badge_id)
 );
 
+-- ------------------------------------------------------------
+-- Descriptor Views (analytics)
+-- ------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS descriptor_views (
+  id            UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  descriptor_id UUID        NOT NULL REFERENCES descriptors(id) ON DELETE CASCADE,
+  user_id       UUID        REFERENCES users(id) ON DELETE SET NULL,
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS descriptor_views_descriptor_idx ON descriptor_views (descriptor_id);
+CREATE INDEX IF NOT EXISTS descriptor_views_created_idx    ON descriptor_views (created_at);
+
 -- Seed default badges
 INSERT INTO badges (name, description, points_threshold, icon) VALUES
   ('First Steps',    'Earned your first points',          10,   '🐣'),
