@@ -4,7 +4,10 @@ const express      = require('express');
 const cookieParser = require('cookie-parser');
 const cors         = require('cors');
 const path         = require('path');
-const authRoutes   = require('./routes/routes');
+const authRoutes        = require('./routes/routes');
+const searchRoutes      = require('./routes/search');
+const submissionRoutes  = require('./routes/submissions');
+const userRoutes        = require('./routes/users');
 
 const app  = express();
 const PORT = process.env.PORT || 3001;
@@ -20,7 +23,10 @@ if (!isProd) {
 app.use(express.json());
 app.use(cookieParser());
 
-app.use('/auth', authRoutes);
+app.use('/auth',             authRoutes);
+app.use('/api/search',      searchRoutes);
+app.use('/api/submissions', submissionRoutes);
+app.use('/api/users',       userRoutes);
 
 if (isProd) {
   const clientDist = path.join(__dirname, '../client/dist');
