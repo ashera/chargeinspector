@@ -91,7 +91,10 @@ export default function Nav({ page, navigate, isAuthenticated, user }) {
         </div>
         <div className="nav-right">
           {isAuthenticated && user && (
-            <span className="nav-pts">{user.total_points ?? 0} pts</span>
+            <>
+              <span className="nav-pts">{user.total_points ?? 0} pts</span>
+              <span style={{ fontSize: '.65rem', color: '#4b4b4b', letterSpacing: '.06em' }}>{user.email}</span>
+            </>
           )}
           {isAuthenticated
             ? <button className="nav-logout" onClick={logout}>Logout</button>
