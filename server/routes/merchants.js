@@ -27,4 +27,23 @@ router.get('/autocomplete', async (req, res) => {
   }
 });
 
+// GET /api/merchants/:id/descriptors
+router.get('/:id/descriptors', async (req, res) => {
+  try {
+    const { rows } = await db.query(
+      `SELECT d.text AS descriptor, s.upvote_count, s.created_at
+       FROM submissions s
+       JOIN descriptors d ON d.id = s.descriptor_id
+       WHERE s.merchant_id = $1
+         AND s.status = 'approved'
+       ORDER BY d.text ASC`,
+      [req.params.id]
+    );
+    return res.json({ descriptors: rows });
+  } catch (err) {
+    console.error('[GET /api/merchants/:id/descriptors]', err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 module.exports = router;
