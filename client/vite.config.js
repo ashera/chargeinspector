@@ -4,7 +4,11 @@ import { execSync } from 'child_process';
 import { version } from './package.json';
 
 let commitHash = 'unknown';
-try { commitHash = execSync('git rev-parse --short HEAD').toString().trim(); } catch { /* no .git in build env */ }
+try {
+  commitHash = process.env.RAILWAY_GIT_COMMIT_SHA
+    ? process.env.RAILWAY_GIT_COMMIT_SHA.slice(0, 7)
+    : execSync('git rev-parse --short HEAD').toString().trim();
+} catch { /* no .git in build env */ }
 
 export default defineConfig({
   plugins: [react()],
