@@ -39,6 +39,37 @@ router.get('/', async (req, res) => {
   }
 });
 
+// GET /api/search/descriptor?q=<exact descriptor text>
+// Returns all approved submissions for a specific descriptor
+router.get('/descriptor', async (req, res) => {
+  const q = (req.query.q || '').trim();
+  if (!q) return res.json({ descriptor: null, submissions: [] });
+
+  try {
+    const { rows } = await db.query(
+      `SELECT
+         d.id   AS descriptor_id,
+         d.text AS descriptor,
+         m.id   AS merchant_id,
+         m.name, m.location, m.website, m.logo_url,
+         s.id   AS submission_id,
+         s.upvote_count,
+         s.created_at
+       FROM submissions s
+       JOIN descriptors d ON d.id = s.descriptor_id
+       JOIN merchants   m ON m.id = s.merchant_id
+       WHERE d.text = $1
+         AND s.status = 'approved'
+       ORDER BY s.upvote_count DESC`,
+      [q]
+    );
+    return res.json({ descriptor: q, submissions: rows });
+  } catch (err) {
+    console.error('[GET /api/search/descriptor]', err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // GET /api/search/autocomplete?q=<partial>
 router.get('/autocomplete', async (req, res) => {
   const q = (req.query.q || '').trim();
