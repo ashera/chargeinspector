@@ -95,12 +95,20 @@ CREATE INDEX IF NOT EXISTS submissions_descriptor_idx ON submissions (descriptor
 CREATE INDEX IF NOT EXISTS submissions_status_idx     ON submissions (status);
 CREATE INDEX IF NOT EXISTS submissions_user_idx       ON submissions (submitted_by);
 
-ALTER TABLE descriptors
-  ADD CONSTRAINT fk_canonical_submission
-  FOREIGN KEY (canonical_submission_id)
-  REFERENCES submissions(id)
-  ON DELETE SET NULL
-  DEFERRABLE INITIALLY DEFERRED;
+DO $$ BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.table_constraints
+    WHERE constraint_name = 'fk_canonical_submission'
+      AND table_name = 'descriptors'
+  ) THEN
+    ALTER TABLE descriptors
+      ADD CONSTRAINT fk_canonical_submission
+      FOREIGN KEY (canonical_submission_id)
+      REFERENCES submissions(id)
+      ON DELETE SET NULL
+      DEFERRABLE INITIALLY DEFERRED;
+  END IF;
+END $$;
 
 -- ------------------------------------------------------------
 -- Votes
