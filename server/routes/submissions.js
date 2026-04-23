@@ -74,7 +74,16 @@ router.post('/', requireAuth, async (req, res) => {
     if (existing.length > 0) {
       const current = existing[0];
       await client.query('ROLLBACK');
-      // Return existing match so client can show conflict UI
+
+      const exactMatch =
+        current.name &&
+        current.name.toLowerCase() === merchantName.trim().toLowerCase() &&
+        (current.location ?? '').toLowerCase() === (merchantLocation?.trim() ?? '').toLowerCase();
+
+      if (exactMatch) {
+        return res.status(200).json({ duplicate: true });
+      }
+
       return res.status(409).json({
         conflict: true,
         existing: current,
