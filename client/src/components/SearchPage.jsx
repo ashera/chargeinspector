@@ -111,21 +111,48 @@ const CSS = `
     cursor: pointer; white-space: nowrap; transition: color .2s, border-color .2s;
   }
   .sp-details-btn:hover { color: #f0ede6; border-color: #4b4b4b; }
+  @keyframes cotd-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(240,180,41,.18), 0 0 18px 0 rgba(240,180,41,.06); }
+    50%       { box-shadow: 0 0 0 4px rgba(240,180,41,.06), 0 0 32px 4px rgba(240,180,41,.14); }
+  }
+  @keyframes cotd-scan {
+    0%   { transform: translateY(-100%); }
+    100% { transform: translateY(200%); }
+  }
   .sp-cotd {
-    max-width: 600px; margin: 1.25rem auto 0;
-    background: #111; border: 1px solid #1e1e1e; border-radius: 3px;
-    padding: .75rem 1.1rem; display: flex; align-items: center; gap: .75rem;
+    max-width: 600px; margin: 1.5rem auto 0;
+    background: linear-gradient(160deg, #141008 0%, #111 60%);
+    border: 1px solid #f0b429;
+    border-radius: 4px;
+    padding: 1.25rem 1.5rem;
+    text-align: center;
+    position: relative; overflow: hidden;
+    animation: cotd-pulse 3s ease-in-out infinite;
   }
+  .sp-cotd::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(to bottom, rgba(240,180,41,.06) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .sp-cotd::after {
+    content: ''; position: absolute; left: 0; right: 0; height: 40%;
+    background: linear-gradient(to bottom, transparent, rgba(240,180,41,.05), transparent);
+    animation: cotd-scan 5s ease-in-out infinite;
+    pointer-events: none;
+  }
+  .sp-cotd-crown { font-size: 1.6rem; line-height: 1; margin-bottom: .4rem; }
   .sp-cotd-label {
-    font-size: .58rem; letter-spacing: .14em; text-transform: uppercase;
-    color: #4b4b4b; white-space: nowrap;
+    font-size: .58rem; letter-spacing: .2em; text-transform: uppercase;
+    color: #9a6f10; margin-bottom: .6rem;
   }
-  .sp-cotd-divider { width: 1px; height: 1rem; background: #1e1e1e; flex-shrink: 0; }
   .sp-cotd-user {
-    font-family: 'DM Mono', monospace; font-size: .75rem;
-    color: #6ee7a0; letter-spacing: .04em;
+    font-family: 'DM Serif Display', serif; font-size: 1.6rem;
+    color: #f0b429; letter-spacing: .02em; line-height: 1.1;
+    margin-bottom: .35rem;
   }
-  .sp-cotd-count { font-size: .65rem; color: #2e2e2e; margin-left: auto; white-space: nowrap; }
+  .sp-cotd-count {
+    font-size: .65rem; color: #6a5018; letter-spacing: .1em; text-transform: uppercase;
+  }
 `;
 
 export default function SearchPage({ navigate }) {
@@ -246,10 +273,12 @@ export default function SearchPage({ navigate }) {
 
         {contributor && (
           <div className="sp-cotd">
-            <span className="sp-cotd-label">Contributor of the day</span>
-            <span className="sp-cotd-divider" />
-            <span className="sp-cotd-user">{contributor.username}</span>
-            <span className="sp-cotd-count">{contributor.submission_count} submission{contributor.submission_count !== 1 ? 's' : ''}</span>
+            <div className="sp-cotd-crown">&#x1F451;</div>
+            <div className="sp-cotd-label">Contributor of the day</div>
+            <div className="sp-cotd-user">{contributor.username}</div>
+            <div className="sp-cotd-count">
+              {contributor.submission_count} submission{contributor.submission_count !== 1 ? 's' : ''} in the last 24 hours
+            </div>
           </div>
         )}
       </div>
