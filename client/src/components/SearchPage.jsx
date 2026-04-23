@@ -171,9 +171,10 @@ export default function SearchPage({ navigate }) {
   const [activeIdx, setActiveIdx]   = useState(-1);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [contributor, setContributor] = useState(undefined);
-  const inputRef    = useRef(null);
-  const debounceRef = useRef(null);
-  const wrapRef     = useRef(null);
+  const inputRef       = useRef(null);
+  const debounceRef    = useRef(null);
+  const wrapRef        = useRef(null);
+  const suppressACRef  = useRef(false);
 
   useEffect(() => {
     fetch('/api/submissions/contributor-of-the-day')
@@ -202,6 +203,7 @@ export default function SearchPage({ navigate }) {
   // Debounced autocomplete
   useEffect(() => {
     clearTimeout(debounceRef.current);
+    if (suppressACRef.current) { suppressACRef.current = false; return; }
     if (query.trim().length < 2) { setSuggestions([]); setShowSuggestions(false); return; }
     debounceRef.current = setTimeout(async () => {
       try {
@@ -223,7 +225,7 @@ export default function SearchPage({ navigate }) {
   }, []);
 
   const pickSuggestion = (descriptor) => {
-    clearTimeout(debounceRef.current);
+    suppressACRef.current = true;
     setQuery(descriptor);
     setSuggestions([]);
     setShowSuggestions(false);
