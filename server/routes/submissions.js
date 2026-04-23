@@ -72,21 +72,27 @@ router.post('/', requireAuth, async (req, res) => {
     );
 
     if (existing.length > 0) {
-      const current = existing[0];
+      // Check all submissions for this descriptor (not just canonical) for an exact merchant match
+      const { rows: exact } = await client.query(
+        `SELECT 1 FROM submissions s
+         JOIN descriptors d ON d.id = s.descriptor_id
+         JOIN merchants   m ON m.id = s.merchant_id
+         WHERE d.text ILIKE $1
+           AND lower(m.name) = lower($2)
+           AND lower(COALESCE(m.location, '')) = lower(COALESCE($3, ''))
+         LIMIT 1`,
+        [descriptor.trim(), merchantName.trim(), merchantLocation?.trim() || null]
+      );
+
       await client.query('ROLLBACK');
 
-      const exactMatch =
-        current.name &&
-        current.name.toLowerCase() === merchantName.trim().toLowerCase() &&
-        (current.location ?? '').toLowerCase() === (merchantLocation?.trim() ?? '').toLowerCase();
-
-      if (exactMatch) {
+      if (exact.length > 0) {
         return res.status(200).json({ duplicate: true });
       }
 
       return res.status(409).json({
         conflict: true,
-        existing: current,
+        existing: existing[0],
         message: 'A submission already exists for this descriptor.',
       });
     }
