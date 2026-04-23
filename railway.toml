@@ -2,4 +2,4 @@
 buildCommand = "npm run build"
 
 [deploy]
-startCommand = "npm start"
+startCommand = "node server/migrate.js && npm start"
