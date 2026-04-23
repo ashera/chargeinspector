@@ -8,12 +8,14 @@ import LeaderboardPage from './components/LeaderboardPage.jsx';
 import AdminPage from './components/AdminPage.jsx';
 import MerchantDetailsPage from './components/MerchantDetailsPage.jsx';
 import PointsHistoryPage from './components/PointsHistoryPage.jsx';
+import DescriptorDetailsPage from './components/DescriptorDetailsPage.jsx';
 import Nav from './components/Nav.jsx';
 
 function Router() {
   const { isAuthenticated, loading, user } = useAuth();
   const [page, setPage]           = useState('search');
   const [pageState, setPageState] = useState({});
+  const [history, setHistory]     = useState([]);
 
   if (loading) return <div style={{ color: '#f0ede6', padding: '2rem' }}>Loading…</div>;
 
@@ -21,7 +23,23 @@ function Router() {
     return <AuthPage onAuth={() => setPage('search')} />;
   }
 
-  const navigate = (p, state = {}) => { setPage(p); setPageState(state); };
+  const navigate = (p, state = {}) => {
+    if (p === -1) {
+      const prev = history[history.length - 1];
+      if (prev) {
+        setHistory(h => h.slice(0, -1));
+        setPage(prev.page);
+        setPageState(prev.state);
+      } else {
+        setPage('search');
+        setPageState({});
+      }
+      return;
+    }
+    setHistory(h => [...h, { page, state: pageState }]);
+    setPage(p);
+    setPageState(state);
+  };
 
   return (
     <div style={{ minHeight: '100dvh', background: '#0a0a0a', color: '#f0ede6', display: 'flex', flexDirection: 'column' }}>
@@ -31,6 +49,7 @@ function Router() {
         {page === 'submit'      && (isAuthenticated ? <SubmitPage navigate={navigate} initialDescriptor={pageState.descriptor ?? ''} /> : <AuthPage onAuth={() => setPage('submit')} />)}
         {page === 'profile'     && (isAuthenticated ? <ProfilePage /> : <AuthPage onAuth={() => setPage('profile')} />)}
         {page === 'merchant'    && <MerchantDetailsPage merchant={pageState.merchant} navigate={navigate} />}
+        {page === 'descriptor'  && <DescriptorDetailsPage descriptor={pageState.descriptor} navigate={navigate} />}
         {page === 'points'      && <PointsHistoryPage totalPoints={user?.total_points} />}
         {page === 'leaderboard' && <LeaderboardPage />}
         {page === 'admin'       && user?.role === 'admin' && <AdminPage />}

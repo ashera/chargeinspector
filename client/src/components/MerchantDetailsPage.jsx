@@ -63,13 +63,23 @@ const CSS = `
   }
   .md-descriptor-list { list-style: none; padding: 0; margin: 0; }
   .md-descriptor-item {
-    display: flex; align-items: center; justify-content: space-between;
+    display: flex; align-items: center; gap: 1rem;
     padding: .65rem 0; border-bottom: 1px solid #111;
-    font-family: 'DM Mono', monospace; font-size: .75rem;
-    letter-spacing: .08em; color: #6ee7a0;
   }
   .md-descriptor-item:last-child { border-bottom: none; }
-  .md-descriptor-votes { font-size: .65rem; color: #2e2e2e; letter-spacing: 0; }
+  .md-descriptor-text {
+    font-family: 'DM Mono', monospace; font-size: .75rem;
+    letter-spacing: .08em; color: #6ee7a0; flex: 1;
+  }
+  .md-descriptor-votes { font-size: .65rem; color: #2e2e2e; white-space: nowrap; }
+  .md-descriptor-btn {
+    padding: .4rem .85rem; border: 1px solid #1e1e1e; border-radius: 2px;
+    background: none; color: #4b4b4b; font-family: 'DM Mono', monospace;
+    font-size: .58rem; letter-spacing: .1em; text-transform: uppercase;
+    cursor: pointer; white-space: nowrap; transition: color .2s, border-color .2s;
+    flex-shrink: 0;
+  }
+  .md-descriptor-btn:hover { color: #f0ede6; border-color: #4b4b4b; }
 `;
 
 export default function MerchantDetailsPage({ merchant, navigate }) {
@@ -109,7 +119,7 @@ export default function MerchantDetailsPage({ merchant, navigate }) {
     <>
       <style>{CSS}</style>
 
-      <button className="md-back" onClick={() => navigate('search')}>← Back to search</button>
+      <button className="md-back" onClick={() => navigate(-1)}>← Back</button>
 
       <div className="md-header">
         {merchant.logo_url
@@ -152,8 +162,14 @@ export default function MerchantDetailsPage({ merchant, navigate }) {
           <ul className="md-descriptor-list">
             {descriptors.map(d => (
               <li key={d.descriptor} className="md-descriptor-item">
-                <span>{d.descriptor}</span>
+                <span className="md-descriptor-text">{d.descriptor}</span>
                 <span className="md-descriptor-votes">{d.upvote_count} confirmation{d.upvote_count !== 1 ? 's' : ''}</span>
+                <button
+                  className="md-descriptor-btn"
+                  onClick={() => navigate('descriptor', { descriptor: d.descriptor })}
+                >
+                  View details
+                </button>
               </li>
             ))}
           </ul>
