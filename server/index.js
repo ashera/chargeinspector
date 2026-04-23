@@ -10,6 +10,7 @@ const authRoutes        = require('./routes/routes');
 const searchRoutes      = require('./routes/search');
 const submissionRoutes  = require('./routes/submissions');
 const userRoutes        = require('./routes/users');
+const merchantRoutes    = require('./routes/merchants');
 
 const app  = express();
 const PORT = process.env.PORT || 3001;
@@ -35,6 +36,7 @@ app.use('/auth',             authRoutes);
 app.use('/api/search',      searchRoutes);
 app.use('/api/submissions', submissionRoutes);
 app.use('/api/users',       userRoutes);
+app.use('/api/merchants',   merchantRoutes);
 
 if (isProd) {
   const clientDist = path.join(__dirname, '../client/dist');
