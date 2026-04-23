@@ -133,7 +133,7 @@ export default function SubmitPage({ navigate, initialDescriptor }) {
   return (
     <>
       <style>{CSS}</style>
-      <h1 className="sub-title">Submit a match</h1>
+      <h1 className="sub-title">Submit a new billing descriptor</h1>
       <p className="sub-desc">
         Know who's behind a confusing bank charge? Submit the billing descriptor and merchant
         details to help others identify it.

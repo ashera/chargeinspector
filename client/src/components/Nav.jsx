@@ -65,7 +65,7 @@ export default function Nav({ page, navigate, isAuthenticated, user }) {
 
   const links = [
     { key: 'search',      label: 'Search' },
-    { key: 'submit',      label: 'Submit' },
+    { key: 'submit',      label: 'Contribute' },
     { key: 'leaderboard', label: 'Leaderboard' },
     ...(isAuthenticated ? [{ key: 'profile', label: 'Profile' }] : []),
     ...(user?.role === 'admin' ? [{ key: 'admin', label: 'Admin' }] : []),
