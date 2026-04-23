@@ -1,5 +1,16 @@
 import { useState } from 'react';
 import { AuthProvider, useAuth } from './hooks/useAuth.jsx';
+
+const GLOBAL_CSS = `
+  *, *::before, *::after { box-sizing: border-box; }
+  .app-main {
+    flex: 1; max-width: 900px; width: 100%;
+    margin: 0 auto; padding: 2rem 1.5rem;
+  }
+  @media (max-width: 480px) {
+    .app-main { padding: 1.5rem 1rem; }
+  }
+`;
 import AuthPage from './components/AuthPage.jsx';
 import SearchPage from './components/SearchPage.jsx';
 import SubmitPage from './components/SubmitPage.jsx';
@@ -43,8 +54,9 @@ function Router() {
 
   return (
     <div style={{ minHeight: '100dvh', background: '#0a0a0a', color: '#f0ede6', display: 'flex', flexDirection: 'column' }}>
+      <style>{GLOBAL_CSS}</style>
       <Nav page={page} navigate={navigate} isAuthenticated={isAuthenticated} user={user} onPointsClick={() => navigate('points')} />
-      <main style={{ flex: 1, maxWidth: '900px', width: '100%', margin: '0 auto', padding: '2rem 1.5rem' }}>
+      <main className="app-main">
         {page === 'search'      && <SearchPage navigate={navigate} />}
         {page === 'submit'      && (isAuthenticated ? <SubmitPage navigate={navigate} initialDescriptor={pageState.descriptor ?? ''} /> : <AuthPage onAuth={() => setPage('submit')} />)}
         {page === 'profile'     && (isAuthenticated ? <ProfilePage /> : <AuthPage onAuth={() => setPage('profile')} />)}
