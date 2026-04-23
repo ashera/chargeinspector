@@ -57,6 +57,10 @@ const CSS = `
   .md-msg { font-size: .7rem; margin-top: .75rem; }
   .md-msg.ok  { color: #6ee7a0; }
   .md-msg.err { color: #e05c5c; }
+  .md-map {
+    width: 100%; height: 300px; border-radius: 3px;
+    border: 1px solid #1e1e1e; display: block;
+  }
 `;
 
 export default function MerchantDetailsPage({ merchant, navigate }) {
@@ -124,6 +128,20 @@ export default function MerchantDetailsPage({ merchant, navigate }) {
           </span>
         </div>
       </div>
+
+      {merchant.location && (
+        <div className="md-section">
+          <div className="md-section-title">Location</div>
+          <iframe
+            className="md-map"
+            title="Merchant location"
+            src={`https://maps.google.com/maps?q=${encodeURIComponent(`${merchant.name} ${merchant.location}`)}&output=embed&z=15`}
+            allowFullScreen
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+          />
+        </div>
+      )}
 
       <div className="md-section">
         <div className="md-section-title">Community confirmations</div>
