@@ -159,23 +159,34 @@ export default function SearchPage({ navigate }) {
               </p>
             </div>
           ) : (
-            results.map(r => (
-              <div key={r.descriptor_id} className="sp-card">
-                {r.logo_url
-                  ? <img className="sp-logo" src={r.logo_url} alt={r.name} />
-                  : <div className="sp-logo-placeholder">🏪</div>
-                }
-                <div className="sp-card-body">
-                  <div className="sp-descriptor">{r.descriptor}</div>
-                  <div className="sp-merchant-name">{r.name}</div>
-                  <div className="sp-meta">
-                    {r.location && <span>📍 {r.location}</span>}
-                    {r.website  && <a href={r.website} target="_blank" rel="noreferrer">🌐 {r.website}</a>}
+            <>
+              {results.map(r => (
+                <div key={r.descriptor_id} className="sp-card">
+                  {r.logo_url
+                    ? <img className="sp-logo" src={r.logo_url} alt={r.name} />
+                    : <div className="sp-logo-placeholder">🏪</div>
+                  }
+                  <div className="sp-card-body">
+                    <div className="sp-descriptor">{r.descriptor}</div>
+                    <div className="sp-merchant-name">{r.name}</div>
+                    <div className="sp-meta">
+                      {r.location && <span>📍 {r.location}</span>}
+                      {r.website  && <a href={r.website} target="_blank" rel="noreferrer">🌐 {r.website}</a>}
+                    </div>
+                    <div className="sp-votes">{r.upvote_count} confirmation{r.upvote_count !== 1 ? 's' : ''}</div>
                   </div>
-                  <div className="sp-votes">{r.upvote_count} confirmation{r.upvote_count !== 1 ? 's' : ''}</div>
                 </div>
-              </div>
-            ))
+              ))}
+              <p style={{ textAlign: 'center', fontSize: '.75rem', color: '#4b4b4b', marginTop: '1.5rem' }}>
+                Not the right match?{' '}
+                <span
+                  style={{ color: '#6ee7a0', cursor: 'pointer' }}
+                  onClick={() => navigate('submit', { descriptor: query })}
+                >
+                  Submit a new one →
+                </span>
+              </p>
+            </>
           )}
         </div>
       )}
