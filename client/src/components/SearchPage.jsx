@@ -152,7 +152,7 @@ export default function SearchPage({ navigate }) {
                 Know who this is?{' '}
                 <span
                   style={{ color: '#6ee7a0', cursor: 'pointer' }}
-                  onClick={() => navigate('submit')}
+                  onClick={() => navigate('submit', { descriptor: query })}
                 >
                   Submit a match →
                 </span>
