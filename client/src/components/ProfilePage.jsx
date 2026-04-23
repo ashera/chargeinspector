@@ -33,6 +33,11 @@ const CSS = `
   .prof-status-approved { color: #6ee7a0; }
   .prof-status-pending  { color: #e0c05c; }
   .prof-status-rejected { color: #e05c5c; }
+  .prof-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .prof-table { min-width: 480px; }
+  @media (max-width: 500px) {
+    .prof-header { gap: 1rem; }
+  }
 `;
 
 export default function ProfilePage() {
@@ -84,7 +89,7 @@ export default function ProfilePage() {
         {submissions.length === 0
           ? <p style={{ fontSize: '.75rem', color: '#4b4b4b' }}>No submissions yet.</p>
           : (
-            <table className="prof-table">
+            <div className="prof-table-wrap"><table className="prof-table">
               <thead>
                 <tr>
                   <th>Descriptor</th>
@@ -103,7 +108,7 @@ export default function ProfilePage() {
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </table></div>
           )
         }
       </div>

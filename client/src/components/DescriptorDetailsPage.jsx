@@ -57,6 +57,11 @@ const CSS = `
   }
   .dd-btn:hover { color: #f0ede6; border-color: #4b4b4b; }
   .dd-empty { font-size: .75rem; color: #4b4b4b; padding: 2rem 0; }
+  @media (max-width: 500px) {
+    .dd-card { flex-wrap: wrap; }
+    .dd-card-action { width: 100%; margin-left: 0; }
+    .dd-btn { width: 100%; text-align: center; }
+  }
 `;
 
 const CustomTooltip = ({ active, payload, label }) => {

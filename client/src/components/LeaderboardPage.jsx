@@ -17,6 +17,8 @@ const CSS = `
   .lb-email { color: #f0ede6; }
   .lb-pts { color: #6ee7a0; font-weight: 500; }
   .lb-badge { font-size: .75rem; }
+  .lb-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .lb-table { min-width: 400px; }
 `;
 
 export default function LeaderboardPage() {
@@ -48,7 +50,7 @@ export default function LeaderboardPage() {
         : rows.length === 0
           ? <p style={{ color: '#4b4b4b', fontSize: '.75rem' }}>No contributors yet — be the first to submit!</p>
           : (
-            <table className="lb-table">
+            <div className="lb-table-wrap"><table className="lb-table">
               <thead>
                 <tr>
                   <th></th>
@@ -69,7 +71,7 @@ export default function LeaderboardPage() {
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </table></div>
           )
       }
     </>

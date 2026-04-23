@@ -43,6 +43,12 @@ const CSS = `
   .ph-badge-name { font-family: 'DM Serif Display', serif; font-size: 1.1rem; margin-bottom: .15rem; }
   .ph-badge-desc { font-size: .7rem; color: #4b4b4b; }
   .ph-badge-date { font-size: .65rem; color: #2e2e2e; margin-left: auto; white-space: nowrap; align-self: flex-start; }
+  .ph-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .ph-table { min-width: 460px; }
+  @media (max-width: 500px) {
+    .ph-badge { flex-wrap: wrap; }
+    .ph-badge-date { margin-left: 0; }
+  }
 `;
 
 const REASON_LABEL = {
@@ -93,7 +99,7 @@ export default function PointsHistoryPage({ totalPoints }) {
       )}
 
       {!loading && rows.length > 0 && (
-        <table className="ph-table">
+        <div className="ph-table-wrap"><table className="ph-table">
           <thead>
             <tr>
               <th>Descriptor / Merchant</th>
@@ -119,7 +125,7 @@ export default function PointsHistoryPage({ totalPoints }) {
               </tr>
             ))}
           </tbody>
-        </table>
+        </table></div>
       )}
     </>
   );

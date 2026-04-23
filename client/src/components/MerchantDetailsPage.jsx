@@ -80,6 +80,14 @@ const CSS = `
     flex-shrink: 0;
   }
   .md-descriptor-btn:hover { color: #f0ede6; border-color: #4b4b4b; }
+  @media (max-width: 500px) {
+    .md-header { gap: 1rem; }
+    .md-name { font-size: 1.5rem; }
+    .md-votes { flex-direction: column; gap: 1rem; }
+    .md-vote-btn { width: 100%; }
+    .md-map { height: 220px; }
+    .md-descriptor-item { flex-wrap: wrap; }
+  }
 `;
 
 export default function MerchantDetailsPage({ merchant, navigate }) {

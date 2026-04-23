@@ -111,6 +111,13 @@ const CSS = `
     cursor: pointer; white-space: nowrap; transition: color .2s, border-color .2s;
   }
   .sp-details-btn:hover { color: #f0ede6; border-color: #4b4b4b; }
+  @media (max-width: 480px) {
+    .sp-form { flex-direction: column; }
+    .sp-btn { width: 100%; }
+    .sp-card { flex-wrap: wrap; gap: 1rem; }
+    .sp-card-action { width: 100%; margin-left: 0; }
+    .sp-details-btn { width: 100%; text-align: center; }
+  }
   @keyframes cotd-pulse {
     0%, 100% { box-shadow: 0 0 0 0 rgba(240,180,41,.18), 0 0 18px 0 rgba(240,180,41,.06); }
     50%       { box-shadow: 0 0 0 4px rgba(240,180,41,.06), 0 0 32px 4px rgba(240,180,41,.14); }
