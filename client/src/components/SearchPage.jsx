@@ -111,6 +111,21 @@ const CSS = `
     cursor: pointer; white-space: nowrap; transition: color .2s, border-color .2s;
   }
   .sp-details-btn:hover { color: #f0ede6; border-color: #4b4b4b; }
+  .sp-cotd {
+    max-width: 600px; margin: 1.25rem auto 0;
+    background: #111; border: 1px solid #1e1e1e; border-radius: 3px;
+    padding: .75rem 1.1rem; display: flex; align-items: center; gap: .75rem;
+  }
+  .sp-cotd-label {
+    font-size: .58rem; letter-spacing: .14em; text-transform: uppercase;
+    color: #4b4b4b; white-space: nowrap;
+  }
+  .sp-cotd-divider { width: 1px; height: 1rem; background: #1e1e1e; flex-shrink: 0; }
+  .sp-cotd-user {
+    font-family: 'DM Mono', monospace; font-size: .75rem;
+    color: #6ee7a0; letter-spacing: .04em;
+  }
+  .sp-cotd-count { font-size: .65rem; color: #2e2e2e; margin-left: auto; white-space: nowrap; }
 `;
 
 export default function SearchPage({ navigate }) {
@@ -121,9 +136,17 @@ export default function SearchPage({ navigate }) {
   const [suggestions, setSuggestions] = useState([]);
   const [activeIdx, setActiveIdx]   = useState(-1);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [contributor, setContributor] = useState(undefined);
   const inputRef    = useRef(null);
   const debounceRef = useRef(null);
   const wrapRef     = useRef(null);
+
+  useEffect(() => {
+    fetch('/api/submissions/contributor-of-the-day')
+      .then(r => r.json())
+      .then(d => setContributor(d.contributor ?? null))
+      .catch(() => setContributor(null));
+  }, []);
 
   const search = useCallback(async (q = query) => {
     const term = q.trim();
@@ -220,6 +243,15 @@ export default function SearchPage({ navigate }) {
             </div>
           )}
         </div>
+
+        {contributor && (
+          <div className="sp-cotd">
+            <span className="sp-cotd-label">Contributor of the day</span>
+            <span className="sp-cotd-divider" />
+            <span className="sp-cotd-user">{contributor.username}</span>
+            <span className="sp-cotd-count">{contributor.submission_count} submission{contributor.submission_count !== 1 ? 's' : ''}</span>
+          </div>
+        )}
       </div>
 
       {results !== null && (

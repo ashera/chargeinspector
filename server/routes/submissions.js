@@ -249,6 +249,27 @@ router.post('/:id/vote', requireAuth, async (req, res) => {
   }
 });
 
+// GET /api/submissions/contributor-of-the-day  (public)
+router.get('/contributor-of-the-day', async (req, res) => {
+  try {
+    const { rows } = await db.query(
+      `SELECT u.email, COUNT(s.id)::int AS submission_count
+       FROM submissions s
+       JOIN users u ON u.id = s.submitted_by
+       WHERE s.created_at > NOW() - INTERVAL '24 hours'
+       GROUP BY u.id, u.email
+       ORDER BY submission_count DESC
+       LIMIT 1`
+    );
+    if (!rows.length) return res.json({ contributor: null });
+    const { email, submission_count } = rows[0];
+    return res.json({ contributor: { username: email.split('@')[0], submission_count } });
+  } catch (err) {
+    console.error('[GET /api/submissions/contributor-of-the-day]', err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // GET /api/submissions/pending  (admin)
 router.get('/pending', requireAuth, requireRole('admin', 'moderator'), async (req, res) => {
   try {
