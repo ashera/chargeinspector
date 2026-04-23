@@ -303,17 +303,37 @@ router.put('/:id/approve', requireAuth, requireRole('admin', 'moderator'), async
 
 // PUT /api/submissions/:id/reject  (admin)
 router.put('/:id/reject', requireAuth, requireRole('admin', 'moderator'), async (req, res) => {
+  const client = await db.connect();
   try {
-    const { rows: [submission] } = await db.query(
+    await client.query('BEGIN');
+
+    const { rows: [submission] } = await client.query(
       `UPDATE submissions SET status = 'rejected' WHERE id = $1 AND status = 'pending'
-       RETURNING id`,
+       RETURNING id, merchant_id`,
       [req.params.id]
     );
-    if (!submission) return res.status(404).json({ error: 'Pending submission not found' });
+    if (!submission) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ error: 'Pending submission not found' });
+    }
+
+    // Delete the merchant if no other submissions reference it
+    await client.query(
+      `DELETE FROM merchants WHERE id = $1
+       AND NOT EXISTS (
+         SELECT 1 FROM submissions WHERE merchant_id = $1 AND id <> $2
+       )`,
+      [submission.merchant_id, submission.id]
+    );
+
+    await client.query('COMMIT');
     return res.json({ message: 'Submission rejected' });
   } catch (err) {
+    await client.query('ROLLBACK');
     console.error('[PUT /api/submissions/:id/reject]', err);
     return res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    client.release();
   }
 });
 
