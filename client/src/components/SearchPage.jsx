@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { useAuth } from '../hooks/useAuth.jsx';
 
 const CSS = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&display=swap');
@@ -113,6 +114,7 @@ const CSS = `
 `;
 
 export default function SearchPage({ navigate }) {
+  const { apiFetch } = useAuth();
   const [query, setQuery]           = useState('');
   const [results, setResults]       = useState(null);
   const [busy, setBusy]             = useState(false);
@@ -253,7 +255,16 @@ export default function SearchPage({ navigate }) {
                     <div className="sp-votes">{r.upvote_count} confirmation{r.upvote_count !== 1 ? 's' : ''}</div>
                   </div>
                   <div className="sp-card-action">
-                    <button className="sp-details-btn" onClick={() => navigate('merchant', { merchant: r })}>
+                    <button
+                      className="sp-details-btn"
+                      onClick={() => {
+                        apiFetch('/api/analytics/view', {
+                          method: 'POST',
+                          body: JSON.stringify({ descriptorId: r.descriptor_id }),
+                        }).catch(() => {});
+                        navigate('merchant', { merchant: r });
+                      }}
+                    >
                       View details
                     </button>
                   </div>
