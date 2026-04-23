@@ -66,7 +66,7 @@ function Router() {
         {page === 'leaderboard' && <LeaderboardPage />}
         {page === 'admin'       && user?.role === 'admin' && <AdminPage />}
       </main>
-      <footer style={{ borderTop: '1px solid #1e1e1e', padding: '1.25rem 1.5rem', textAlign: 'center', fontSize: '.65rem', color: '#2e2e2e', fontFamily: "'DM Mono', monospace", letterSpacing: '.08em' }}>
+      <footer style={{ borderTop: '1px solid #1e1e1e', padding: '1.25rem 1.5rem', textAlign: 'center', fontSize: '.65rem', color: '#4b4b4b', fontFamily: "'DM Mono', monospace", letterSpacing: '.08em' }}>
         ChargeInspector v{__APP_VERSION__}
       </footer>
     </div>
