@@ -3,7 +3,8 @@ import react from '@vitejs/plugin-react';
 import { execSync } from 'child_process';
 import { version } from './package.json';
 
-const commitHash = execSync('git rev-parse --short HEAD').toString().trim();
+let commitHash = 'unknown';
+try { commitHash = execSync('git rev-parse --short HEAD').toString().trim(); } catch { /* no .git in build env */ }
 
 export default defineConfig({
   plugins: [react()],
