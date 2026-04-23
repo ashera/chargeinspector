@@ -1,5 +1,5 @@
 import { useAuth } from '../hooks/useAuth.jsx';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const CSS = `
   .md-back {
@@ -61,13 +61,30 @@ const CSS = `
     width: 100%; height: 300px; border-radius: 3px;
     border: 1px solid #1e1e1e; display: block;
   }
+  .md-descriptor-list { list-style: none; padding: 0; margin: 0; }
+  .md-descriptor-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: .65rem 0; border-bottom: 1px solid #111;
+    font-family: 'DM Mono', monospace; font-size: .75rem;
+    letter-spacing: .08em; color: #6ee7a0;
+  }
+  .md-descriptor-item:last-child { border-bottom: none; }
+  .md-descriptor-votes { font-size: .65rem; color: #2e2e2e; letter-spacing: 0; }
 `;
 
 export default function MerchantDetailsPage({ merchant, navigate }) {
   const { isAuthenticated, apiFetch } = useAuth();
-  const [votes, setVotes]   = useState(merchant.upvote_count);
-  const [busy, setBusy]     = useState(false);
-  const [msg, setMsg]       = useState(null);
+  const [votes, setVotes]         = useState(merchant.upvote_count);
+  const [busy, setBusy]           = useState(false);
+  const [msg, setMsg]             = useState(null);
+  const [descriptors, setDescriptors] = useState([]);
+
+  useEffect(() => {
+    fetch(`/api/merchants/${merchant.merchant_id}/descriptors`)
+      .then(r => r.json())
+      .then(d => setDescriptors(d.descriptors || []))
+      .catch(() => {});
+  }, [merchant.merchant_id]);
 
   const vote = async () => {
     setBusy(true);
@@ -128,6 +145,20 @@ export default function MerchantDetailsPage({ merchant, navigate }) {
           </span>
         </div>
       </div>
+
+      {descriptors.length > 0 && (
+        <div className="md-section">
+          <div className="md-section-title">Linked billing descriptors</div>
+          <ul className="md-descriptor-list">
+            {descriptors.map(d => (
+              <li key={d.descriptor} className="md-descriptor-item">
+                <span>{d.descriptor}</span>
+                <span className="md-descriptor-votes">{d.upvote_count} confirmation{d.upvote_count !== 1 ? 's' : ''}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {merchant.location && (
         <div className="md-section">
