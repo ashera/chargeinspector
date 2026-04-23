@@ -43,6 +43,29 @@ router.get('/me/stats', requireAuth, async (req, res) => {
   }
 });
 
+// GET /api/users/me/points
+router.get('/me/points', requireAuth, async (req, res) => {
+  try {
+    const { rows } = await db.query(
+      `SELECT
+         pl.id, pl.amount, pl.reason, pl.created_at,
+         d.text  AS descriptor,
+         m.name  AS merchant_name
+       FROM points_log pl
+       JOIN submissions s ON s.id = pl.reference_id
+       JOIN descriptors d ON d.id = s.descriptor_id
+       JOIN merchants   m ON m.id = s.merchant_id
+       WHERE pl.user_id = $1
+       ORDER BY pl.created_at DESC`,
+      [req.user.sub]
+    );
+    return res.json({ points: rows });
+  } catch (err) {
+    console.error('[GET /api/users/me/points]', err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // GET /api/users/leaderboard
 router.get('/leaderboard', async (req, res) => {
   try {
