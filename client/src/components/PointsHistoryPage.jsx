@@ -33,6 +33,16 @@ const CSS = `
   }
   .ph-total-label { font-size: .65rem; color: #4b4b4b; letter-spacing: .1em; text-transform: uppercase; }
   .ph-total-value { font-family: 'DM Serif Display', serif; font-size: 1.75rem; color: #6ee7a0; }
+  .ph-badge {
+    display: flex; align-items: center; gap: 1rem;
+    background: #111; border: 1px solid #1e1e1e; border-radius: 3px;
+    padding: 1rem 1.25rem; margin-bottom: 2rem;
+  }
+  .ph-badge-icon { font-size: 2rem; flex-shrink: 0; }
+  .ph-badge-label { font-size: .55rem; letter-spacing: .14em; text-transform: uppercase; color: #4b4b4b; margin-bottom: .2rem; }
+  .ph-badge-name { font-family: 'DM Serif Display', serif; font-size: 1.1rem; margin-bottom: .15rem; }
+  .ph-badge-desc { font-size: .7rem; color: #4b4b4b; }
+  .ph-badge-date { font-size: .65rem; color: #2e2e2e; margin-left: auto; white-space: nowrap; align-self: flex-start; }
 `;
 
 const REASON_LABEL = {
@@ -41,14 +51,15 @@ const REASON_LABEL = {
 };
 
 export default function PointsHistoryPage({ totalPoints }) {
-  const { apiFetch }          = useAuth();
-  const [rows, setRows]       = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { apiFetch }              = useAuth();
+  const [rows, setRows]           = useState([]);
+  const [latestBadge, setLatestBadge] = useState(null);
+  const [loading, setLoading]     = useState(true);
 
   useEffect(() => {
     apiFetch('/api/users/me/points')
       .then(r => r.json())
-      .then(d => setRows(d.points || []))
+      .then(d => { setRows(d.points || []); setLatestBadge(d.latestBadge ?? null); })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
@@ -62,6 +73,18 @@ export default function PointsHistoryPage({ totalPoints }) {
         <span className="ph-total-label">Total</span>
         <span className="ph-total-value">{totalPoints ?? 0} pts</span>
       </div>
+
+      {!loading && latestBadge && (
+        <div className="ph-badge">
+          <div className="ph-badge-icon">{latestBadge.icon}</div>
+          <div>
+            <div className="ph-badge-label">Most recent badge</div>
+            <div className="ph-badge-name">{latestBadge.name}</div>
+            <div className="ph-badge-desc">{latestBadge.description}</div>
+          </div>
+          <div className="ph-badge-date">{new Date(latestBadge.awarded_at).toLocaleDateString()}</div>
+        </div>
+      )}
 
       {loading && <p className="ph-empty">Loading…</p>}
 
