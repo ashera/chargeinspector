@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth.jsx';
 
 const CSS = `
@@ -108,6 +108,12 @@ const CSS = `
 export default function Nav({ page, navigate, isAuthenticated, user, onPointsClick }) {
   const { logout } = useAuth();
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    const onResize = () => { if (window.innerWidth > 640) setOpen(false); };
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
 
   const links = [
     { key: 'search',      label: 'Search' },
