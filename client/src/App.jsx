@@ -10,7 +10,8 @@ import Nav from './components/Nav.jsx';
 
 function Router() {
   const { isAuthenticated, loading, user } = useAuth();
-  const [page, setPage] = useState('search');
+  const [page, setPage]           = useState('search');
+  const [pageState, setPageState] = useState({});
 
   if (loading) return <div style={{ color: '#f0ede6', padding: '2rem' }}>Loading…</div>;
 
@@ -18,14 +19,14 @@ function Router() {
     return <AuthPage onAuth={() => setPage('search')} />;
   }
 
-  const navigate = (p) => setPage(p);
+  const navigate = (p, state = {}) => { setPage(p); setPageState(state); };
 
   return (
     <div style={{ minHeight: '100dvh', background: '#0a0a0a', color: '#f0ede6' }}>
       <Nav page={page} navigate={navigate} isAuthenticated={isAuthenticated} user={user} />
       <main style={{ maxWidth: '900px', margin: '0 auto', padding: '2rem 1.5rem' }}>
         {page === 'search'      && <SearchPage navigate={navigate} />}
-        {page === 'submit'      && (isAuthenticated ? <SubmitPage navigate={navigate} /> : <AuthPage onAuth={() => setPage('submit')} />)}
+        {page === 'submit'      && (isAuthenticated ? <SubmitPage navigate={navigate} initialDescriptor={pageState.descriptor ?? ''} /> : <AuthPage onAuth={() => setPage('submit')} />)}
         {page === 'profile'     && (isAuthenticated ? <ProfilePage /> : <AuthPage onAuth={() => setPage('profile')} />)}
         {page === 'leaderboard' && <LeaderboardPage />}
         {page === 'admin'       && user?.role === 'admin' && <AdminPage />}
