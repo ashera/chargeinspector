@@ -135,7 +135,7 @@ export default function SubmitPage({ navigate, initialDescriptor }) {
 
       {conflict && (
         <div className="sub-conflict">
-          <div className="sub-conflict-title">⚠ Existing match found</div>
+          <div className="sub-conflict-title">⚠ A similar merchant already exists</div>
           <div className="sub-conflict-merchant">{conflict.name}</div>
           <div className="sub-conflict-meta">
             {conflict.location && <span>📍 {conflict.location} · </span>}
