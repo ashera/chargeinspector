@@ -6,6 +6,7 @@ import SubmitPage from './components/SubmitPage.jsx';
 import ProfilePage from './components/ProfilePage.jsx';
 import LeaderboardPage from './components/LeaderboardPage.jsx';
 import AdminPage from './components/AdminPage.jsx';
+import MerchantDetailsPage from './components/MerchantDetailsPage.jsx';
 import Nav from './components/Nav.jsx';
 
 function Router() {
@@ -28,6 +29,7 @@ function Router() {
         {page === 'search'      && <SearchPage navigate={navigate} />}
         {page === 'submit'      && (isAuthenticated ? <SubmitPage navigate={navigate} initialDescriptor={pageState.descriptor ?? ''} /> : <AuthPage onAuth={() => setPage('submit')} />)}
         {page === 'profile'     && (isAuthenticated ? <ProfilePage /> : <AuthPage onAuth={() => setPage('profile')} />)}
+        {page === 'merchant'    && <MerchantDetailsPage merchant={pageState.merchant} navigate={navigate} />}
         {page === 'leaderboard' && <LeaderboardPage />}
         {page === 'admin'       && user?.role === 'admin' && <AdminPage />}
       </main>

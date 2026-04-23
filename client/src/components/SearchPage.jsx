@@ -97,6 +97,22 @@ const CSS = `
   .sp-meta a { color: #6ee7a0; text-decoration: none; }
   .sp-meta a:hover { text-decoration: underline; }
   .sp-votes { font-size: .65rem; color: #4b4b4b; margin-top: .5rem; }
+  .sp-card-action { margin-left: auto; flex-shrink: 0; align-self: center; }
+  .sp-details-btn {
+    padding: .55rem 1rem;
+    border: 1px solid #1e1e1e;
+    border-radius: 2px;
+    background: none;
+    color: #4b4b4b;
+    font-family: 'DM Mono', monospace;
+    font-size: .6rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color .2s, border-color .2s;
+  }
+  .sp-details-btn:hover { color: #f0ede6; border-color: #4b4b4b; }
 `;
 
 export default function SearchPage({ navigate }) {
@@ -174,6 +190,11 @@ export default function SearchPage({ navigate }) {
                       {r.website  && <a href={r.website} target="_blank" rel="noreferrer">🌐 {r.website}</a>}
                     </div>
                     <div className="sp-votes">{r.upvote_count} confirmation{r.upvote_count !== 1 ? 's' : ''}</div>
+                  </div>
+                  <div className="sp-card-action">
+                    <button className="sp-details-btn" onClick={() => navigate('merchant', { merchant: r })}>
+                      View details
+                    </button>
                   </div>
                 </div>
               ))}
