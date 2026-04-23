@@ -66,6 +66,9 @@ CREATE TABLE IF NOT EXISTS merchants (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+CREATE UNIQUE INDEX IF NOT EXISTS merchants_name_location_idx
+  ON merchants (lower(name), lower(COALESCE(location, '')));
+
 -- ------------------------------------------------------------
 -- Descriptors
 -- ------------------------------------------------------------

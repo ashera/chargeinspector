@@ -82,10 +82,15 @@ router.post('/', requireAuth, async (req, res) => {
       });
     }
 
-    // Create merchant
+    // Upsert merchant — reuse existing if same name+location
     const { rows: [merchant] } = await client.query(
       `INSERT INTO merchants (name, location, website, logo_url)
-       VALUES ($1, $2, $3, $4) RETURNING id`,
+       VALUES ($1, $2, $3, $4)
+       ON CONFLICT (lower(name), lower(COALESCE(location, '')))
+       DO UPDATE SET
+         website  = COALESCE(EXCLUDED.website,  merchants.website),
+         logo_url = COALESCE(EXCLUDED.logo_url, merchants.logo_url)
+       RETURNING id`,
       [merchantName.trim(), merchantLocation?.trim() || null, website?.trim() || null, logoUrl?.trim() || null]
     );
 
@@ -144,7 +149,12 @@ router.post('/conflict', requireAuth, async (req, res) => {
 
     const { rows: [merchant] } = await client.query(
       `INSERT INTO merchants (name, location, website, logo_url)
-       VALUES ($1, $2, $3, $4) RETURNING id`,
+       VALUES ($1, $2, $3, $4)
+       ON CONFLICT (lower(name), lower(COALESCE(location, '')))
+       DO UPDATE SET
+         website  = COALESCE(EXCLUDED.website,  merchants.website),
+         logo_url = COALESCE(EXCLUDED.logo_url, merchants.logo_url)
+       RETURNING id`,
       [merchantName.trim(), merchantLocation?.trim() || null, website?.trim() || null, logoUrl?.trim() || null]
     );
 
