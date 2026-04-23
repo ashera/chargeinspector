@@ -37,6 +37,7 @@ export default function AdminPage() {
   const [items, setItems]           = useState([]);
   const [loading, setLoading]       = useState(true);
   const [acting, setActing]         = useState(null);
+  const [error, setError]           = useState('');
 
   const load = () => {
     setLoading(true);
@@ -50,9 +51,17 @@ export default function AdminPage() {
 
   const act = async (id, action) => {
     setActing(id);
+    setError('');
     try {
-      await apiFetch(`/api/submissions/${id}/${action}`, { method: 'PUT' });
+      const res = await apiFetch(`/api/submissions/${id}/${action}`, { method: 'PUT' });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setError(data.error || `Action failed (${res.status})`);
+        return;
+      }
       setItems(prev => prev.filter(i => i.id !== id));
+    } catch (err) {
+      setError(err.message || 'Something went wrong.');
     } finally {
       setActing(null);
     }
@@ -65,6 +74,10 @@ export default function AdminPage() {
       <p className="adm-sub">
         {loading ? 'Loading…' : `${items.length} submission${items.length !== 1 ? 's' : ''} pending review`}
       </p>
+
+      {error && (
+        <p style={{ color: '#e05c5c', fontSize: '.75rem', marginBottom: '1rem' }}>{error}</p>
+      )}
 
       {!loading && items.length === 0 && (
         <p className="adm-empty">Queue is clear ✓</p>
