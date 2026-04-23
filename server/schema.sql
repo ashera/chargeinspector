@@ -66,6 +66,43 @@ CREATE TABLE IF NOT EXISTS merchants (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- Deduplicate merchants before enforcing uniqueness.
+-- Keeps the oldest record and re-points any submissions that
+-- referenced the duplicates so no data is orphaned.
+DO $$
+DECLARE
+  dup     RECORD;
+  keep_id UUID;
+BEGIN
+  FOR dup IN
+    SELECT lower(name) AS lname, lower(COALESCE(location, '')) AS lloc
+    FROM merchants
+    GROUP BY lower(name), lower(COALESCE(location, ''))
+    HAVING count(*) > 1
+  LOOP
+    SELECT id INTO keep_id
+    FROM merchants
+    WHERE lower(name) = dup.lname
+      AND lower(COALESCE(location, '')) = dup.lloc
+    ORDER BY created_at ASC
+    LIMIT 1;
+
+    UPDATE submissions
+    SET merchant_id = keep_id
+    WHERE merchant_id IN (
+      SELECT id FROM merchants
+      WHERE lower(name) = dup.lname
+        AND lower(COALESCE(location, '')) = dup.lloc
+        AND id <> keep_id
+    );
+
+    DELETE FROM merchants
+    WHERE lower(name) = dup.lname
+      AND lower(COALESCE(location, '')) = dup.lloc
+      AND id <> keep_id;
+  END LOOP;
+END $$;
+
 CREATE UNIQUE INDEX IF NOT EXISTS merchants_name_location_idx
   ON merchants (lower(name), lower(COALESCE(location, '')));
 
