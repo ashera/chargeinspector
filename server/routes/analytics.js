@@ -23,4 +23,31 @@ router.post('/view', optionalAuth, async (req, res) => {
   }
 });
 
+// GET /api/analytics/descriptor/:id/views?days=30
+router.get('/descriptor/:id/views', async (req, res) => {
+  const days = Math.min(parseInt(req.query.days) || 30, 365);
+  try {
+    const { rows } = await db.query(
+      `SELECT
+         to_char(gs.day, 'YYYY-MM-DD') AS date,
+         COUNT(dv.id)::int             AS views
+       FROM generate_series(
+         (NOW() - ($2 || ' days')::interval)::date,
+         NOW()::date,
+         '1 day'::interval
+       ) AS gs(day)
+       LEFT JOIN descriptor_views dv
+         ON dv.descriptor_id = $1
+        AND dv.created_at::date = gs.day::date
+       GROUP BY gs.day
+       ORDER BY gs.day ASC`,
+      [req.params.id, days]
+    );
+    return res.json({ views: rows });
+  } catch (err) {
+    console.error('[GET /api/analytics/descriptor/:id/views]', err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 module.exports = router;
