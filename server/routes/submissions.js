@@ -97,15 +97,20 @@ router.post('/', requireAuth, async (req, res) => {
       });
     }
 
-    // Upsert merchant — reuse existing if same name+location
+    // Insert merchant or reuse existing — never update an existing record
     const { rows: [merchant] } = await client.query(
-      `INSERT INTO merchants (name, location, website, logo_url)
-       VALUES ($1, $2, $3, $4)
-       ON CONFLICT (lower(name), lower(COALESCE(location, '')))
-       DO UPDATE SET
-         website  = COALESCE(EXCLUDED.website,  merchants.website),
-         logo_url = COALESCE(EXCLUDED.logo_url, merchants.logo_url)
-       RETURNING id`,
+      `WITH ins AS (
+         INSERT INTO merchants (name, location, website, logo_url)
+         VALUES ($1, $2, $3, $4)
+         ON CONFLICT (lower(name), lower(COALESCE(location, ''))) DO NOTHING
+         RETURNING id
+       )
+       SELECT id FROM ins
+       UNION ALL
+       SELECT id FROM merchants
+       WHERE lower(name) = lower($1)
+         AND lower(COALESCE(location, '')) = lower(COALESCE($2, ''))
+       LIMIT 1`,
       [merchantName.trim(), merchantLocation?.trim() || null, website?.trim() || null, logoUrl?.trim() || null]
     );
 
@@ -163,13 +168,18 @@ router.post('/conflict', requireAuth, async (req, res) => {
     }
 
     const { rows: [merchant] } = await client.query(
-      `INSERT INTO merchants (name, location, website, logo_url)
-       VALUES ($1, $2, $3, $4)
-       ON CONFLICT (lower(name), lower(COALESCE(location, '')))
-       DO UPDATE SET
-         website  = COALESCE(EXCLUDED.website,  merchants.website),
-         logo_url = COALESCE(EXCLUDED.logo_url, merchants.logo_url)
-       RETURNING id`,
+      `WITH ins AS (
+         INSERT INTO merchants (name, location, website, logo_url)
+         VALUES ($1, $2, $3, $4)
+         ON CONFLICT (lower(name), lower(COALESCE(location, ''))) DO NOTHING
+         RETURNING id
+       )
+       SELECT id FROM ins
+       UNION ALL
+       SELECT id FROM merchants
+       WHERE lower(name) = lower($1)
+         AND lower(COALESCE(location, '')) = lower(COALESCE($2, ''))
+       LIMIT 1`,
       [merchantName.trim(), merchantLocation?.trim() || null, website?.trim() || null, logoUrl?.trim() || null]
     );
 
