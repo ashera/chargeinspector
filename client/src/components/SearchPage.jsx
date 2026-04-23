@@ -127,7 +127,7 @@ const CSS = `
     100% { transform: translateY(200%); }
   }
   .sp-cotd {
-    max-width: 600px; margin: 1.5rem auto 0;
+    max-width: 600px; margin: 0 auto 1.5rem;
     background: linear-gradient(160deg, #141008 0%, #111 60%);
     border: 1px solid #f0b429;
     border-radius: 4px;
@@ -240,6 +240,16 @@ export default function SearchPage({ navigate }) {
   return (
     <>
       <style>{CSS}</style>
+      {contributor && (
+        <div className="sp-cotd">
+          <div className="sp-cotd-crown">&#x1F451;</div>
+          <div className="sp-cotd-label">Contributor of the day</div>
+          <div className="sp-cotd-user">{contributor.username}</div>
+          <div className="sp-cotd-count">
+            {contributor.submission_count} submission{contributor.submission_count !== 1 ? 's' : ''} in the last 24 hours
+          </div>
+        </div>
+      )}
       <div className="sp-hero">
         <h1 className="sp-headline">Who <em>charged</em> me?</h1>
         <p className="sp-sub">
@@ -277,17 +287,6 @@ export default function SearchPage({ navigate }) {
             </div>
           )}
         </div>
-
-        {contributor && (
-          <div className="sp-cotd">
-            <div className="sp-cotd-crown">&#x1F451;</div>
-            <div className="sp-cotd-label">Contributor of the day</div>
-            <div className="sp-cotd-user">{contributor.username}</div>
-            <div className="sp-cotd-count">
-              {contributor.submission_count} submission{contributor.submission_count !== 1 ? 's' : ''} in the last 24 hours
-            </div>
-          </div>
-        )}
       </div>
 
       {results !== null && (
