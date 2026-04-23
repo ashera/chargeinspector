@@ -1,4 +1,7 @@
 import { useState, useEffect } from 'react';
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+} from 'recharts';
 
 const CSS = `
   .dd-back {
@@ -20,6 +23,10 @@ const CSS = `
     font-size: .6rem; letter-spacing: .14em; text-transform: uppercase;
     color: #4b4b4b; margin-bottom: 1rem; border-bottom: 1px solid #1e1e1e;
     padding-bottom: .5rem;
+  }
+  .dd-chart-wrap {
+    background: #111; border: 1px solid #1e1e1e; border-radius: 3px;
+    padding: 1.25rem 1.25rem 0.5rem; margin-bottom: 2rem;
   }
   .dd-card {
     background: #111; border: 1px solid #1e1e1e; border-radius: 3px;
@@ -52,17 +59,44 @@ const CSS = `
   .dd-empty { font-size: .75rem; color: #4b4b4b; padding: 2rem 0; }
 `;
 
-export default function DescriptorDetailsPage({ descriptor, navigate }) {
+const CustomTooltip = ({ active, payload, label }) => {
+  if (!active || !payload?.length) return null;
+  return (
+    <div style={{ background: '#1a1a1a', border: '1px solid #2e2e2e', borderRadius: 2, padding: '8px 12px', fontFamily: "'DM Mono', monospace", fontSize: '.7rem', color: '#f0ede6' }}>
+      <div style={{ color: '#4b4b4b', marginBottom: 2 }}>{label}</div>
+      <div style={{ color: '#6ee7a0' }}>{payload[0].value} view{payload[0].value !== 1 ? 's' : ''}</div>
+    </div>
+  );
+};
+
+export default function DescriptorDetailsPage({ descriptor, descriptorId, navigate }) {
   const [submissions, setSubmissions] = useState([]);
+  const [viewData, setViewData]       = useState([]);
   const [loading, setLoading]         = useState(true);
 
   useEffect(() => {
-    fetch(`/api/search/descriptor?q=${encodeURIComponent(descriptor)}`)
+    const fetchSubmissions = fetch(`/api/search/descriptor?q=${encodeURIComponent(descriptor)}`)
       .then(r => r.json())
-      .then(d => setSubmissions(d.submissions || []))
+      .then(d => setSubmissions(d.submissions || []));
+
+    const fetchViews = descriptorId
+      ? fetch(`/api/analytics/descriptor/${descriptorId}/views`)
+          .then(r => r.json())
+          .then(d => setViewData(d.views || []))
+      : Promise.resolve();
+
+    Promise.all([fetchSubmissions, fetchViews])
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [descriptor]);
+  }, [descriptor, descriptorId]);
+
+  const totalViews = viewData.reduce((sum, d) => sum + d.views, 0);
+  const hasViews   = viewData.some(d => d.views > 0);
+
+  // Show only the last 30 days but label every 7th tick to avoid crowding
+  const tickDates = viewData
+    .map(d => d.date)
+    .filter((_, i) => i % 7 === 0 || i === viewData.length - 1);
 
   return (
     <>
@@ -72,6 +106,41 @@ export default function DescriptorDetailsPage({ descriptor, navigate }) {
 
       <div className="dd-eyebrow">Billing descriptor</div>
       <div className="dd-title">{descriptor}</div>
+
+      {descriptorId && (
+        <>
+          <div className="dd-section-title">
+            Views over the last 30 days {!loading && `· ${totalViews} total`}
+          </div>
+          <div className="dd-chart-wrap">
+            <ResponsiveContainer width="100%" height={180}>
+              <BarChart data={viewData} barSize={8}>
+                <CartesianGrid vertical={false} stroke="#1e1e1e" />
+                <XAxis
+                  dataKey="date"
+                  ticks={tickDates}
+                  tick={{ fill: '#4b4b4b', fontFamily: "'DM Mono', monospace", fontSize: 10 }}
+                  tickLine={false}
+                  axisLine={false}
+                  tickFormatter={d => d.slice(5)}
+                />
+                <YAxis
+                  allowDecimals={false}
+                  tick={{ fill: '#4b4b4b', fontFamily: "'DM Mono', monospace", fontSize: 10 }}
+                  tickLine={false}
+                  axisLine={false}
+                  width={24}
+                />
+                <Tooltip content={<CustomTooltip />} cursor={{ fill: '#1a1a1a' }} />
+                <Bar dataKey="views" fill="#6ee7a0" radius={[2, 2, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+            {!loading && !hasViews && (
+              <p style={{ textAlign: 'center', fontSize: '.7rem', color: '#2e2e2e', paddingBottom: '.75rem' }}>No views recorded yet</p>
+            )}
+          </div>
+        </>
+      )}
 
       <div className="dd-section-title">
         {loading ? 'Loading…' : `${submissions.length} approved merchant match${submissions.length !== 1 ? 'es' : ''}`}
@@ -100,15 +169,15 @@ export default function DescriptorDetailsPage({ descriptor, navigate }) {
               className="dd-btn"
               onClick={() => navigate('merchant', {
                 merchant: {
-                  merchant_id:    s.merchant_id,
-                  submission_id:  s.submission_id,
-                  descriptor_id:  s.descriptor_id,
-                  descriptor:     s.descriptor,
-                  name:           s.name,
-                  location:       s.location,
-                  website:        s.website,
-                  logo_url:       s.logo_url,
-                  upvote_count:   s.upvote_count,
+                  merchant_id:   s.merchant_id,
+                  submission_id: s.submission_id,
+                  descriptor_id: s.descriptor_id,
+                  descriptor:    s.descriptor,
+                  name:          s.name,
+                  location:      s.location,
+                  website:       s.website,
+                  logo_url:      s.logo_url,
+                  upvote_count:  s.upvote_count,
                 }
               })}
             >

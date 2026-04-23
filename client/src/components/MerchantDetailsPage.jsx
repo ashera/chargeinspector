@@ -166,7 +166,7 @@ export default function MerchantDetailsPage({ merchant, navigate }) {
                 <span className="md-descriptor-votes">{d.upvote_count} confirmation{d.upvote_count !== 1 ? 's' : ''}</span>
                 <button
                   className="md-descriptor-btn"
-                  onClick={() => navigate('descriptor', { descriptor: d.descriptor })}
+                  onClick={() => navigate('descriptor', { descriptor: d.descriptor, descriptorId: d.descriptor_id })}
                 >
                   View details
                 </button>

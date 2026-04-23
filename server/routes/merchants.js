@@ -31,7 +31,7 @@ router.get('/autocomplete', async (req, res) => {
 router.get('/:id/descriptors', async (req, res) => {
   try {
     const { rows } = await db.query(
-      `SELECT d.text AS descriptor, s.upvote_count, s.created_at
+      `SELECT d.id AS descriptor_id, d.text AS descriptor, s.upvote_count, s.created_at
        FROM submissions s
        JOIN descriptors d ON d.id = s.descriptor_id
        WHERE s.merchant_id = $1

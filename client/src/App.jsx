@@ -49,7 +49,7 @@ function Router() {
         {page === 'submit'      && (isAuthenticated ? <SubmitPage navigate={navigate} initialDescriptor={pageState.descriptor ?? ''} /> : <AuthPage onAuth={() => setPage('submit')} />)}
         {page === 'profile'     && (isAuthenticated ? <ProfilePage /> : <AuthPage onAuth={() => setPage('profile')} />)}
         {page === 'merchant'    && <MerchantDetailsPage merchant={pageState.merchant} navigate={navigate} />}
-        {page === 'descriptor'  && <DescriptorDetailsPage descriptor={pageState.descriptor} navigate={navigate} />}
+        {page === 'descriptor'  && <DescriptorDetailsPage descriptor={pageState.descriptor} descriptorId={pageState.descriptorId} navigate={navigate} />}
         {page === 'points'      && <PointsHistoryPage totalPoints={user?.total_points} />}
         {page === 'leaderboard' && <LeaderboardPage />}
         {page === 'admin'       && user?.role === 'admin' && <AdminPage />}
