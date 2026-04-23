@@ -223,6 +223,7 @@ export default function SearchPage({ navigate }) {
   }, []);
 
   const pickSuggestion = (descriptor) => {
+    clearTimeout(debounceRef.current);
     setQuery(descriptor);
     setSuggestions([]);
     setShowSuggestions(false);
