@@ -46,7 +46,13 @@ const CSS = `
     font-size: .65rem;
     color: #6ee7a0;
     letter-spacing: .08em;
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-family: 'DM Mono', monospace;
+    padding: 0;
   }
+  .nav-pts:hover { text-decoration: underline; }
   .nav-logout {
     font-size: .6rem;
     letter-spacing: .1em;
@@ -60,7 +66,7 @@ const CSS = `
   .nav-logout:hover { color: #e05c5c; }
 `;
 
-export default function Nav({ page, navigate, isAuthenticated, user }) {
+export default function Nav({ page, navigate, isAuthenticated, user, onPointsClick }) {
   const { logout } = useAuth();
 
   const links = [
@@ -92,7 +98,7 @@ export default function Nav({ page, navigate, isAuthenticated, user }) {
         <div className="nav-right">
           {isAuthenticated && user && (
             <>
-              <span className="nav-pts">{user.total_points ?? 0} pts</span>
+              <button className="nav-pts" onClick={onPointsClick}>{user.total_points ?? 0} pts</button>
               <span style={{ fontSize: '.65rem', color: '#4b4b4b', letterSpacing: '.06em' }}>{user.email}</span>
             </>
           )}

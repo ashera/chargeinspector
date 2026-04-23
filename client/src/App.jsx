@@ -7,6 +7,7 @@ import ProfilePage from './components/ProfilePage.jsx';
 import LeaderboardPage from './components/LeaderboardPage.jsx';
 import AdminPage from './components/AdminPage.jsx';
 import MerchantDetailsPage from './components/MerchantDetailsPage.jsx';
+import PointsHistoryPage from './components/PointsHistoryPage.jsx';
 import Nav from './components/Nav.jsx';
 
 function Router() {
@@ -24,12 +25,13 @@ function Router() {
 
   return (
     <div style={{ minHeight: '100dvh', background: '#0a0a0a', color: '#f0ede6', display: 'flex', flexDirection: 'column' }}>
-      <Nav page={page} navigate={navigate} isAuthenticated={isAuthenticated} user={user} />
+      <Nav page={page} navigate={navigate} isAuthenticated={isAuthenticated} user={user} onPointsClick={() => navigate('points')} />
       <main style={{ flex: 1, maxWidth: '900px', width: '100%', margin: '0 auto', padding: '2rem 1.5rem' }}>
         {page === 'search'      && <SearchPage navigate={navigate} />}
         {page === 'submit'      && (isAuthenticated ? <SubmitPage navigate={navigate} initialDescriptor={pageState.descriptor ?? ''} /> : <AuthPage onAuth={() => setPage('submit')} />)}
         {page === 'profile'     && (isAuthenticated ? <ProfilePage /> : <AuthPage onAuth={() => setPage('profile')} />)}
         {page === 'merchant'    && <MerchantDetailsPage merchant={pageState.merchant} navigate={navigate} />}
+        {page === 'points'      && <PointsHistoryPage totalPoints={user?.total_points} />}
         {page === 'leaderboard' && <LeaderboardPage />}
         {page === 'admin'       && user?.role === 'admin' && <AdminPage />}
       </main>
