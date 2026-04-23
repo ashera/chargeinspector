@@ -46,20 +46,31 @@ router.get('/me/stats', requireAuth, async (req, res) => {
 // GET /api/users/me/points
 router.get('/me/points', requireAuth, async (req, res) => {
   try {
-    const { rows } = await db.query(
-      `SELECT
-         pl.id, pl.amount, pl.reason, pl.created_at,
-         d.text  AS descriptor,
-         m.name  AS merchant_name
-       FROM points_log pl
-       JOIN submissions s ON s.id = pl.reference_id
-       JOIN descriptors d ON d.id = s.descriptor_id
-       JOIN merchants   m ON m.id = s.merchant_id
-       WHERE pl.user_id = $1
-       ORDER BY pl.created_at DESC`,
-      [req.user.sub]
-    );
-    return res.json({ points: rows });
+    const [{ rows: points }, { rows: badges }] = await Promise.all([
+      db.query(
+        `SELECT
+           pl.id, pl.amount, pl.reason, pl.created_at,
+           d.text  AS descriptor,
+           m.name  AS merchant_name
+         FROM points_log pl
+         JOIN submissions s ON s.id = pl.reference_id
+         JOIN descriptors d ON d.id = s.descriptor_id
+         JOIN merchants   m ON m.id = s.merchant_id
+         WHERE pl.user_id = $1
+         ORDER BY pl.created_at DESC`,
+        [req.user.sub]
+      ),
+      db.query(
+        `SELECT b.name, b.description, b.icon, b.points_threshold, ub.awarded_at
+         FROM user_badges ub
+         JOIN badges b ON b.id = ub.badge_id
+         WHERE ub.user_id = $1
+         ORDER BY ub.awarded_at DESC
+         LIMIT 1`,
+        [req.user.sub]
+      ),
+    ]);
+    return res.json({ points, latestBadge: badges[0] ?? null });
   } catch (err) {
     console.error('[GET /api/users/me/points]', err);
     return res.status(500).json({ error: 'Internal server error' });
