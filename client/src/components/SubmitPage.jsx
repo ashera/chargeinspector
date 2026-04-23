@@ -103,6 +103,12 @@ export default function SubmitPage({ navigate, initialDescriptor }) {
       });
       const data = await res.json();
 
+      if (res.ok && data.duplicate) {
+        setSuccess('This merchant is already on file for this descriptor.');
+        setForm(EMPTY);
+        setConflict(null);
+        return;
+      }
       if (res.status === 409 && data.conflict) {
         setConflict(data.existing);
         setBusy(false);
