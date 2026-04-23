@@ -288,7 +288,7 @@ function passwordStrength(pw) {
 }
 
 // ── Component ─────────────────────────────────────────────────
-export default function AuthPage() {
+export default function AuthPage({ onAuth }) {
   const { login, register } = useAuth();
 
   const [mode, setMode]         = useState('login');   // 'login' | 'register'
@@ -321,6 +321,7 @@ export default function AuthPage() {
       } else {
         await register(email.trim(), password);
       }
+      onAuth?.();
     } catch (err) {
       setError(err.message || 'Something went wrong. Please try again.');
     } finally {
