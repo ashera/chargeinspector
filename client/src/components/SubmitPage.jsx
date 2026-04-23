@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth.jsx';
 
 const CSS = `
@@ -9,7 +9,7 @@ const CSS = `
   }
   .sub-desc { font-size: .75rem; color: #4b4b4b; margin-bottom: 2rem; line-height: 1.6; }
   .sub-form { max-width: 520px; }
-  .sub-field { margin-bottom: 1.25rem; }
+  .sub-field { margin-bottom: 1.25rem; position: relative; }
   .sub-label {
     display: block;
     font-size: .6rem;
@@ -29,6 +29,7 @@ const CSS = `
     font-size: .8rem;
     outline: none;
     transition: border-color .2s;
+    box-sizing: border-box;
   }
   .sub-input:focus { border-color: #6ee7a0; }
   .sub-input::placeholder { color: #2e2e2e; }
@@ -77,6 +78,27 @@ const CSS = `
   }
   .sub-conflict-btn:hover { color: #f0ede6; border-color: #4b4b4b; }
   .sub-conflict-btn.primary { background: #6ee7a0; color: #0a0a0a; border-color: #6ee7a0; }
+  .sub-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0; right: 0;
+    background: #111;
+    border: 1px solid #1e1e1e;
+    border-top: none;
+    border-radius: 0 0 2px 2px;
+    z-index: 200;
+    overflow: hidden;
+  }
+  .sub-suggestion {
+    padding: .65rem 1rem;
+    cursor: pointer;
+    border-bottom: 1px solid #1a1a1a;
+    transition: background .15s;
+  }
+  .sub-suggestion:last-child { border-bottom: none; }
+  .sub-suggestion:hover, .sub-suggestion.active { background: #1a1a1a; }
+  .sub-sug-name { font-size: .8rem; color: #f0ede6; }
+  .sub-sug-meta { font-size: .65rem; color: #4b4b4b; margin-top: .1rem; }
 `;
 
 const EMPTY = { descriptor: '', merchantName: '', merchantLocation: '', website: '', logoUrl: '' };
@@ -89,7 +111,57 @@ export default function SubmitPage({ navigate, initialDescriptor }) {
   const [success, setSuccess]   = useState('');
   const [conflict, setConflict] = useState(null);
 
+  const [suggestions, setSuggestions]   = useState([]);
+  const [activeIdx, setActiveIdx]       = useState(-1);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const debounceRef = useRef(null);
+  const fieldRef    = useRef(null);
+
   const set = (k) => (e) => setForm(f => ({ ...f, [k]: e.target.value }));
+
+  // Merchant name autocomplete
+  useEffect(() => {
+    clearTimeout(debounceRef.current);
+    const q = form.merchantName.trim();
+    if (q.length < 2) { setSuggestions([]); setShowSuggestions(false); return; }
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const res  = await fetch(`/api/merchants/autocomplete?q=${encodeURIComponent(q)}`);
+        const data = await res.json();
+        setSuggestions(data.results || []);
+        setShowSuggestions((data.results || []).length > 0);
+        setActiveIdx(-1);
+      } catch { /* ignore */ }
+    }, 220);
+    return () => clearTimeout(debounceRef.current);
+  }, [form.merchantName]);
+
+  // Close on outside click
+  useEffect(() => {
+    const handler = (e) => { if (fieldRef.current && !fieldRef.current.contains(e.target)) setShowSuggestions(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const pickMerchant = (m) => {
+    setForm(f => ({
+      ...f,
+      merchantName:     m.name,
+      merchantLocation: m.location || '',
+      website:          m.website  || '',
+      logoUrl:          m.logo_url || '',
+    }));
+    setSuggestions([]);
+    setShowSuggestions(false);
+  };
+
+  const handleMerchantKeyDown = (e) => {
+    if (!showSuggestions) return;
+    if (e.key === 'ArrowDown')  { e.preventDefault(); setActiveIdx(i => Math.min(i + 1, suggestions.length - 1)); }
+    else if (e.key === 'ArrowUp')   { e.preventDefault(); setActiveIdx(i => Math.max(i - 1, -1)); }
+    else if (e.key === 'Enter' && activeIdx >= 0) { e.preventDefault(); pickMerchant(suggestions[activeIdx]); }
+    else if (e.key === 'Escape') { setShowSuggestions(false); setActiveIdx(-1); }
+  };
 
   const submit = async (forceConflict = false) => {
     setError('');
@@ -159,21 +231,55 @@ export default function SubmitPage({ navigate, initialDescriptor }) {
       )}
 
       <div className="sub-form">
+        {/* Descriptor */}
+        <div className="sub-field">
+          <label className="sub-label">Billing Descriptor</label>
+          <input className="sub-input" placeholder="e.g. SQ *COFFEE NYC" value={form.descriptor} onChange={set('descriptor')} />
+        </div>
+
+        {/* Merchant Name with typeahead */}
+        <div className="sub-field" ref={fieldRef}>
+          <label className="sub-label">Merchant Name</label>
+          <input
+            className="sub-input"
+            placeholder="e.g. Blue Bottle Coffee"
+            value={form.merchantName}
+            onChange={set('merchantName')}
+            onKeyDown={handleMerchantKeyDown}
+            onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+            autoComplete="off"
+          />
+          {showSuggestions && (
+            <div className="sub-suggestions">
+              {suggestions.map((m, i) => (
+                <div
+                  key={m.id}
+                  className={`sub-suggestion${i === activeIdx ? ' active' : ''}`}
+                  onMouseDown={() => pickMerchant(m)}
+                >
+                  <div className="sub-sug-name">{m.name}</div>
+                  {(m.location || m.website) && (
+                    <div className="sub-sug-meta">
+                      {m.location && `📍 ${m.location}`}
+                      {m.location && m.website && ' · '}
+                      {m.website  && `🌐 ${m.website}`}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Remaining fields */}
         {[
-          { key: 'descriptor',       label: 'Billing Descriptor',     placeholder: 'e.g. SQ *COFFEE NYC' },
-          { key: 'merchantName',     label: 'Merchant Name',           placeholder: 'e.g. Blue Bottle Coffee' },
-          { key: 'merchantLocation', label: 'Location (optional)',     placeholder: 'e.g. New York, NY' },
-          { key: 'website',          label: 'Website (optional)',      placeholder: 'e.g. https://bluebottlecoffee.com' },
-          { key: 'logoUrl',          label: 'Logo URL (optional)',     placeholder: 'e.g. https://example.com/logo.png' },
+          { key: 'merchantLocation', label: 'Location (optional)',  placeholder: 'e.g. New York, NY' },
+          { key: 'website',          label: 'Website (optional)',   placeholder: 'e.g. https://bluebottlecoffee.com' },
+          { key: 'logoUrl',          label: 'Logo URL (optional)',  placeholder: 'e.g. https://example.com/logo.png' },
         ].map(({ key, label, placeholder }) => (
           <div key={key} className="sub-field">
             <label className="sub-label">{label}</label>
-            <input
-              className="sub-input"
-              placeholder={placeholder}
-              value={form[key]}
-              onChange={set(key)}
-            />
+            <input className="sub-input" placeholder={placeholder} value={form[key]} onChange={set(key)} />
           </div>
         ))}
 
