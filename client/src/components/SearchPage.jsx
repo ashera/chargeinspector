@@ -131,34 +131,24 @@ const CSS = `
     background: linear-gradient(160deg, #141008 0%, #111 60%);
     border: 1px solid #f0b429;
     border-radius: 4px;
-    padding: 1.25rem 1.5rem;
-    text-align: center;
+    padding: .55rem 1rem;
+    display: flex; align-items: center; gap: .65rem;
     position: relative; overflow: hidden;
     animation: cotd-pulse 3s ease-in-out infinite;
   }
-  .sp-cotd::before {
-    content: ''; position: absolute; inset: 0;
-    background: linear-gradient(to bottom, rgba(240,180,41,.06) 0%, transparent 60%);
-    pointer-events: none;
-  }
-  .sp-cotd::after {
-    content: ''; position: absolute; left: 0; right: 0; height: 40%;
-    background: linear-gradient(to bottom, transparent, rgba(240,180,41,.05), transparent);
-    animation: cotd-scan 5s ease-in-out infinite;
-    pointer-events: none;
-  }
-  .sp-cotd-crown { font-size: 1.6rem; line-height: 1; margin-bottom: .4rem; }
+  .sp-cotd-crown { font-size: .95rem; flex-shrink: 0; line-height: 1; }
   .sp-cotd-label {
-    font-size: .58rem; letter-spacing: .2em; text-transform: uppercase;
-    color: #9a6f10; margin-bottom: .6rem;
+    font-size: .55rem; letter-spacing: .16em; text-transform: uppercase;
+    color: #9a6f10; white-space: nowrap; flex-shrink: 0;
   }
+  .sp-cotd-divider { width: 1px; height: .75rem; background: #3a2a08; flex-shrink: 0; }
   .sp-cotd-user {
-    font-family: 'DM Serif Display', serif; font-size: 1.6rem;
-    color: #f0b429; letter-spacing: .02em; line-height: 1.1;
-    margin-bottom: .35rem;
+    font-family: 'DM Mono', monospace; font-size: .75rem;
+    color: #f0b429; letter-spacing: .04em;
   }
   .sp-cotd-count {
-    font-size: .65rem; color: #6a5018; letter-spacing: .1em; text-transform: uppercase;
+    font-size: .6rem; color: #6a5018; letter-spacing: .08em;
+    text-transform: uppercase; margin-left: auto; white-space: nowrap;
   }
 `;
 
@@ -245,12 +235,11 @@ export default function SearchPage({ navigate }) {
       <style>{CSS}</style>
       {contributor && (
         <div className="sp-cotd">
-          <div className="sp-cotd-crown">&#x1F451;</div>
-          <div className="sp-cotd-label">Contributor of the day</div>
-          <div className="sp-cotd-user">{contributor.username}</div>
-          <div className="sp-cotd-count">
-            {contributor.submission_count} submission{contributor.submission_count !== 1 ? 's' : ''} in the last 24 hours
-          </div>
+          <span className="sp-cotd-crown">&#x1F451;</span>
+          <span className="sp-cotd-label">Contributor of the day</span>
+          <span className="sp-cotd-divider" />
+          <span className="sp-cotd-user">{contributor.username}</span>
+          <span className="sp-cotd-count">{contributor.submission_count} submission{contributor.submission_count !== 1 ? 's' : ''}</span>
         </div>
       )}
       <div className="sp-hero">
