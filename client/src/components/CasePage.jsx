@@ -73,6 +73,39 @@ const CSS = `
     text-transform: uppercase; color: var(--bg-page); font-weight: 500; cursor: pointer;
   }
   .cp-btn:hover { opacity: .9; }
+
+  .cp-evidence-room { margin-bottom: 1.5rem; }
+  .cp-evidence-header {
+    display: flex; align-items: baseline; gap: .75rem; margin-bottom: 1rem;
+    border-bottom: 1px solid var(--border); padding-bottom: .5rem;
+  }
+  .cp-evidence-title {
+    font-size: .6rem; letter-spacing: .16em; text-transform: uppercase; color: var(--text-muted);
+  }
+  .cp-evidence-count {
+    font-size: .6rem; letter-spacing: .08em; color: var(--text-dim);
+  }
+  .cp-evidence-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: .75rem;
+  }
+  .cp-evidence-slot {
+    border: 1px dashed var(--border); border-radius: 3px;
+    padding: 1rem 1.1rem; display: flex; flex-direction: column; gap: .4rem;
+  }
+  .cp-evidence-slot-icon { font-size: 1.2rem; line-height: 1; }
+  .cp-evidence-slot-label {
+    font-size: .65rem; letter-spacing: .08em; color: var(--text-muted);
+  }
+  .cp-evidence-slot-desc {
+    font-size: .62rem; color: var(--text-dim); line-height: 1.5;
+  }
+  .cp-evidence-slot-empty {
+    font-size: .58rem; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--border-subtle); margin-top: .25rem;
+  }
+  @media (max-width: 600px) { .cp-evidence-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 400px) { .cp-evidence-grid { grid-template-columns: 1fr; } }
+
   @media (max-width: 540px) {
     .cp-top { flex-direction: column-reverse; }
     .cp-team { text-align: left; min-width: 0; width: 100%; }
@@ -81,6 +114,15 @@ const CSS = `
 `;
 
 const STATUS_LABEL = { open: 'Open', investigating: 'Investigating', solved: 'Solved' };
+
+const EVIDENCE_TYPES = [
+  { key: 'merchant_matches',    icon: '🏪', label: 'Merchant Matches',     desc: 'Community-identified merchants linked to this descriptor' },
+  { key: 'witness_tips',        icon: '💬', label: 'Witness Tips',          desc: 'Tips and insights submitted by investigators'             },
+  { key: 'web_intelligence',    icon: '🌐', label: 'Web Intelligence',      desc: 'Online mentions, search results and web traces'           },
+  { key: 'similar_descriptors', icon: '🔗', label: 'Similar Descriptors',   desc: 'Related billing descriptors found in the database'        },
+  { key: 'transaction_data',    icon: '📊', label: 'Transaction Patterns',  desc: 'Reported amounts, frequencies and timing'                 },
+  { key: 'visual_evidence',     icon: '📸', label: 'Visual Evidence',       desc: 'Logos, screenshots and imagery collected'                 },
+];
 
 export default function CasePage({ caseData: initialData, navigate }) {
   const [data, setData] = useState(initialData);
@@ -136,6 +178,23 @@ export default function CasePage({ caseData: initialData, navigate }) {
         <div className="cp-card-body">
           This billing descriptor hasn't been identified yet. The community is working to crack this case.
           If you recognise this merchant, submit a match to help others solve the mystery.
+        </div>
+      </div>
+
+      <div className="cp-evidence-room">
+        <div className="cp-evidence-header">
+          <span className="cp-evidence-title">Evidence Room</span>
+          <span className="cp-evidence-count">0 items collected</span>
+        </div>
+        <div className="cp-evidence-grid">
+          {EVIDENCE_TYPES.map(({ key, icon, label, desc }) => (
+            <div key={key} className="cp-evidence-slot">
+              <span className="cp-evidence-slot-icon">{icon}</span>
+              <span className="cp-evidence-slot-label">{label}</span>
+              <span className="cp-evidence-slot-desc">{desc}</span>
+              <span className="cp-evidence-slot-empty">No evidence yet</span>
+            </div>
+          ))}
         </div>
       </div>
 
