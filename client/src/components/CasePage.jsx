@@ -311,13 +311,17 @@ function ConfirmModal({ modal, onConfirm, onCancel, confirming, error }) {
           ? <div className="cp-modal-merchant">{d.merchant_name}</div>
           : <div className="cp-modal-unknown">Merchant not identified</div>
         }
-        <div className="cp-modal-row">
-          {d.confidence && (
+        {d.confidence && (
+          <div style={{ marginBottom: '.75rem' }}>
             <span className={`cp-confidence ${d.confidence}`}>{d.confidence} confidence</span>
-          )}
-          {d.business_type && <span className="cp-modal-btype">{d.business_type}</span>}
+          </div>
+        )}
+        <div className="cp-modal-desc">
+          Only confirm and solve the case if you are confident that these are the most likely merchant
+          details based on the evidence. When you confirm, these details will be reviewed by our
+          moderation team and then added to our community database for others to see when searching
+          for a descriptor.
         </div>
-        {d.description && <div className="cp-modal-desc">{d.description}</div>}
         {error && <div style={{ fontSize: '.7rem', color: '#e05', marginTop: '.75rem' }}>{error}</div>}
         <div className="cp-modal-actions">
           <button className="cp-modal-cancel" onClick={onCancel} disabled={confirming}>Cancel</button>
