@@ -290,7 +290,7 @@ function LocalKnowledgeForm({ onSubmit, submitting, label }) {
         onClick={() => onSubmit(form)}
         disabled={submitting || !form.merchant_name.trim()}
       >
-        {submitting ? 'Collecting…' : `Run ${label}`}
+        {submitting ? 'Collecting…' : 'Accept & solve case →'}
       </button>
     </div>
   );
