@@ -330,6 +330,7 @@ export default function ProfilePage({ navigate }) {
             <div className="prof-table-wrap"><table className="prof-table">
               <thead>
                 <tr>
+                  <th>Case</th>
                   <th>Descriptor</th>
                   <th>Status</th>
                   <th>Role</th>
@@ -339,6 +340,7 @@ export default function ProfilePage({ navigate }) {
               <tbody>
                 {cases.map(c => (
                   <tr key={c.id} className="prof-case-row" onClick={() => navigate('case', { caseData: c })}>
+                    <td style={{ fontFamily: 'monospace', fontSize: '.7rem', color: 'var(--text-dim)' }}>#{c.id.slice(0, 8).toUpperCase()}</td>
                     <td style={{ fontFamily: 'monospace', fontSize: '.7rem', color: 'var(--amber)' }}>{c.descriptor}</td>
                     <td className={`prof-case-${c.computed_status}`}>{c.computed_status}</td>
                     <td style={{ color: 'var(--text-dim)', fontSize: '.7rem' }}>{c.connection}</td>
