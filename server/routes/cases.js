@@ -29,16 +29,21 @@ const DETECTIVES_AGG =
     '[]'
   )`;
 
-// Returns a single case row with computed_status and detectives array.
+// Returns a single case row with computed_status, detectives, and creator rank/surname.
 async function fetchCase(where, params) {
   const { rows } = await db.query(
     'SELECT c.*, (' + COMPUTED_STATUS + ') AS computed_status, ' +
-    DETECTIVES_AGG + ' AS detectives' +
-    ' FROM cases c' +
+    DETECTIVES_AGG + ' AS detectives, ' +
+    'cb.last_name AS created_by_last_name, ' +
+    '(SELECT r.icon || \' \' || r.name FROM ranks r' +
+    '  WHERE r.points_threshold <= COALESCE(cb.total_points, 0)' +
+    '  ORDER BY r.points_threshold DESC LIMIT 1) AS created_by_rank ' +
+    'FROM cases c' +
+    ' LEFT JOIN users cb ON cb.id = c.created_by' +
     ' LEFT JOIN detectives det ON det.case_id = c.id' +
     ' LEFT JOIN users u ON u.id = det.user_id' +
     ' WHERE ' + where +
-    ' GROUP BY c.id' +
+    ' GROUP BY c.id, cb.last_name, cb.total_points' +
     ' LIMIT 1',
     params
   );

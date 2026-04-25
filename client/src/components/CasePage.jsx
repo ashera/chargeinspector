@@ -108,7 +108,12 @@ export default function CasePage({ caseData: initialData, navigate }) {
           <div className="cp-descriptor">{data.descriptor}</div>
           <div className="cp-status-row">
             <span className={`cp-status ${status}`}>{STATUS_LABEL[status] ?? status}</span>
-            <span className="cp-date">Opened {new Date(data.created_at).toLocaleDateString()}</span>
+            <span className="cp-date">
+              Opened {new Date(data.created_at).toLocaleDateString()}
+              {data.created_by_rank && (
+                <> · {data.created_by_rank}{data.created_by_last_name ? ` ${data.created_by_last_name}` : ''}</>
+              )}
+            </span>
           </div>
         </div>
 
