@@ -244,9 +244,8 @@ export default function SearchPage({ navigate }) {
   const handleInvestigate = async () => {
     setCaseCreating(true);
     try {
-      const res  = await fetch('/api/cases', {
+      const res  = await apiFetch('/api/cases', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ descriptor: query }),
       });
       const data = await res.json();
