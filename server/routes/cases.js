@@ -23,7 +23,13 @@ const COMPUTED_STATUS =
 const DETECTIVES_AGG =
   `COALESCE(
     json_agg(
-      json_build_object('user_id', u.id, 'username', split_part(u.email, '@', 1))
+      json_build_object(
+        'user_id',      u.id,
+        'username',     split_part(u.email, '@', 1),
+        'last_name',    u.last_name,
+        'total_points', u.total_points,
+        'avatar_url',   u.avatar_url
+      )
       ORDER BY det.joined_at ASC
     ) FILTER (WHERE det.user_id IS NOT NULL),
     '[]'

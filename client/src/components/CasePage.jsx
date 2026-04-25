@@ -1,5 +1,21 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth.jsx';
+import { getCurrentRank } from '../constants/ranks.js';
+
+const PRESET_MAP = {
+  'preset:detective':  { emoji: '🕵️', bg: '#0f1f3a' },
+  'preset:magnifier':  { emoji: '🔍', bg: '#1a3a2a' },
+  'preset:fedora':     { emoji: '🎩', bg: '#1a1a2a' },
+  'preset:dagger':     { emoji: '🗡️', bg: '#3a1010' },
+  'preset:file':       { emoji: '📋', bg: '#0a2a3a' },
+  'preset:candle':     { emoji: '🕯️', bg: '#2a1a08' },
+  'preset:lock':       { emoji: '🔐', bg: '#1a2a1a' },
+  'preset:map':        { emoji: '🗺️', bg: '#2a2010' },
+  'preset:phone':      { emoji: '📞', bg: '#0a2a2a' },
+  'preset:briefcase':  { emoji: '💼', bg: '#2a152a' },
+  'preset:flashlight': { emoji: '🔦', bg: '#0a0f2a' },
+  'preset:skull':      { emoji: '💀', bg: '#2a0a0a' },
+};
 
 const CSS = `
   .cp-back {
@@ -46,17 +62,20 @@ const CSS = `
   }
   .cp-detective {
     display: flex; align-items: center; justify-content: flex-end;
-    gap: .5rem; margin-bottom: .5rem;
+    gap: .6rem; margin-bottom: .65rem;
   }
   .cp-detective:last-child { margin-bottom: 0; }
+  .cp-detective-info { display: flex; flex-direction: column; align-items: flex-end; gap: .1rem; }
+  .cp-detective-rank { font-size: .62rem; color: var(--text-muted); }
   .cp-detective-name { font-size: .7rem; color: var(--text); }
   .cp-detective-avatar {
-    width: 22px; height: 22px; border-radius: 50%;
+    width: 30px; height: 30px; border-radius: 50%;
     background: var(--border); border: 1px solid var(--border-subtle);
     display: flex; align-items: center; justify-content: center;
-    font-size: .65rem; color: var(--text-muted); flex-shrink: 0;
-    text-transform: uppercase; font-family: var(--font-ui);
+    font-size: .85rem; color: var(--text-muted); flex-shrink: 0;
+    text-transform: uppercase; font-family: var(--font-ui); overflow: hidden;
   }
+  .cp-detective-avatar img { width: 100%; height: 100%; object-fit: cover; }
   .cp-team-empty { font-size: .65rem; color: var(--text-dim); }
 
   .cp-card {
@@ -150,6 +169,7 @@ const CSS = `
     .cp-top { flex-direction: column-reverse; }
     .cp-team { text-align: left; min-width: 0; width: 100%; }
     .cp-detective { justify-content: flex-start; }
+    .cp-detective-info { align-items: flex-start; }
   }
 `;
 
@@ -283,7 +303,7 @@ export default function CasePage({ caseData: initialData, navigate }) {
         <div className="cp-top-left">
           <div className="cp-eyebrow">Open case</div>
           <div className="cp-ref">#{data.id.slice(0, 8).toUpperCase()}</div>
-          <div className="cp-descriptor">Prime Suspect: &ldquo;{data.descriptor}&rdquo;</div>
+          <div className="cp-descriptor">Investigating: &ldquo;{data.descriptor}&rdquo;</div>
           <div className="cp-status-row">
             <span className={`cp-status ${status}`}>{STATUS_LABEL[status] ?? status}</span>
             <span className="cp-date">
@@ -299,12 +319,30 @@ export default function CasePage({ caseData: initialData, navigate }) {
           <div className="cp-team-label">Investigation team</div>
           {detectives.length === 0
             ? <div className="cp-team-empty">No detectives yet</div>
-            : detectives.map(d => (
-              <div key={d.user_id} className="cp-detective">
-                <span className="cp-detective-name">{d.username}</span>
-                <div className="cp-detective-avatar">{d.username[0]}</div>
-              </div>
-            ))
+            : detectives.map(d => {
+              const rank    = getCurrentRank(d.total_points ?? 0);
+              const display = d.last_name || d.username;
+              const preset  = d.avatar_url && PRESET_MAP[d.avatar_url];
+              return (
+                <div key={d.user_id} className="cp-detective">
+                  <div className="cp-detective-info">
+                    <span className="cp-detective-rank">{rank.icon} {rank.name}</span>
+                    <span className="cp-detective-name">{display}</span>
+                  </div>
+                  <div
+                    className="cp-detective-avatar"
+                    style={preset ? { background: preset.bg, fontSize: '.9rem' } : {}}
+                  >
+                    {preset
+                      ? preset.emoji
+                      : d.avatar_url && !d.avatar_url.startsWith('preset:')
+                        ? <img src={d.avatar_url} alt="" onError={e => { e.currentTarget.style.display = 'none'; }} />
+                        : display[0].toUpperCase()
+                    }
+                  </div>
+                </div>
+              );
+            })
           }
         </div>
       </div>
