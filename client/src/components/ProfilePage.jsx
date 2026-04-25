@@ -66,6 +66,23 @@ const CSS = `
   .prof-edit-msg-ok  { font-size: .72rem; color: var(--accent); margin-top: .75rem; }
   .prof-edit-msg-err { font-size: .72rem; color: var(--error);  margin-top: .75rem; }
 
+  .prof-avatar-picker { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .25rem; }
+  .prof-avatar-option {
+    width: 48px; height: 48px; border-radius: 50%;
+    border: 2px solid transparent; cursor: pointer;
+    font-size: 1.4rem; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: border-color .15s, transform .1s;
+  }
+  .prof-avatar-option:hover { transform: scale(1.1); }
+  .prof-avatar-option.selected { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+  .prof-avatar-none {
+    width: 48px; height: 48px; border-radius: 50%;
+    border: 1px dashed var(--border); background: none; cursor: pointer;
+    font-size: .5rem; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--text-dim); transition: color .2s, border-color .2s; flex-shrink: 0;
+  }
+  .prof-avatar-none:hover { color: var(--text-muted); border-color: var(--text-muted); }
+
   .prof-section { margin-bottom: 2.5rem; }
   .prof-section-title {
     font-size: .6rem; letter-spacing: .16em; text-transform: uppercase;
@@ -96,8 +113,32 @@ const CSS = `
   }
 `;
 
+const PRESETS = [
+  { key: 'preset:detective',  emoji: '🕵️', bg: '#0f1f3a', label: 'Detective'    },
+  { key: 'preset:magnifier',  emoji: '🔍', bg: '#1a3a2a', label: 'Investigator' },
+  { key: 'preset:fedora',     emoji: '🎩', bg: '#1a1a2a', label: 'The Hat'      },
+  { key: 'preset:dagger',     emoji: '🗡️', bg: '#3a1010', label: 'Blade'        },
+  { key: 'preset:file',       emoji: '📋', bg: '#0a2a3a', label: 'Case File'    },
+  { key: 'preset:candle',     emoji: '🕯️', bg: '#2a1a08', label: 'Candlelit'   },
+  { key: 'preset:lock',       emoji: '🔐', bg: '#1a2a1a', label: 'Locked'       },
+  { key: 'preset:map',        emoji: '🗺️', bg: '#2a2010', label: 'Cartographer' },
+  { key: 'preset:phone',      emoji: '📞', bg: '#0a2a2a', label: 'Informant'    },
+  { key: 'preset:briefcase',  emoji: '💼', bg: '#2a152a', label: 'Agent'        },
+  { key: 'preset:flashlight', emoji: '🔦', bg: '#0a0f2a', label: 'Nightwatch'   },
+  { key: 'preset:skull',      emoji: '💀', bg: '#2a0a0a', label: 'Unknown'      },
+];
+const PRESET_MAP = Object.fromEntries(PRESETS.map(p => [p.key, p]));
+
 function Avatar({ user }) {
   const [imgErr, setImgErr] = useState(false);
+  const preset = user.avatar_url && PRESET_MAP[user.avatar_url];
+  if (preset) {
+    return (
+      <div className="prof-avatar" style={{ background: preset.bg, border: 'none' }}>
+        <span style={{ fontSize: '1.5rem', lineHeight: 1 }}>{preset.emoji}</span>
+      </div>
+    );
+  }
   if (user.avatar_url && !imgErr) {
     return (
       <div className="prof-avatar">
@@ -210,13 +251,26 @@ export default function ProfilePage() {
             </div>
           </div>
           <div className="prof-edit-field">
-            <label className="prof-edit-label">Profile picture URL</label>
-            <input
-              className="prof-edit-input"
-              placeholder="https://example.com/avatar.jpg"
-              value={form.avatar_url}
-              onChange={set('avatar_url')}
-            />
+            <label className="prof-edit-label">Profile picture</label>
+            <div className="prof-avatar-picker">
+              {PRESETS.map(({ key, emoji, bg, label }) => (
+                <button
+                  key={key}
+                  type="button"
+                  className={`prof-avatar-option${form.avatar_url === key ? ' selected' : ''}`}
+                  style={{ background: bg }}
+                  title={label}
+                  onClick={() => setForm(f => ({ ...f, avatar_url: key }))}
+                >
+                  {emoji}
+                </button>
+              ))}
+              {form.avatar_url && (
+                <button type="button" className="prof-avatar-none" onClick={() => setForm(f => ({ ...f, avatar_url: '' }))}>
+                  None
+                </button>
+              )}
+            </div>
           </div>
           <div className="prof-edit-actions">
             <button className="prof-edit-save" onClick={save} disabled={saving}>
