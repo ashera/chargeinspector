@@ -18,9 +18,8 @@ const PRESET_MAP = {
 };
 
 const STEPS = [
-  { key: 'web_intelligence',  icon: '🌐', label: 'Web Intelligence',  desc: 'AI-powered web search to identify the merchant behind this descriptor' },
-  { key: 'witness_tips',      icon: '💬', label: 'Witness Tips',      desc: 'Community reports, forums and consumer complaints about this charge'   },
-  { key: 'transaction_mafia', icon: '💰', label: 'Transaction Mafia', desc: 'Payment forensics: processor registrations, MCC codes and patterns'    },
+  { key: 'web_intelligence', icon: '🌐', label: 'Web Intelligence', desc: 'AI-powered web search to identify the merchant behind this descriptor', manual: false },
+  { key: 'local_knowledge',  icon: '🗣️', label: 'Local Knowledge',  desc: 'Enter what you know about this merchant directly.',                   manual: true  },
 ];
 
 const CSS = `
@@ -193,6 +192,30 @@ const CSS = `
   .cp-step-error { font-size: .65rem; color: #e05; margin-top: .4rem; display: block; }
   .cp-sign-in-note { font-size: .65rem; color: var(--text-dim); font-style: italic; }
 
+  /* Local Knowledge form */
+  .cp-lk-form { display: flex; flex-direction: column; gap: .75rem; }
+  .cp-lk-field { display: flex; flex-direction: column; gap: .3rem; }
+  .cp-lk-label {
+    font-size: .58rem; letter-spacing: .14em; text-transform: uppercase; color: var(--text-muted);
+  }
+  .cp-lk-input, .cp-lk-textarea, .cp-lk-select {
+    background: var(--bg-page); border: 1px solid var(--border); border-radius: 2px;
+    color: var(--text); font-family: var(--font-ui); font-size: .78rem;
+    padding: .55rem .75rem; outline: none; transition: border-color .2s;
+  }
+  .cp-lk-input:focus, .cp-lk-textarea:focus, .cp-lk-select:focus { border-color: var(--accent); }
+  .cp-lk-input::placeholder, .cp-lk-textarea::placeholder { color: var(--text-dim); }
+  .cp-lk-textarea { resize: vertical; min-height: 72px; }
+  .cp-lk-select { cursor: pointer; }
+  .cp-lk-submit {
+    align-self: flex-start; padding: .55rem 1.25rem;
+    background: var(--accent); border: none; border-radius: 2px;
+    font-family: var(--font-ui); font-size: .65rem; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--bg-page); font-weight: 500; cursor: pointer;
+  }
+  .cp-lk-submit:hover { opacity: .9; }
+  .cp-lk-submit:disabled { opacity: .45; cursor: default; }
+
   /* Submit button */
   .cp-submit-btn {
     padding: .85rem 1.75rem; background: var(--accent); border: none; border-radius: 2px;
@@ -236,6 +259,43 @@ function EvidenceResults({ ev }) {
   );
 }
 
+function LocalKnowledgeForm({ onSubmit, submitting }) {
+  const [form, setForm] = useState({ merchant_name: '', business_type: '', description: '', confidence: 'medium' });
+  const set = k => e => setForm(f => ({ ...f, [k]: e.target.value }));
+
+  return (
+    <div className="cp-lk-form">
+      <div className="cp-lk-field">
+        <label className="cp-lk-label">Merchant name <span style={{ color: 'var(--accent)' }}>*</span></label>
+        <input className="cp-lk-input" placeholder="e.g. Blue Bottle Coffee" value={form.merchant_name} onChange={set('merchant_name')} />
+      </div>
+      <div className="cp-lk-field">
+        <label className="cp-lk-label">Business type</label>
+        <input className="cp-lk-input" placeholder="e.g. Coffee chain, SaaS subscription" value={form.business_type} onChange={set('business_type')} />
+      </div>
+      <div className="cp-lk-field">
+        <label className="cp-lk-label">Notes</label>
+        <textarea className="cp-lk-textarea" placeholder="Any additional context or details you know about this charge…" value={form.description} onChange={set('description')} />
+      </div>
+      <div className="cp-lk-field">
+        <label className="cp-lk-label">Confidence</label>
+        <select className="cp-lk-select" value={form.confidence} onChange={set('confidence')}>
+          <option value="high">High — I am certain</option>
+          <option value="medium">Medium — I am fairly sure</option>
+          <option value="low">Low — just a guess</option>
+        </select>
+      </div>
+      <button
+        className="cp-lk-submit"
+        onClick={() => onSubmit(form)}
+        disabled={submitting || !form.merchant_name.trim()}
+      >
+        {submitting ? 'Saving…' : 'Save local knowledge'}
+      </button>
+    </div>
+  );
+}
+
 export default function CasePage({ caseData: initialData, navigate }) {
   const { apiFetch, isAuthenticated } = useAuth();
   const [data, setData]       = useState(initialData);
@@ -263,13 +323,13 @@ export default function CasePage({ caseData: initialData, navigate }) {
       .catch(() => {});
   }, [initialData.id]);
 
-  async function collect(type) {
+  async function collect(type, extra = {}) {
     setCollecting(type);
     setErrors(e => ({ ...e, [type]: null }));
     try {
       const res  = await apiFetch(`/api/cases/${initialData.id}/evidence/collect`, {
         method: 'POST',
-        body: JSON.stringify({ type }),
+        body: JSON.stringify({ type, ...extra }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Collection failed');
@@ -414,10 +474,10 @@ export default function CasePage({ caseData: initialData, navigate }) {
                           )}
                           <button
                             className="cp-recollect-btn"
-                            onClick={() => collect(step.key)}
+                            onClick={() => step.manual ? setEvidence(ev => ({ ...ev, [step.key]: null })) : collect(step.key)}
                             disabled={isCollecting}
                           >
-                            {isCollecting ? 'Re-collecting…' : '↺ Re-collect'}
+                            ↺ Re-enter
                           </button>
                         </div>
                       )}
@@ -426,18 +486,27 @@ export default function CasePage({ caseData: initialData, navigate }) {
                     <>
                       <p className="cp-step-desc">{step.desc}</p>
                       {isAuthenticated ? (
-                        <button
-                          className="cp-collect-btn"
-                          onClick={() => collect(step.key)}
-                          disabled={isCollecting || isLocked}
-                        >
-                          {isCollecting ? 'Collecting…' : `Run ${step.label}`}
-                        </button>
+                        step.manual ? (
+                          <LocalKnowledgeForm
+                            onSubmit={form => collect(step.key, form)}
+                            submitting={isCollecting}
+                          />
+                        ) : (
+                          <>
+                            <button
+                              className="cp-collect-btn"
+                              onClick={() => collect(step.key)}
+                              disabled={isCollecting || isLocked}
+                            >
+                              {isCollecting ? 'Collecting…' : `Run ${step.label}`}
+                            </button>
+                            {isCollecting && (
+                              <span className="cp-collecting">Agent searching the web — this may take a moment…</span>
+                            )}
+                          </>
+                        )
                       ) : (
                         <span className="cp-sign-in-note">Sign in to run this investigation</span>
-                      )}
-                      {isCollecting && (
-                        <span className="cp-collecting">Agent searching the web — this may take a moment…</span>
                       )}
                     </>
                   )}

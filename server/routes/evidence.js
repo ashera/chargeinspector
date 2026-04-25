@@ -7,7 +7,7 @@ const { collectEvidence } = require('../agents/collect');
 
 const router = express.Router();
 
-const STEP_ORDER = ['web_intelligence', 'witness_tips', 'transaction_mafia'];
+const STEP_ORDER = ['web_intelligence', 'local_knowledge'];
 
 // GET /api/cases/:id/evidence
 router.get('/:id/evidence', async (req, res) => {
@@ -51,7 +51,19 @@ router.post('/:id/evidence/collect', requireAuth, async (req, res) => {
       }
     }
 
-    const result = await collectEvidence(type, caseRow.descriptor);
+    let result;
+    if (type === 'local_knowledge') {
+      const { merchant_name, confidence, business_type, description, sources } = req.body;
+      result = {
+        merchant_name: merchant_name?.trim() || null,
+        confidence: ['high', 'medium', 'low'].includes(confidence) ? confidence : 'medium',
+        business_type: business_type?.trim() || null,
+        description: description?.trim() || null,
+        sources: Array.isArray(sources) ? sources.slice(0, 8) : [],
+      };
+    } else {
+      result = await collectEvidence(type, caseRow.descriptor);
+    }
 
     const { rows: [evidence] } = await db.query(
       `INSERT INTO evidence (case_id, type, merchant_name, confidence, business_type, description, sources)
