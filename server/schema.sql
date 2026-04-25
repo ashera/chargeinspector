@@ -247,6 +247,24 @@ INSERT INTO badges (name, description, points_threshold, icon) VALUES
 ON CONFLICT (name) DO NOTHING;
 
 -- ------------------------------------------------------------
+-- Evidence (collected per case, by type)
+-- ------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS evidence (
+  id             UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  case_id        UUID        NOT NULL REFERENCES cases(id) ON DELETE CASCADE,
+  type           TEXT        NOT NULL DEFAULT 'web_intelligence',
+  merchant_name  TEXT,
+  confidence     TEXT        CHECK (confidence IN ('high', 'medium', 'low')),
+  business_type  TEXT,
+  description    TEXT,
+  sources        JSONB       NOT NULL DEFAULT '[]',
+  collected_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS evidence_case_idx ON evidence (case_id);
+CREATE INDEX IF NOT EXISTS evidence_type_idx  ON evidence (type);
+
+-- ------------------------------------------------------------
 -- Ranks (progressive levels based on total_points)
 -- ------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS ranks (

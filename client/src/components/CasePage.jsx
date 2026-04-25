@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useAuth } from '../hooks/useAuth.jsx';
 
 const CSS = `
   .cp-back {
@@ -73,6 +74,7 @@ const CSS = `
     text-transform: uppercase; color: var(--bg-page); font-weight: 500; cursor: pointer;
   }
   .cp-btn:hover { opacity: .9; }
+  .cp-btn:disabled { opacity: .5; cursor: default; }
 
   .cp-evidence-room { margin-bottom: 1.5rem; }
   .cp-evidence-header {
@@ -92,6 +94,7 @@ const CSS = `
     border: 1px dashed var(--border); border-radius: 3px;
     padding: 1rem 1.1rem; display: flex; flex-direction: column; gap: .4rem;
   }
+  .cp-evidence-slot.has-data { border-style: solid; border-color: var(--border-subtle); }
   .cp-evidence-slot-icon { font-size: 1.2rem; line-height: 1; }
   .cp-evidence-slot-label {
     font-size: .65rem; letter-spacing: .08em; color: var(--text-muted);
@@ -103,6 +106,43 @@ const CSS = `
     font-size: .58rem; letter-spacing: .1em; text-transform: uppercase;
     color: var(--border-subtle); margin-top: .25rem;
   }
+  .cp-collect-btn {
+    margin-top: .5rem; padding: .4rem .75rem; background: none;
+    border: 1px solid var(--border); border-radius: 2px;
+    font-family: var(--font-ui); font-size: .6rem; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--text-muted); cursor: pointer;
+    align-self: flex-start;
+  }
+  .cp-collect-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+  .cp-collect-btn:disabled { opacity: .5; cursor: default; }
+  .cp-collecting {
+    font-size: .62rem; color: var(--accent); margin-top: .5rem; letter-spacing: .06em;
+  }
+
+  .cp-wi-merchant { font-size: .8rem; color: var(--text); font-weight: 500; margin-top: .35rem; }
+  .cp-wi-confidence {
+    display: inline-block; font-size: .55rem; letter-spacing: .1em; text-transform: uppercase;
+    padding: .15rem .5rem; border-radius: 2px; margin-top: .2rem;
+  }
+  .cp-wi-confidence.high   { color: var(--accent);  border: 1px solid #1e3a2a; background: #0d1a0f; }
+  .cp-wi-confidence.medium { color: var(--warning); border: 1px solid #3a3010; background: #1a1608; }
+  .cp-wi-confidence.low    { color: var(--text-dim); border: 1px solid var(--border); background: transparent; }
+  .cp-wi-btype { font-size: .62rem; color: var(--text-dim); margin-top: .2rem; }
+  .cp-wi-desc { font-size: .68rem; color: var(--text-muted); line-height: 1.55; margin-top: .5rem; }
+  .cp-wi-sources { margin-top: .6rem; display: flex; flex-direction: column; gap: .3rem; }
+  .cp-wi-source {
+    font-size: .6rem; color: var(--accent); text-decoration: none;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .cp-wi-source:hover { text-decoration: underline; }
+  .cp-wi-recollect {
+    margin-top: .6rem; font-size: .58rem; letter-spacing: .08em; text-transform: uppercase;
+    background: none; border: none; color: var(--text-dim); cursor: pointer; padding: 0;
+    font-family: var(--font-ui);
+  }
+  .cp-wi-recollect:hover { color: var(--text-muted); }
+  .cp-wi-error { font-size: .65rem; color: #e05; margin-top: .4rem; }
+
   @media (max-width: 600px) { .cp-evidence-grid { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 400px) { .cp-evidence-grid { grid-template-columns: 1fr; } }
 
@@ -116,15 +156,111 @@ const CSS = `
 const STATUS_LABEL = { open: 'Open', investigating: 'Investigating', solved: 'Solved' };
 
 const EVIDENCE_TYPES = [
-  { key: 'merchant_matches',    icon: '🏪', label: 'Merchant Matches',     desc: 'Community-identified merchants linked to this descriptor' },
-  { key: 'witness_tips',        icon: '💬', label: 'Witness Tips',          desc: 'Tips and insights submitted by investigators'             },
   { key: 'web_intelligence',    icon: '🌐', label: 'Web Intelligence',      desc: 'Online mentions, search results and web traces'           },
-  { key: 'similar_descriptors', icon: '🔗', label: 'Similar Descriptors',   desc: 'Related billing descriptors found in the database'        },
-  { key: 'transaction_data',    icon: '📊', label: 'Transaction Patterns',  desc: 'Reported amounts, frequencies and timing'                 },
-  { key: 'visual_evidence',     icon: '📸', label: 'Visual Evidence',       desc: 'Logos, screenshots and imagery collected'                 },
+  { key: 'merchant_matches',    icon: '🏪', label: 'Merchant Matches',      desc: 'Community-identified merchants linked to this descriptor' },
+  { key: 'witness_tips',        icon: '💬', label: 'Witness Tips',          desc: 'Tips and insights submitted by investigators'            },
+  { key: 'similar_descriptors', icon: '🔗', label: 'Similar Descriptors',   desc: 'Related billing descriptors found in the database'       },
+  { key: 'transaction_data',    icon: '📊', label: 'Transaction Patterns',  desc: 'Reported amounts, frequencies and timing'                },
+  { key: 'visual_evidence',     icon: '📸', label: 'Visual Evidence',       desc: 'Logos, screenshots and imagery collected'                },
 ];
 
+function WebIntelligenceSlot({ caseId, apiFetch, isAuthenticated }) {
+  const [wi, setWi]           = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [collecting, setCollecting] = useState(false);
+  const [error, setError]     = useState(null);
+
+  useEffect(() => {
+    fetch(`/api/cases/${caseId}/evidence`)
+      .then(r => r.json())
+      .then(d => {
+        const item = (d.evidence || []).find(e => e.type === 'web_intelligence');
+        setWi(item ?? null);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [caseId]);
+
+  async function collect() {
+    setCollecting(true);
+    setError(null);
+    try {
+      const res = await apiFetch(`/api/cases/${caseId}/evidence/collect`, {
+        method: 'POST',
+        body: JSON.stringify({ type: 'web_intelligence' }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Collection failed');
+      setWi(data.evidence);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setCollecting(false);
+    }
+  }
+
+  const slot = EVIDENCE_TYPES[0];
+
+  return (
+    <div className={`cp-evidence-slot${wi ? ' has-data' : ''}`}>
+      <span className="cp-evidence-slot-icon">{slot.icon}</span>
+      <span className="cp-evidence-slot-label">{slot.label}</span>
+
+      {loading ? (
+        <span className="cp-evidence-slot-desc">Loading…</span>
+      ) : wi ? (
+        <>
+          {wi.merchant_name && (
+            <span className="cp-wi-merchant">{wi.merchant_name}</span>
+          )}
+          {wi.confidence && (
+            <span className={`cp-wi-confidence ${wi.confidence}`}>{wi.confidence} confidence</span>
+          )}
+          {wi.business_type && (
+            <span className="cp-wi-btype">{wi.business_type}</span>
+          )}
+          {wi.description && (
+            <span className="cp-wi-desc">{wi.description}</span>
+          )}
+          {Array.isArray(wi.sources) && wi.sources.length > 0 && (
+            <div className="cp-wi-sources">
+              {wi.sources.slice(0, 3).map((s, i) => (
+                <a key={i} href={s.url} target="_blank" rel="noopener noreferrer" className="cp-wi-source">
+                  {s.title || s.url}
+                </a>
+              ))}
+            </div>
+          )}
+          {isAuthenticated && (
+            <button className="cp-wi-recollect" onClick={collect} disabled={collecting}>
+              {collecting ? 'Re-collecting…' : '↺ Re-collect'}
+            </button>
+          )}
+        </>
+      ) : (
+        <>
+          <span className="cp-evidence-slot-desc">{slot.desc}</span>
+          {isAuthenticated ? (
+            <>
+              <button className="cp-collect-btn" onClick={collect} disabled={collecting}>
+                {collecting ? 'Collecting…' : 'Collect intelligence'}
+              </button>
+              {collecting && (
+                <span className="cp-collecting">Agent searching the web…</span>
+              )}
+            </>
+          ) : (
+            <span className="cp-evidence-slot-empty">Sign in to collect</span>
+          )}
+        </>
+      )}
+      {error && <span className="cp-wi-error">{error}</span>}
+    </div>
+  );
+}
+
 export default function CasePage({ caseData: initialData, navigate }) {
+  const { apiFetch, isAuthenticated } = useAuth();
   const [data, setData] = useState(initialData);
 
   useEffect(() => {
@@ -184,10 +320,14 @@ export default function CasePage({ caseData: initialData, navigate }) {
       <div className="cp-evidence-room">
         <div className="cp-evidence-header">
           <span className="cp-evidence-title">Evidence Room</span>
-          <span className="cp-evidence-count">0 items collected</span>
         </div>
         <div className="cp-evidence-grid">
-          {EVIDENCE_TYPES.map(({ key, icon, label, desc }) => (
+          <WebIntelligenceSlot
+            caseId={data.id}
+            apiFetch={apiFetch}
+            isAuthenticated={isAuthenticated}
+          />
+          {EVIDENCE_TYPES.slice(1).map(({ key, icon, label, desc }) => (
             <div key={key} className="cp-evidence-slot">
               <span className="cp-evidence-slot-icon">{icon}</span>
               <span className="cp-evidence-slot-label">{label}</span>
