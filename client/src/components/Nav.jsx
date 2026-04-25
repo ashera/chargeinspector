@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth.jsx';
+import { getCurrentRank } from '../constants/ranks.js';
 
 const CSS = `
   .nav {
@@ -49,7 +50,16 @@ const CSS = `
     font-family: var(--font-ui); padding: 0;
   }
   .nav-pts:hover { text-decoration: underline; }
-  .nav-email { font-size: .65rem; color: var(--text-muted); letter-spacing: .06em; }
+  .nav-identity {
+    display: flex; flex-direction: column; gap: .1rem;
+    cursor: pointer; align-items: flex-end;
+  }
+  .nav-rank {
+    font-size: .65rem; color: var(--text); letter-spacing: .06em; white-space: nowrap;
+    transition: color .2s;
+  }
+  .nav-identity:hover .nav-rank { color: var(--accent); }
+  .nav-email { font-size: .6rem; color: var(--text-muted); letter-spacing: .06em; }
   .nav-logout {
     font-size: .6rem; letter-spacing: .1em; text-transform: uppercase;
     color: var(--text-muted); cursor: pointer; background: none; border: none;
@@ -87,7 +97,8 @@ const CSS = `
     padding: .9rem 1.5rem; border-top: 1px solid var(--border);
     display: flex; justify-content: space-between; align-items: center;
   }
-  .nav-drawer-email { font-size: .65rem; color: var(--text-muted); }
+  .nav-drawer-rank { font-size: .65rem; color: var(--text); letter-spacing: .06em; margin-bottom: .15rem; }
+  .nav-drawer-email { font-size: .6rem; color: var(--text-muted); }
   .nav-drawer-logout {
     background: none; border: none; font-family: var(--font-ui);
     font-size: .6rem; letter-spacing: .1em; text-transform: uppercase;
@@ -108,6 +119,7 @@ const CSS = `
 export default function Nav({ page, navigate, isAuthenticated, user, onPointsClick }) {
   const { logout } = useAuth();
   const [open, setOpen] = useState(false);
+  const rank = user ? getCurrentRank(user.total_points ?? 0) : null;
 
   useEffect(() => {
     const onResize = () => { if (window.innerWidth > 640) setOpen(false); };
@@ -149,7 +161,12 @@ export default function Nav({ page, navigate, isAuthenticated, user, onPointsCli
           {isAuthenticated && user && (
             <>
               <button className="nav-pts" onClick={onPointsClick}>{user.total_points ?? 0} pts</button>
-              <span className="nav-email">{user.email}</span>
+              <div className="nav-identity" onClick={() => { navigate('profile'); setOpen(false); }}>
+                <span className="nav-rank">
+                  {rank.icon} {rank.name}{user.last_name ? ` · ${user.last_name}` : ''}
+                </span>
+                <span className="nav-email">{user.email}</span>
+              </div>
             </>
           )}
           {isAuthenticated
@@ -177,7 +194,10 @@ export default function Nav({ page, navigate, isAuthenticated, user, onPointsCli
             )}
             {isAuthenticated && user && (
               <div className="nav-drawer-bottom">
-                <span className="nav-drawer-email">{user.email}</span>
+                <div>
+                  <div className="nav-drawer-rank">{rank.icon} {rank.name}{user.last_name ? ` · ${user.last_name}` : ''}</div>
+                  <span className="nav-drawer-email">{user.email}</span>
+                </div>
                 <button className="nav-drawer-logout" onClick={() => { logout(); setOpen(false); }}>
                   Logout
                 </button>

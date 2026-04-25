@@ -159,7 +159,7 @@ function Avatar({ user }) {
 }
 
 export default function ProfilePage() {
-  const { apiFetch }          = useAuth();
+  const { apiFetch, updateUser } = useAuth();
   const [data, setData]       = useState(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
@@ -200,6 +200,7 @@ export default function ProfilePage() {
       const json = await res.json();
       if (!res.ok) { setMsg({ text: json.error || 'Failed to save.', ok: false }); return; }
       setData(d => ({ ...d, user: { ...d.user, ...json.user } }));
+      updateUser({ first_name: json.user.first_name, last_name: json.user.last_name });
       setForm({
         first_name: json.user.first_name || '',
         last_name:  json.user.last_name  || '',

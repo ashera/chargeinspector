@@ -232,6 +232,10 @@ export function AuthProvider({ children }) {
     return res;
   }, [silentRefresh, clearTokenState]);
 
+  const updateUser = useCallback((updates) => {
+    setUser(prev => prev ? { ...prev, ...updates } : prev);
+  }, []);
+
   const value = {
     isAuthenticated,
     loading,
@@ -241,6 +245,7 @@ export function AuthProvider({ children }) {
     logout,
     logoutAll,
     apiFetch,
+    updateUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -127,7 +127,7 @@ router.post('/register', async (req, res) => {
     try {
       const { rows } = await db.query(
         `INSERT INTO users (email, password_hash) VALUES ($1, $2)
-         RETURNING id, email, role, total_points`,
+         RETURNING id, email, role, total_points, first_name, last_name`,
         [email.toLowerCase().trim(), passwordHash]
       );
       user = rows[0];
@@ -145,7 +145,7 @@ router.post('/register', async (req, res) => {
     return res.status(201).json({
       accessToken,
       expiresIn: ACCESS_TTL_SECONDS,
-      user: { id: user.id, email: user.email, role: user.role, total_points: user.total_points },
+      user: { id: user.id, email: user.email, role: user.role, total_points: user.total_points, first_name: user.first_name ?? null, last_name: user.last_name ?? null },
     });
   } catch (err) {
     console.error('[/auth/register]', err);
@@ -163,7 +163,7 @@ router.post('/login', async (req, res) => {
 
   try {
     const { rows } = await db.query(
-      'SELECT id, email, role, total_points, password_hash FROM users WHERE email = $1',
+      'SELECT id, email, role, total_points, first_name, last_name, password_hash FROM users WHERE email = $1',
       [email.toLowerCase().trim()]
     );
 
@@ -182,7 +182,7 @@ router.post('/login', async (req, res) => {
     return res.json({
       accessToken,
       expiresIn: ACCESS_TTL_SECONDS,
-      user: { id: user.id, email: user.email, role: user.role, total_points: user.total_points },
+      user: { id: user.id, email: user.email, role: user.role, total_points: user.total_points, first_name: user.first_name ?? null, last_name: user.last_name ?? null },
     });
   } catch (err) {
     console.error('[/auth/login]', err);
@@ -231,7 +231,7 @@ router.post('/refresh', async (req, res) => {
 
     // Fetch fresh user data (role may have changed)
     const { rows } = await db.query(
-      'SELECT id, email, role, total_points FROM users WHERE id = $1',
+      'SELECT id, email, role, total_points, first_name, last_name FROM users WHERE id = $1',
       [userId]
     );
     const user = rows[0];
@@ -247,7 +247,7 @@ router.post('/refresh', async (req, res) => {
     return res.json({
       accessToken,
       expiresIn: ACCESS_TTL_SECONDS,
-      user: { id: user.id, email: user.email, role: user.role, total_points: user.total_points },
+      user: { id: user.id, email: user.email, role: user.role, total_points: user.total_points, first_name: user.first_name ?? null, last_name: user.last_name ?? null },
     });
   } catch (err) {
     console.error('[/auth/refresh]', err);
