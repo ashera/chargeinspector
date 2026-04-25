@@ -206,6 +206,19 @@ CREATE TABLE IF NOT EXISTS descriptor_views (
 CREATE INDEX IF NOT EXISTS descriptor_views_descriptor_idx ON descriptor_views (descriptor_id);
 CREATE INDEX IF NOT EXISTS descriptor_views_created_idx    ON descriptor_views (created_at);
 
+-- ------------------------------------------------------------
+-- Cases (unidentified descriptors under investigation)
+-- ------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS cases (
+  id           UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  descriptor   TEXT        NOT NULL,
+  created_by   UUID        REFERENCES users(id) ON DELETE SET NULL,
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS cases_descriptor_idx ON cases (lower(descriptor));
+CREATE INDEX IF NOT EXISTS cases_created_idx           ON cases (created_at);
+
 -- Seed default badges
 INSERT INTO badges (name, description, points_threshold, icon) VALUES
   ('First Steps',    'Earned your first points',          10,   '🐣'),

@@ -118,6 +118,46 @@ const CSS = `
     .sp-card-action { width: 100%; margin-left: 0; }
     .sp-details-btn { width: 100%; text-align: center; }
   }
+  .sp-modal-overlay {
+    position: fixed; inset: 0; z-index: 500;
+    background: rgba(0,0,0,.8);
+    display: flex; align-items: center; justify-content: center;
+    padding: 1.5rem;
+  }
+  .sp-modal {
+    background: #111; border: 1px solid #1e1e1e; border-radius: 4px;
+    padding: 2rem; max-width: 400px; width: 100%;
+  }
+  .sp-modal-eyebrow {
+    font-size: .6rem; letter-spacing: .2em; text-transform: uppercase;
+    color: #4b4b4b; margin-bottom: .75rem;
+  }
+  .sp-modal-title {
+    font-family: 'DM Serif Display', serif; font-style: italic;
+    font-size: 1.6rem; color: #6ee7a0; margin-bottom: .5rem; line-height: 1.1;
+  }
+  .sp-modal-descriptor {
+    font-family: 'DM Mono', monospace; font-size: .75rem;
+    color: #f0b429; letter-spacing: .08em; margin-bottom: 1.25rem;
+  }
+  .sp-modal-body {
+    font-size: .78rem; color: #4b4b4b; line-height: 1.7; margin-bottom: 1.5rem;
+  }
+  .sp-modal-btn {
+    width: 100%; padding: .85rem; background: #6ee7a0;
+    border: none; border-radius: 2px;
+    font-family: 'DM Mono', monospace; font-size: .7rem;
+    letter-spacing: .14em; text-transform: uppercase;
+    color: #0a0a0a; font-weight: 500; cursor: pointer; margin-bottom: .75rem;
+  }
+  .sp-modal-btn:disabled { opacity: .4; cursor: not-allowed; }
+  .sp-modal-dismiss {
+    display: block; width: 100%; background: none; border: none;
+    font-family: 'DM Mono', monospace; font-size: .6rem;
+    letter-spacing: .1em; text-transform: uppercase;
+    color: #4b4b4b; cursor: pointer; text-align: center; padding: .5rem 0;
+  }
+  .sp-modal-dismiss:hover { color: #f0ede6; }
   @keyframes cotd-pulse {
     0%, 100% { box-shadow: 0 0 0 0 rgba(240,180,41,.18), 0 0 18px 0 rgba(240,180,41,.06); }
     50%       { box-shadow: 0 0 0 4px rgba(240,180,41,.06), 0 0 32px 4px rgba(240,180,41,.14); }
@@ -160,7 +200,9 @@ export default function SearchPage({ navigate }) {
   const [suggestions, setSuggestions] = useState([]);
   const [activeIdx, setActiveIdx]   = useState(-1);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [contributor, setContributor] = useState(undefined);
+  const [contributor, setContributor]   = useState(undefined);
+  const [showModal, setShowModal]       = useState(false);
+  const [caseCreating, setCaseCreating] = useState(false);
   const inputRef       = useRef(null);
   const debounceRef    = useRef(null);
   const wrapRef        = useRef(null);
@@ -178,17 +220,37 @@ export default function SearchPage({ navigate }) {
     if (!term) return;
     setShowSuggestions(false);
     setSuggestions([]);
+    setShowModal(false);
     setBusy(true);
     try {
       const res  = await fetch(`/api/search?q=${encodeURIComponent(term)}`);
       const data = await res.json();
       setResults(data.results);
+      if (data.results.length === 0) setShowModal(true);
     } catch {
       setResults([]);
     } finally {
       setBusy(false);
     }
   }, [query]);
+
+  const handleInvestigate = async () => {
+    setCaseCreating(true);
+    try {
+      const res  = await fetch('/api/cases', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ descriptor: query }),
+      });
+      const data = await res.json();
+      if (res.ok && data.case) {
+        setShowModal(false);
+        navigate('case', { caseData: data.case });
+      }
+    } catch { /* ignore */ } finally {
+      setCaseCreating(false);
+    }
+  };
 
   // Debounced autocomplete
   useEffect(() => {
@@ -283,20 +345,7 @@ export default function SearchPage({ navigate }) {
 
       {results !== null && (
         <div className="sp-results">
-          {results.length === 0 ? (
-            <div className="sp-empty">
-              <p>No results found for <strong>"{query}"</strong>.</p>
-              <p style={{ marginTop: '.5rem' }}>
-                Know who this is?{' '}
-                <span
-                  style={{ color: '#6ee7a0', cursor: 'pointer' }}
-                  onClick={() => navigate('submit', { descriptor: query })}
-                >
-                  Submit a match →
-                </span>
-              </p>
-            </div>
-          ) : (
+          {results.length === 0 ? null : (
             <>
               <div style={{ marginBottom: '1.25rem' }}>
                 <p style={{ fontFamily: "'DM Serif Display', serif", fontStyle: 'italic', fontSize: '1.5rem', color: '#6ee7a0', marginBottom: '.35rem' }}>
@@ -348,6 +397,24 @@ export default function SearchPage({ navigate }) {
               </p>
             </>
           )}
+        </div>
+      )}
+      {showModal && (
+        <div className="sp-modal-overlay" onClick={e => { if (e.target === e.currentTarget) setShowModal(false); }}>
+          <div className="sp-modal">
+            <div className="sp-modal-eyebrow">Unidentified descriptor</div>
+            <div className="sp-modal-title">Mystery Identified</div>
+            <div className="sp-modal-descriptor">{query}</div>
+            <div className="sp-modal-body">
+              We don't recognise this descriptor! Would you like to help solve the mystery?
+            </div>
+            <button className="sp-modal-btn" onClick={handleInvestigate} disabled={caseCreating}>
+              {caseCreating ? 'Opening case…' : 'Investigate'}
+            </button>
+            <button className="sp-modal-dismiss" onClick={() => setShowModal(false)}>
+              Dismiss
+            </button>
+          </div>
         </div>
       )}
     </>
