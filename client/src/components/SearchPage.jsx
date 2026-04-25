@@ -126,22 +126,22 @@ const CSS = `
   }
   .sp-modal {
     background: #111; border: 1px solid #1e1e1e; border-radius: 4px;
-    padding: 2rem; max-width: 400px; width: 100%;
-  }
-  .sp-modal-eyebrow {
-    font-size: .6rem; letter-spacing: .2em; text-transform: uppercase;
-    color: #4b4b4b; margin-bottom: .75rem;
+    padding: 2rem; max-width: 400px; width: 100%; text-align: center;
   }
   .sp-modal-title {
     font-family: 'DM Serif Display', serif; font-style: italic;
-    font-size: 1.6rem; color: #6ee7a0; margin-bottom: .5rem; line-height: 1.1;
+    font-size: 1.6rem; color: #6ee7a0; margin-bottom: .6rem; line-height: 1.1;
+  }
+  .sp-modal-eyebrow {
+    font-size: .6rem; letter-spacing: .2em; text-transform: uppercase;
+    color: #4b4b4b; margin-bottom: .85rem;
   }
   .sp-modal-descriptor {
     font-family: 'DM Mono', monospace; font-size: .75rem;
     color: #f0b429; letter-spacing: .08em; margin-bottom: 1.25rem;
   }
   .sp-modal-body {
-    font-size: .78rem; color: #4b4b4b; line-height: 1.7; margin-bottom: 1.5rem;
+    font-size: .78rem; color: #8a8a8a; line-height: 1.7; margin-bottom: 1.5rem;
   }
   .sp-modal-btn {
     width: 100%; padding: .85rem; background: #6ee7a0;
@@ -402,9 +402,9 @@ export default function SearchPage({ navigate }) {
       {showModal && (
         <div className="sp-modal-overlay" onClick={e => { if (e.target === e.currentTarget) setShowModal(false); }}>
           <div className="sp-modal">
-            <div className="sp-modal-eyebrow">Unidentified descriptor</div>
             <div className="sp-modal-title">Mystery Identified</div>
-            <div className="sp-modal-descriptor">{query}</div>
+            <div className="sp-modal-eyebrow">Unidentified descriptor</div>
+            <div className="sp-modal-descriptor">"{query}"</div>
             <div className="sp-modal-body">
               We don't recognise this descriptor! Would you like to help solve the mystery?
             </div>
