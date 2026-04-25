@@ -3,12 +3,12 @@ import { useAuth } from '../hooks/useAuth.jsx';
 
 const CSS = `
   .ph-title { font-family: 'DM Serif Display', serif; font-size: 2rem; margin-bottom: .5rem; }
-  .ph-sub   { font-size: .75rem; color: #4b4b4b; margin-bottom: 2rem; }
-  .ph-empty { font-size: .75rem; color: #4b4b4b; padding: 3rem 0; text-align: center; }
+  .ph-sub   { font-size: .75rem; color: #888; margin-bottom: 2rem; }
+  .ph-empty { font-size: .75rem; color: #888; padding: 3rem 0; text-align: center; }
   .ph-table { width: 100%; border-collapse: collapse; }
   .ph-table th {
     font-size: .6rem; letter-spacing: .14em; text-transform: uppercase;
-    color: #4b4b4b; text-align: left; padding: .6rem 1rem;
+    color: #888; text-align: left; padding: .6rem 1rem;
     border-bottom: 1px solid #1e1e1e; font-weight: 400;
   }
   .ph-table td {
@@ -24,14 +24,14 @@ const CSS = `
   .ph-merchant { font-weight: 400; }
   .ph-reason {
     font-size: .6rem; letter-spacing: .1em; text-transform: uppercase;
-    color: #4b4b4b; white-space: nowrap;
+    color: #888; white-space: nowrap;
   }
-  .ph-date { font-size: .65rem; color: #2e2e2e; white-space: nowrap; }
+  .ph-date { font-size: .65rem; color: #4b4b4b; white-space: nowrap; }
   .ph-total {
     display: flex; justify-content: flex-end; align-items: baseline;
     gap: .5rem; margin-bottom: 1.5rem;
   }
-  .ph-total-label { font-size: .65rem; color: #4b4b4b; letter-spacing: .1em; text-transform: uppercase; }
+  .ph-total-label { font-size: .65rem; color: #888; letter-spacing: .1em; text-transform: uppercase; }
   .ph-total-value { font-family: 'DM Serif Display', serif; font-size: 1.75rem; color: #6ee7a0; }
   .ph-badge {
     display: flex; align-items: center; gap: 1rem;
@@ -39,10 +39,10 @@ const CSS = `
     padding: 1rem 1.25rem; margin-bottom: 2rem;
   }
   .ph-badge-icon { font-size: 2rem; flex-shrink: 0; }
-  .ph-badge-label { font-size: .55rem; letter-spacing: .14em; text-transform: uppercase; color: #4b4b4b; margin-bottom: .2rem; }
+  .ph-badge-label { font-size: .55rem; letter-spacing: .14em; text-transform: uppercase; color: #888; margin-bottom: .2rem; }
   .ph-badge-name { font-family: 'DM Serif Display', serif; font-size: 1.1rem; margin-bottom: .15rem; }
-  .ph-badge-desc { font-size: .7rem; color: #4b4b4b; }
-  .ph-badge-date { font-size: .65rem; color: #2e2e2e; margin-left: auto; white-space: nowrap; align-self: flex-start; }
+  .ph-badge-desc { font-size: .7rem; color: #888; }
+  .ph-badge-date { font-size: .65rem; color: #4b4b4b; margin-left: auto; white-space: nowrap; align-self: flex-start; }
   .ph-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
   .ph-table { min-width: 460px; }
   @media (max-width: 500px) {

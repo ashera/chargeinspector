@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 const CSS = `
   .cp-back {
     font-size: .65rem; letter-spacing: .1em; text-transform: uppercase;
-    color: #4b4b4b; cursor: pointer; background: none; border: none;
+    color: #888; cursor: pointer; background: none; border: none;
     font-family: 'DM Mono', monospace; padding: 0; margin-bottom: 2rem;
     display: inline-block;
   }
@@ -14,11 +14,11 @@ const CSS = `
   .cp-top-left { flex: 1; min-width: 0; }
   .cp-eyebrow {
     font-size: .6rem; letter-spacing: .2em; text-transform: uppercase;
-    color: #4b4b4b; margin-bottom: .3rem;
+    color: #888; margin-bottom: .3rem;
   }
   .cp-ref {
     font-family: 'DM Mono', monospace; font-size: .65rem;
-    color: #2e2e2e; letter-spacing: .12em; margin-bottom: 1.25rem;
+    color: #4b4b4b; letter-spacing: .12em; margin-bottom: 1.25rem;
   }
   .cp-descriptor {
     font-family: 'DM Mono', monospace; font-size: 1.5rem;
@@ -32,7 +32,7 @@ const CSS = `
   .cp-status.open          { color: #e0c05c; border: 1px solid #3a3010; background: #1a1608; }
   .cp-status.investigating { color: #6ee7a0; border: 1px solid #1e3a2a; background: #0d1a0f; }
   .cp-status.solved        { color: #6ee7a0; border: 1px solid #1e3a2a; background: #0d1a0f; }
-  .cp-date { font-size: .65rem; color: #2e2e2e; }
+  .cp-date { font-size: .65rem; color: #4b4b4b; }
 
   .cp-team {
     flex-shrink: 0; text-align: right;
@@ -41,7 +41,7 @@ const CSS = `
   }
   .cp-team-label {
     font-size: .55rem; letter-spacing: .16em; text-transform: uppercase;
-    color: #4b4b4b; margin-bottom: .85rem;
+    color: #888; margin-bottom: .85rem;
   }
   .cp-detective {
     display: flex; align-items: center; justify-content: flex-end;
@@ -53,10 +53,10 @@ const CSS = `
     width: 22px; height: 22px; border-radius: 50%;
     background: #1e1e1e; border: 1px solid #2e2e2e;
     display: flex; align-items: center; justify-content: center;
-    font-size: .65rem; color: #4b4b4b; flex-shrink: 0;
+    font-size: .65rem; color: #888; flex-shrink: 0;
     text-transform: uppercase; font-family: 'DM Mono', monospace;
   }
-  .cp-team-empty { font-size: .65rem; color: #2e2e2e; }
+  .cp-team-empty { font-size: .65rem; color: #4b4b4b; }
 
   .cp-card {
     background: #111; border: 1px solid #1e1e1e; border-radius: 3px;
@@ -64,9 +64,9 @@ const CSS = `
   }
   .cp-card-title {
     font-size: .6rem; letter-spacing: .14em; text-transform: uppercase;
-    color: #4b4b4b; margin-bottom: .75rem;
+    color: #888; margin-bottom: .75rem;
   }
-  .cp-card-body { font-size: .8rem; color: #4b4b4b; line-height: 1.7; }
+  .cp-card-body { font-size: .8rem; color: #888; line-height: 1.7; }
   .cp-btn {
     padding: .85rem 1.75rem; background: #6ee7a0; border: none; border-radius: 2px;
     font-family: 'DM Mono', monospace; font-size: .7rem; letter-spacing: .14em;

@@ -29,7 +29,7 @@ const CSS = `
     font-size: .65rem;
     letter-spacing: .12em;
     text-transform: uppercase;
-    color: #4b4b4b;
+    color: #888;
     cursor: pointer;
     border-bottom: 2px solid transparent;
     margin-bottom: -1px;
@@ -49,10 +49,10 @@ const CSS = `
     font-family: 'DM Mono', monospace; padding: 0;
   }
   .nav-pts:hover { text-decoration: underline; }
-  .nav-email { font-size: .65rem; color: #4b4b4b; letter-spacing: .06em; }
+  .nav-email { font-size: .65rem; color: #888; letter-spacing: .06em; }
   .nav-logout {
     font-size: .6rem; letter-spacing: .1em; text-transform: uppercase;
-    color: #4b4b4b; cursor: pointer; background: none; border: none;
+    color: #888; cursor: pointer; background: none; border: none;
     font-family: 'DM Mono', monospace;
   }
   .nav-logout:hover { color: #e05c5c; }
@@ -77,7 +77,7 @@ const CSS = `
     display: block; width: 100%; text-align: left;
     padding: .9rem 1.5rem;
     font-size: .65rem; letter-spacing: .12em; text-transform: uppercase;
-    color: #4b4b4b; cursor: pointer;
+    color: #888; cursor: pointer;
     background: none; border: none; border-bottom: 1px solid #111;
     font-family: 'DM Mono', monospace; transition: color .2s;
   }
@@ -87,11 +87,11 @@ const CSS = `
     padding: .9rem 1.5rem; border-top: 1px solid #1e1e1e;
     display: flex; justify-content: space-between; align-items: center;
   }
-  .nav-drawer-email { font-size: .65rem; color: #4b4b4b; }
+  .nav-drawer-email { font-size: .65rem; color: #888; }
   .nav-drawer-logout {
     background: none; border: none; font-family: 'DM Mono', monospace;
     font-size: .6rem; letter-spacing: .1em; text-transform: uppercase;
-    color: #4b4b4b; cursor: pointer;
+    color: #888; cursor: pointer;
   }
   .nav-drawer-logout:hover { color: #e05c5c; }
 

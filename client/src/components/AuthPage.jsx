@@ -104,7 +104,7 @@ const CSS = `
     font-size: .6rem;
     letter-spacing: .12em;
     text-transform: uppercase;
-    color: #4b4b4b;
+    color: #888;
   }
 
   /* ── Form Panel ── */
@@ -148,7 +148,7 @@ const CSS = `
     background: none;
     border: none;
     border-bottom: 2px solid transparent;
-    color: #4b4b4b;
+    color: #888;
     cursor: pointer;
     transition: color .2s, border-color .2s;
     margin-bottom: -1px;
@@ -169,7 +169,7 @@ const CSS = `
     font-size: .6rem;
     letter-spacing: .14em;
     text-transform: uppercase;
-    color: #4b4b4b;
+    color: #888;
     margin-bottom: .5rem;
   }
 
@@ -187,7 +187,7 @@ const CSS = `
   }
 
   .ap-input:focus { border-color: #6ee7a0; }
-  .ap-input::placeholder { color: #2e2e2e; }
+  .ap-input::placeholder { color: #4b4b4b; }
 
   .ap-input.error { border-color: #e05c5c; }
 
@@ -240,13 +240,13 @@ const CSS = `
   .ap-footer {
     margin-top: 2rem;
     font-size: .6rem;
-    color: #2e2e2e;
+    color: #4b4b4b;
     line-height: 1.6;
     letter-spacing: .04em;
   }
 
   .ap-footer a {
-    color: #4b4b4b;
+    color: #888;
     text-decoration: underline;
     cursor: pointer;
   }

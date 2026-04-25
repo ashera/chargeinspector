@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 const CSS = `
   .md-back {
     font-size: .65rem; letter-spacing: .1em; text-transform: uppercase;
-    color: #4b4b4b; cursor: pointer; background: none; border: none;
+    color: #888; cursor: pointer; background: none; border: none;
     font-family: 'DM Mono', monospace; padding: 0; margin-bottom: 2rem;
     display: inline-block;
   }
@@ -30,11 +30,11 @@ const CSS = `
   .md-section { margin-bottom: 2rem; }
   .md-section-title {
     font-size: .6rem; letter-spacing: .14em; text-transform: uppercase;
-    color: #4b4b4b; margin-bottom: 1rem; border-bottom: 1px solid #1e1e1e;
+    color: #888; margin-bottom: 1rem; border-bottom: 1px solid #1e1e1e;
     padding-bottom: .5rem;
   }
   .md-row { display: flex; gap: 1rem; margin-bottom: .75rem; font-size: .8rem; }
-  .md-label { color: #4b4b4b; width: 100px; flex-shrink: 0; font-size: .7rem; }
+  .md-label { color: #888; width: 100px; flex-shrink: 0; font-size: .7rem; }
   .md-value { color: #f0ede6; }
   .md-value a { color: #6ee7a0; text-decoration: none; }
   .md-value a:hover { text-decoration: underline; }
@@ -43,7 +43,7 @@ const CSS = `
     padding: 1.25rem; display: flex; align-items: center; justify-content: space-between;
   }
   .md-votes-count { font-family: 'DM Serif Display', serif; font-size: 2rem; color: #6ee7a0; }
-  .md-votes-label { font-size: .7rem; color: #4b4b4b; margin-top: .2rem; }
+  .md-votes-label { font-size: .7rem; color: #888; margin-top: .2rem; }
   .md-vote-btn {
     padding: .7rem 1.5rem; border-radius: 2px;
     font-family: 'DM Mono', monospace; font-size: .65rem;
@@ -71,15 +71,15 @@ const CSS = `
     font-family: 'DM Mono', monospace; font-size: .75rem;
     letter-spacing: .08em; color: #6ee7a0; flex: 1;
   }
-  .md-descriptor-votes { font-size: .65rem; color: #2e2e2e; white-space: nowrap; }
+  .md-descriptor-votes { font-size: .65rem; color: #4b4b4b; white-space: nowrap; }
   .md-descriptor-btn {
     padding: .4rem .85rem; border: 1px solid #1e1e1e; border-radius: 2px;
-    background: none; color: #4b4b4b; font-family: 'DM Mono', monospace;
+    background: none; color: #888; font-family: 'DM Mono', monospace;
     font-size: .58rem; letter-spacing: .1em; text-transform: uppercase;
     cursor: pointer; white-space: nowrap; transition: color .2s, border-color .2s;
     flex-shrink: 0;
   }
-  .md-descriptor-btn:hover { color: #f0ede6; border-color: #4b4b4b; }
+  .md-descriptor-btn:hover { color: #f0ede6; border-color: #888; }
   @media (max-width: 500px) {
     .md-header { gap: 1rem; }
     .md-name { font-size: 1.5rem; }

@@ -3,8 +3,8 @@ import { useAuth } from '../hooks/useAuth.jsx';
 
 const CSS = `
   .adm-title { font-family: 'DM Serif Display', serif; font-size: 2rem; margin-bottom: .5rem; }
-  .adm-sub { font-size: .75rem; color: #4b4b4b; margin-bottom: 2rem; }
-  .adm-empty { font-size: .75rem; color: #4b4b4b; padding: 2rem 0; }
+  .adm-sub { font-size: .75rem; color: #888; margin-bottom: 2rem; }
+  .adm-empty { font-size: .75rem; color: #888; padding: 2rem 0; }
   .adm-card {
     background: #111; border: 1px solid #1e1e1e; border-radius: 3px;
     padding: 1.25rem; margin-bottom: 1rem;
@@ -14,16 +14,16 @@ const CSS = `
     color: #6ee7a0; margin-bottom: .5rem;
   }
   .adm-merchant { font-family: 'DM Serif Display', serif; font-size: 1.3rem; margin-bottom: .25rem; }
-  .adm-meta { font-size: .7rem; color: #4b4b4b; display: flex; flex-wrap: wrap; gap: .75rem; margin-bottom: 1rem; }
+  .adm-meta { font-size: .7rem; color: #888; display: flex; flex-wrap: wrap; gap: .75rem; margin-bottom: 1rem; }
   .adm-meta a { color: #6ee7a0; text-decoration: none; }
-  .adm-submitter { font-size: .65rem; color: #2e2e2e; margin-bottom: 1rem; }
+  .adm-submitter { font-size: .65rem; color: #4b4b4b; margin-bottom: 1rem; }
   .adm-btns { display: flex; gap: .75rem; }
   .adm-btn {
     padding: .6rem 1.25rem; border-radius: 2px;
     font-family: 'DM Mono', monospace; font-size: .65rem;
     letter-spacing: .1em; text-transform: uppercase;
     cursor: pointer; border: 1px solid #1e1e1e;
-    background: none; color: #4b4b4b;
+    background: none; color: #888;
     transition: color .2s, border-color .2s;
   }
   .adm-btn:disabled { opacity: .3; cursor: not-allowed; }

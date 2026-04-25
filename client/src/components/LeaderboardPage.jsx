@@ -2,15 +2,15 @@ import { useEffect, useState } from 'react';
 
 const CSS = `
   .lb-title { font-family: 'DM Serif Display', serif; font-size: 2rem; margin-bottom: .5rem; }
-  .lb-sub { font-size: .75rem; color: #4b4b4b; margin-bottom: 2rem; }
+  .lb-sub { font-size: .75rem; color: #888; margin-bottom: 2rem; }
   .lb-table { width: 100%; border-collapse: collapse; font-size: .8rem; }
   .lb-table th {
     text-align: left; font-size: .6rem; letter-spacing: .12em;
-    text-transform: uppercase; color: #4b4b4b; padding: .5rem 0;
+    text-transform: uppercase; color: #888; padding: .5rem 0;
     border-bottom: 1px solid #1e1e1e;
   }
   .lb-table td { padding: .75rem 0; border-bottom: 1px solid #111; }
-  .lb-rank { color: #4b4b4b; font-size: .7rem; width: 2rem; }
+  .lb-rank { color: #888; font-size: .7rem; width: 2rem; }
   .lb-rank-1 { color: #ffd700; }
   .lb-rank-2 { color: #c0c0c0; }
   .lb-rank-3 { color: #cd7f32; }

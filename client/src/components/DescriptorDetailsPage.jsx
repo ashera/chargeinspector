@@ -6,14 +6,14 @@ import {
 const CSS = `
   .dd-back {
     font-size: .65rem; letter-spacing: .1em; text-transform: uppercase;
-    color: #4b4b4b; cursor: pointer; background: none; border: none;
+    color: #888; cursor: pointer; background: none; border: none;
     font-family: 'DM Mono', monospace; padding: 0; margin-bottom: 2rem;
     display: inline-block;
   }
   .dd-back:hover { color: #f0ede6; }
   .dd-eyebrow {
     font-size: .65rem; letter-spacing: .14em; text-transform: uppercase;
-    color: #4b4b4b; margin-bottom: .4rem;
+    color: #888; margin-bottom: .4rem;
   }
   .dd-title {
     font-family: 'DM Mono', monospace; font-size: 1.5rem;
@@ -21,7 +21,7 @@ const CSS = `
   }
   .dd-section-title {
     font-size: .6rem; letter-spacing: .14em; text-transform: uppercase;
-    color: #4b4b4b; margin-bottom: 1rem; border-bottom: 1px solid #1e1e1e;
+    color: #888; margin-bottom: 1rem; border-bottom: 1px solid #1e1e1e;
     padding-bottom: .5rem;
   }
   .dd-chart-wrap {
@@ -44,19 +44,19 @@ const CSS = `
   }
   .dd-card-body { flex: 1; min-width: 0; }
   .dd-merchant-name { font-family: 'DM Serif Display', serif; font-size: 1.2rem; margin-bottom: .25rem; }
-  .dd-meta { font-size: .7rem; color: #4b4b4b; display: flex; flex-wrap: wrap; gap: .75rem; margin-top: .4rem; }
+  .dd-meta { font-size: .7rem; color: #888; display: flex; flex-wrap: wrap; gap: .75rem; margin-top: .4rem; }
   .dd-meta a { color: #6ee7a0; text-decoration: none; }
   .dd-meta a:hover { text-decoration: underline; }
-  .dd-votes { font-size: .65rem; color: #4b4b4b; margin-top: .4rem; }
+  .dd-votes { font-size: .65rem; color: #888; margin-top: .4rem; }
   .dd-card-action { margin-left: auto; flex-shrink: 0; align-self: center; }
   .dd-btn {
     padding: .55rem 1rem; border: 1px solid #1e1e1e; border-radius: 2px;
-    background: none; color: #4b4b4b; font-family: 'DM Mono', monospace;
+    background: none; color: #888; font-family: 'DM Mono', monospace;
     font-size: .6rem; letter-spacing: .1em; text-transform: uppercase;
     cursor: pointer; white-space: nowrap; transition: color .2s, border-color .2s;
   }
-  .dd-btn:hover { color: #f0ede6; border-color: #4b4b4b; }
-  .dd-empty { font-size: .75rem; color: #4b4b4b; padding: 2rem 0; }
+  .dd-btn:hover { color: #f0ede6; border-color: #888; }
+  .dd-empty { font-size: .75rem; color: #888; padding: 2rem 0; }
   @media (max-width: 500px) {
     .dd-card { flex-wrap: wrap; }
     .dd-card-action { width: 100%; margin-left: 0; }
@@ -68,7 +68,7 @@ const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   return (
     <div style={{ background: '#1a1a1a', border: '1px solid #2e2e2e', borderRadius: 2, padding: '8px 12px', fontFamily: "'DM Mono', monospace", fontSize: '.7rem', color: '#f0ede6' }}>
-      <div style={{ color: '#4b4b4b', marginBottom: 2 }}>{label}</div>
+      <div style={{ color: '#888', marginBottom: 2 }}>{label}</div>
       <div style={{ color: '#6ee7a0' }}>{payload[0].value} view{payload[0].value !== 1 ? 's' : ''}</div>
     </div>
   );
@@ -124,14 +124,14 @@ export default function DescriptorDetailsPage({ descriptor, descriptorId, naviga
                 <XAxis
                   dataKey="date"
                   ticks={tickDates}
-                  tick={{ fill: '#4b4b4b', fontFamily: "'DM Mono', monospace", fontSize: 10 }}
+                  tick={{ fill: '#888', fontFamily: "'DM Mono', monospace", fontSize: 10 }}
                   tickLine={false}
                   axisLine={false}
                   tickFormatter={d => d.slice(5)}
                 />
                 <YAxis
                   allowDecimals={false}
-                  tick={{ fill: '#4b4b4b', fontFamily: "'DM Mono', monospace", fontSize: 10 }}
+                  tick={{ fill: '#888', fontFamily: "'DM Mono', monospace", fontSize: 10 }}
                   tickLine={false}
                   axisLine={false}
                   width={24}
@@ -141,7 +141,7 @@ export default function DescriptorDetailsPage({ descriptor, descriptorId, naviga
               </BarChart>
             </ResponsiveContainer>
             {!loading && !hasViews && (
-              <p style={{ textAlign: 'center', fontSize: '.7rem', color: '#2e2e2e', paddingBottom: '.75rem' }}>No views recorded yet</p>
+              <p style={{ textAlign: 'center', fontSize: '.7rem', color: '#4b4b4b', paddingBottom: '.75rem' }}>No views recorded yet</p>
             )}
           </div>
         </>

@@ -7,7 +7,7 @@ const CSS = `
     font-size: 2rem;
     margin-bottom: .5rem;
   }
-  .sub-desc { font-size: .75rem; color: #4b4b4b; margin-bottom: 2rem; line-height: 1.6; }
+  .sub-desc { font-size: .75rem; color: #888; margin-bottom: 2rem; line-height: 1.6; }
   .sub-form { max-width: 520px; }
   .sub-field { margin-bottom: 1.25rem; position: relative; }
   .sub-label {
@@ -15,7 +15,7 @@ const CSS = `
     font-size: .6rem;
     letter-spacing: .14em;
     text-transform: uppercase;
-    color: #4b4b4b;
+    color: #888;
     margin-bottom: .5rem;
   }
   .sub-input {
@@ -32,7 +32,7 @@ const CSS = `
     box-sizing: border-box;
   }
   .sub-input:focus { border-color: #6ee7a0; }
-  .sub-input::placeholder { color: #2e2e2e; }
+  .sub-input::placeholder { color: #4b4b4b; }
   .sub-btn {
     width: 100%;
     padding: .85rem;
@@ -60,7 +60,7 @@ const CSS = `
   }
   .sub-conflict-title { font-size: .65rem; letter-spacing: .14em; text-transform: uppercase; color: #e0c05c; margin-bottom: .75rem; }
   .sub-conflict-merchant { font-family: 'DM Serif Display', serif; font-size: 1.2rem; margin-bottom: .25rem; }
-  .sub-conflict-meta { font-size: .7rem; color: #4b4b4b; }
+  .sub-conflict-meta { font-size: .7rem; color: #888; }
   .sub-conflict-btns { display: flex; gap: .75rem; margin-top: 1rem; }
   .sub-conflict-btn {
     flex: 1;
@@ -73,10 +73,10 @@ const CSS = `
     cursor: pointer;
     border: 1px solid #1e1e1e;
     background: none;
-    color: #4b4b4b;
+    color: #888;
     transition: color .2s, border-color .2s;
   }
-  .sub-conflict-btn:hover { color: #f0ede6; border-color: #4b4b4b; }
+  .sub-conflict-btn:hover { color: #f0ede6; border-color: #888; }
   .sub-conflict-btn.primary { background: #6ee7a0; color: #0a0a0a; border-color: #6ee7a0; }
   .sub-suggestions {
     position: absolute;
@@ -98,7 +98,7 @@ const CSS = `
   .sub-suggestion:last-child { border-bottom: none; }
   .sub-suggestion:hover, .sub-suggestion.active { background: #1a1a1a; }
   .sub-sug-name { font-size: .8rem; color: #f0ede6; }
-  .sub-sug-meta { font-size: .65rem; color: #4b4b4b; margin-top: .1rem; }
+  .sub-sug-meta { font-size: .65rem; color: #888; margin-top: .1rem; }
 `;
 
 const EMPTY = { descriptor: '', merchantName: '', merchantLocation: '', website: '', logoUrl: '' };

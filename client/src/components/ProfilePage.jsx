@@ -9,12 +9,12 @@ const CSS = `
     display: flex; align-items: center; justify-content: center;
     font-size: 1.5rem; flex-shrink: 0;
   }
-  .prof-email { font-size: .8rem; color: #4b4b4b; }
+  .prof-email { font-size: .8rem; color: #888; }
   .prof-pts { font-size: 1.5rem; color: #6ee7a0; font-family: 'DM Serif Display', serif; }
   .prof-section { margin-bottom: 2.5rem; }
   .prof-section-title {
     font-size: .6rem; letter-spacing: .16em; text-transform: uppercase;
-    color: #4b4b4b; margin-bottom: 1rem; border-bottom: 1px solid #1e1e1e;
+    color: #888; margin-bottom: 1rem; border-bottom: 1px solid #1e1e1e;
     padding-bottom: .5rem;
   }
   .prof-badges { display: flex; flex-wrap: wrap; gap: .75rem; }
@@ -26,7 +26,7 @@ const CSS = `
   .prof-table { width: 100%; border-collapse: collapse; font-size: .75rem; }
   .prof-table th {
     text-align: left; font-size: .6rem; letter-spacing: .12em;
-    text-transform: uppercase; color: #4b4b4b; padding: .5rem 0;
+    text-transform: uppercase; color: #888; padding: .5rem 0;
     border-bottom: 1px solid #1e1e1e;
   }
   .prof-table td { padding: .6rem 0; border-bottom: 1px solid #111; color: #f0ede6; }

@@ -11,7 +11,7 @@ const CSS = `
     margin-bottom: .75rem;
   }
   .sp-headline em { font-style: italic; color: #6ee7a0; }
-  .sp-sub { font-size: .75rem; color: #4b4b4b; line-height: 1.6; margin-bottom: 2rem; }
+  .sp-sub { font-size: .75rem; color: #888; line-height: 1.6; margin-bottom: 2rem; }
   .sp-form-wrap { position: relative; max-width: 600px; margin: 0 auto; }
   .sp-form { display: flex; gap: .75rem; }
   .sp-input {
@@ -27,7 +27,7 @@ const CSS = `
     transition: border-color .2s;
   }
   .sp-input:focus { border-color: #6ee7a0; }
-  .sp-input::placeholder { color: #2e2e2e; }
+  .sp-input::placeholder { color: #4b4b4b; }
   .sp-btn {
     padding: .85rem 1.5rem;
     background: #6ee7a0;
@@ -66,9 +66,9 @@ const CSS = `
     font-family: 'DM Mono', monospace; font-size: .75rem;
     letter-spacing: .08em; color: #6ee7a0; flex-shrink: 0;
   }
-  .sp-sug-merchant { font-size: .7rem; color: #4b4b4b; }
+  .sp-sug-merchant { font-size: .7rem; color: #888; }
   .sp-results { margin-top: 2.5rem; }
-  .sp-empty { text-align: center; color: #4b4b4b; font-size: .75rem; padding: 3rem 0; }
+  .sp-empty { text-align: center; color: #888; font-size: .75rem; padding: 3rem 0; }
   .sp-card {
     background: #111;
     border: 1px solid #1e1e1e;
@@ -97,20 +97,20 @@ const CSS = `
     font-family: 'DM Serif Display', serif; font-size: 1.3rem; margin-bottom: .3rem;
   }
   .sp-meta {
-    font-size: .7rem; color: #4b4b4b;
+    font-size: .7rem; color: #888;
     display: flex; flex-wrap: wrap; gap: .75rem; margin-top: .5rem;
   }
   .sp-meta a { color: #6ee7a0; text-decoration: none; }
   .sp-meta a:hover { text-decoration: underline; }
-  .sp-votes { font-size: .65rem; color: #4b4b4b; margin-top: .5rem; }
+  .sp-votes { font-size: .65rem; color: #888; margin-top: .5rem; }
   .sp-card-action { margin-left: auto; flex-shrink: 0; align-self: center; }
   .sp-details-btn {
     padding: .55rem 1rem; border: 1px solid #1e1e1e; border-radius: 2px;
-    background: none; color: #4b4b4b; font-family: 'DM Mono', monospace;
+    background: none; color: #888; font-family: 'DM Mono', monospace;
     font-size: .6rem; letter-spacing: .1em; text-transform: uppercase;
     cursor: pointer; white-space: nowrap; transition: color .2s, border-color .2s;
   }
-  .sp-details-btn:hover { color: #f0ede6; border-color: #4b4b4b; }
+  .sp-details-btn:hover { color: #f0ede6; border-color: #888; }
   @media (max-width: 480px) {
     .sp-form { flex-direction: column; }
     .sp-btn { width: 100%; }
@@ -134,7 +134,7 @@ const CSS = `
   }
   .sp-modal-eyebrow {
     font-size: .6rem; letter-spacing: .2em; text-transform: uppercase;
-    color: #4b4b4b; margin-bottom: .85rem;
+    color: #888; margin-bottom: .85rem;
   }
   .sp-modal-descriptor {
     font-family: 'DM Mono', monospace; font-size: .75rem;
@@ -155,7 +155,7 @@ const CSS = `
     display: block; width: 100%; background: none; border: none;
     font-family: 'DM Mono', monospace; font-size: .6rem;
     letter-spacing: .1em; text-transform: uppercase;
-    color: #4b4b4b; cursor: pointer; text-align: center; padding: .5rem 0;
+    color: #888; cursor: pointer; text-align: center; padding: .5rem 0;
   }
   .sp-modal-dismiss:hover { color: #f0ede6; }
   @keyframes cotd-pulse {
@@ -357,7 +357,7 @@ export default function SearchPage({ navigate }) {
                 <p style={{ fontFamily: "'DM Serif Display', serif", fontStyle: 'italic', fontSize: '1.5rem', color: '#6ee7a0', marginBottom: '.35rem' }}>
                   Mystery solved!
                 </p>
-                <p style={{ fontSize: '.75rem', color: '#4b4b4b', lineHeight: 1.6 }}>
+                <p style={{ fontSize: '.75rem', color: '#888', lineHeight: 1.6 }}>
                   The following merchant{results.length !== 1 ? 's match' : ' matches'} that descriptor. Click <strong style={{ color: '#f0ede6' }}>View Details</strong> to see more information about the merchant.
                 </p>
               </div>
@@ -392,7 +392,7 @@ export default function SearchPage({ navigate }) {
                   </div>
                 </div>
               ))}
-              <p style={{ textAlign: 'center', fontSize: '.75rem', color: '#4b4b4b', marginTop: '1.5rem' }}>
+              <p style={{ textAlign: 'center', fontSize: '.75rem', color: '#888', marginTop: '1.5rem' }}>
                 Not the right match?{' '}
                 <span
                   style={{ color: '#6ee7a0', cursor: 'pointer' }}
