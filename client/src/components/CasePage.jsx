@@ -301,7 +301,8 @@ export default function CasePage({ caseData: initialData, navigate }) {
   const [data, setData]       = useState(initialData);
   const [evidence, setEvidence] = useState({});   // { type: most-recent-row }
   const [collecting, setCollecting] = useState(null);
-  const [errors, setErrors]   = useState({});
+  const [errors, setErrors]     = useState({});
+  const [activeStepIdx, setActiveStepIdx] = useState(0);
 
   useEffect(() => {
     fetch(`/api/cases/${initialData.id}`)
@@ -319,6 +320,9 @@ export default function CasePage({ caseData: initialData, navigate }) {
           if (!map[row.type]) map[row.type] = row; // already DESC, first = newest
         }
         setEvidence(map);
+        // Open up to the last step that already has evidence
+        const lastDone = STEPS.reduce((acc, s, i) => (map[s.key] ? i : acc), 0);
+        setActiveStepIdx(lastDone);
       })
       .catch(() => {});
   }, [initialData.id]);
@@ -442,6 +446,7 @@ export default function CasePage({ caseData: initialData, navigate }) {
             const isSolved     = status === 'solved';
             const prevDone     = idx === 0 || !!evidence[STEPS[idx - 1].key];
             const isLocked     = !prevDone;
+            const isOpen       = idx <= activeStepIdx;
             const isNext       = idx < STEPS.length - 1;
             const isCollecting = collecting === step.key;
 
@@ -458,7 +463,7 @@ export default function CasePage({ caseData: initialData, navigate }) {
                   {hasData && <span className="cp-step-done">✓ Done</span>}
                 </div>
 
-                <div className="cp-step-body">
+                {isOpen && <div className="cp-step-body">
                   {hasData ? (
                     <>
                       <EvidenceResults ev={ev} />
@@ -467,8 +472,8 @@ export default function CasePage({ caseData: initialData, navigate }) {
                           <button className="cp-solve-btn" onClick={() => acceptAndSolve(step.key)}>
                             Accept &amp; solve case →
                           </button>
-                          {isNext && !evidence[STEPS[idx + 1].key] && (
-                            <button className="cp-next-btn" onClick={() => {}}>
+                          {isNext && activeStepIdx === idx && (
+                            <button className="cp-next-btn" onClick={() => setActiveStepIdx(idx + 1)}>
                               Continue to {STEPS[idx + 1].label} ↓
                             </button>
                           )}
@@ -513,7 +518,7 @@ export default function CasePage({ caseData: initialData, navigate }) {
                   {errors[step.key] && (
                     <span className="cp-step-error">{errors[step.key]}</span>
                   )}
-                </div>
+                </div>}
               </div>
             );
           })}
