@@ -5,8 +5,8 @@ const db      = require('../db');
 const { optionalAuth } = require('../middleware/auth');
 const router  = express.Router();
 
-const COMPUTED_STATUS = `
-  CASE
+const COMPUTED_STATUS =
+  `CASE
     WHEN EXISTS (
       SELECT 1 FROM submissions s
       JOIN descriptors d ON d.id = s.descriptor_id
@@ -18,8 +18,7 @@ const COMPUTED_STATUS = `
       WHERE lower(d.text) = lower(c.descriptor)
     ) THEN 'investigating'
     ELSE 'open'
-  END
-`;
+  END`;
 
 // POST /api/cases  — get-or-create a case for a descriptor
 router.post('/', optionalAuth, async (req, res) => {
@@ -28,17 +27,15 @@ router.post('/', optionalAuth, async (req, res) => {
 
   try {
     const { rows } = await db.query(
-      `WITH ins AS (
-         INSERT INTO cases (descriptor, created_by)
-         VALUES ($1, $2)
-         ON CONFLICT (lower(descriptor)) DO NOTHING
-         RETURNING *
-       )
-       SELECT *, (${COMPUTED_STATUS}) AS computed_status FROM ins
-       UNION ALL
-       SELECT *, (${COMPUTED_STATUS}) AS computed_status FROM cases c
-         WHERE lower(descriptor) = lower($1)
-       LIMIT 1`,
+      'WITH ins AS (' +
+      '  INSERT INTO cases (descriptor, created_by) VALUES ($1, $2)' +
+      '  ON CONFLICT (lower(descriptor)) DO NOTHING RETURNING *' +
+      ')' +
+      ' SELECT *, (' + COMPUTED_STATUS + ') AS computed_status FROM ins c' +
+      ' UNION ALL' +
+      ' SELECT *, (' + COMPUTED_STATUS + ') AS computed_status FROM cases c' +
+      '   WHERE lower(descriptor) = lower($1)' +
+      ' LIMIT 1',
       [descriptor.trim().toUpperCase(), req.user?.sub ?? null]
     );
     return res.status(201).json({ case: rows[0] });
@@ -52,7 +49,7 @@ router.post('/', optionalAuth, async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const { rows } = await db.query(
-      `SELECT *, (${COMPUTED_STATUS}) AS computed_status FROM cases c WHERE c.id = $1`,
+      'SELECT *, (' + COMPUTED_STATUS + ') AS computed_status FROM cases c WHERE c.id = $1',
       [req.params.id]
     );
     if (!rows.length) return res.status(404).json({ error: 'Case not found' });
