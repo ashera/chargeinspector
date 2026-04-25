@@ -216,6 +216,48 @@ const CSS = `
   .cp-lk-submit:hover { opacity: .9; }
   .cp-lk-submit:disabled { opacity: .45; cursor: default; }
 
+  /* Confirmation modal */
+  .cp-modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,.65);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000; padding: 1rem;
+  }
+  .cp-modal {
+    background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 4px;
+    width: 100%; max-width: 440px; padding: 1.75rem;
+  }
+  .cp-modal-eyebrow {
+    font-size: .55rem; letter-spacing: .2em; text-transform: uppercase;
+    color: var(--text-muted); margin-bottom: .6rem;
+  }
+  .cp-modal-merchant {
+    font-family: var(--font-display); font-size: 1.4rem; color: var(--text);
+    margin-bottom: .5rem; line-height: 1.2;
+  }
+  .cp-modal-unknown {
+    font-size: 1rem; color: var(--text-dim); font-style: italic; margin-bottom: .5rem;
+  }
+  .cp-modal-row { display: flex; align-items: center; gap: .6rem; margin-bottom: .5rem; flex-wrap: wrap; }
+  .cp-modal-btype { font-size: .75rem; color: var(--text-dim); }
+  .cp-modal-desc {
+    font-size: .75rem; color: var(--text-muted); line-height: 1.6;
+    margin: .75rem 0; padding-top: .75rem; border-top: 1px solid var(--border);
+  }
+  .cp-modal-actions { display: flex; gap: .75rem; margin-top: 1.25rem; }
+  .cp-modal-confirm {
+    flex: 1; padding: .7rem; background: var(--accent); border: none; border-radius: 2px;
+    font-family: var(--font-ui); font-size: .65rem; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--bg-page); font-weight: 500; cursor: pointer;
+  }
+  .cp-modal-confirm:hover { opacity: .9; }
+  .cp-modal-confirm:disabled { opacity: .45; cursor: default; }
+  .cp-modal-cancel {
+    padding: .7rem 1.25rem; background: none; border: 1px solid var(--border); border-radius: 2px;
+    font-family: var(--font-ui); font-size: .65rem; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--text-muted); cursor: pointer;
+  }
+  .cp-modal-cancel:hover { border-color: var(--text-muted); color: var(--text); }
+
   /* Submit button */
   .cp-submit-btn {
     padding: .85rem 1.75rem; background: var(--accent); border: none; border-radius: 2px;
@@ -256,6 +298,34 @@ function EvidenceResults({ ev }) {
         </div>
       )}
     </>
+  );
+}
+
+function ConfirmModal({ modal, onConfirm, onCancel, confirming }) {
+  const d = modal.data;
+  return (
+    <div className="cp-modal-overlay" onClick={e => { if (e.target === e.currentTarget) onCancel(); }}>
+      <div className="cp-modal">
+        <div className="cp-modal-eyebrow">Confirm merchant identification</div>
+        {d.merchant_name
+          ? <div className="cp-modal-merchant">{d.merchant_name}</div>
+          : <div className="cp-modal-unknown">Merchant not identified</div>
+        }
+        <div className="cp-modal-row">
+          {d.confidence && (
+            <span className={`cp-confidence ${d.confidence}`}>{d.confidence} confidence</span>
+          )}
+          {d.business_type && <span className="cp-modal-btype">{d.business_type}</span>}
+        </div>
+        {d.description && <div className="cp-modal-desc">{d.description}</div>}
+        <div className="cp-modal-actions">
+          <button className="cp-modal-cancel" onClick={onCancel} disabled={confirming}>Cancel</button>
+          <button className="cp-modal-confirm" onClick={onConfirm} disabled={confirming}>
+            {confirming ? 'Saving…' : 'Confirm & solve case →'}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -303,6 +373,7 @@ export default function CasePage({ caseData: initialData, navigate }) {
   const [collecting, setCollecting] = useState(null);
   const [errors, setErrors]     = useState({});
   const [activeStepIdx, setActiveStepIdx] = useState(0);
+  const [confirmModal, setConfirmModal] = useState(null); // { data, formData|null }
 
   useEffect(() => {
     fetch(`/api/cases/${initialData.id}`)
@@ -345,11 +416,39 @@ export default function CasePage({ caseData: initialData, navigate }) {
     }
   }
 
-  function acceptAndSolve(type) {
-    const ev = evidence[type];
+  function openConfirm(type, formData = null) {
+    const ev = formData
+      ? { merchant_name: formData.merchant_name, confidence: formData.confidence, business_type: formData.business_type, description: formData.description }
+      : evidence[type];
+    setConfirmModal({ type, data: ev || {}, formData });
+  }
+
+  async function handleConfirm() {
+    const { type, data: modalData, formData } = confirmModal;
+    setConfirmModal(null);
+
+    if (formData) {
+      setCollecting(type);
+      setErrors(e => ({ ...e, [type]: null }));
+      try {
+        const res = await apiFetch(`/api/cases/${initialData.id}/evidence/collect`, {
+          method: 'POST',
+          body: JSON.stringify({ type, ...formData }),
+        });
+        const body = await res.json();
+        if (!res.ok) throw new Error(body.error || 'Collection failed');
+        setEvidence(ev => ({ ...ev, [type]: body.evidence }));
+      } catch (err) {
+        setErrors(e => ({ ...e, [type]: err.message }));
+        setCollecting(null);
+        return;
+      }
+      setCollecting(null);
+    }
+
     navigate('submit', {
       descriptor: data.descriptor,
-      merchant:   ev?.merchant_name || '',
+      merchant:   modalData.merchant_name || '',
     });
   }
 
@@ -469,7 +568,7 @@ export default function CasePage({ caseData: initialData, navigate }) {
                       <EvidenceResults ev={ev} />
                       {!isSolved && (
                         <div className="cp-step-actions">
-                          <button className="cp-solve-btn" onClick={() => acceptAndSolve(step.key)}>
+                          <button className="cp-solve-btn" onClick={() => openConfirm(step.key)}>
                             Accept &amp; solve case →
                           </button>
                           {isNext && activeStepIdx === idx && (
@@ -493,7 +592,7 @@ export default function CasePage({ caseData: initialData, navigate }) {
                       {isAuthenticated ? (
                         step.manual ? (
                           <LocalKnowledgeForm
-                            onSubmit={form => collect(step.key, form)}
+                            onSubmit={form => openConfirm(step.key, form)}
                             submitting={isCollecting}
                             label={step.label}
                           />
@@ -526,6 +625,14 @@ export default function CasePage({ caseData: initialData, navigate }) {
         </div>
       </div>
 
+      {confirmModal && (
+        <ConfirmModal
+          modal={confirmModal}
+          onConfirm={handleConfirm}
+          onCancel={() => setConfirmModal(null)}
+          confirming={collecting === confirmModal.type}
+        />
+      )}
     </>
   );
 }
