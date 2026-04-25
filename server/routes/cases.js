@@ -38,6 +38,12 @@ router.post('/', optionalAuth, async (req, res) => {
       ' LIMIT 1',
       [descriptor.trim().toUpperCase(), req.user?.sub ?? null]
     );
+    if (req.user?.sub) {
+      await db.query(
+        'INSERT INTO detectives (case_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
+        [rows[0].id, req.user.sub]
+      );
+    }
     return res.status(201).json({ case: rows[0] });
   } catch (err) {
     console.error('[POST /api/cases]', err);

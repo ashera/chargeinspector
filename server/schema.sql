@@ -219,6 +219,20 @@ CREATE TABLE IF NOT EXISTS cases (
 CREATE UNIQUE INDEX IF NOT EXISTS cases_descriptor_idx ON cases (lower(descriptor));
 CREATE INDEX IF NOT EXISTS cases_created_idx           ON cases (created_at);
 
+-- ------------------------------------------------------------
+-- Detectives (users investigating a case)
+-- ------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS detectives (
+  id        UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  case_id   UUID        NOT NULL REFERENCES cases(id) ON DELETE CASCADE,
+  user_id   UUID        NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  joined_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (case_id, user_id)
+);
+
+CREATE INDEX IF NOT EXISTS detectives_case_idx ON detectives (case_id);
+CREATE INDEX IF NOT EXISTS detectives_user_idx ON detectives (user_id);
+
 -- Seed default badges
 INSERT INTO badges (name, description, points_threshold, icon) VALUES
   ('First Steps',    'Earned your first points',          10,   '🐣'),
