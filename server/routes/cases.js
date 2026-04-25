@@ -35,7 +35,8 @@ const DETECTIVES_AGG =
     '[]'
   )`;
 
-// Returns a single case row with computed_status, detectives, and creator rank/surname.
+// Returns a single case row with computed_status, detectives, creator rank/surname,
+// and solved_merchant_name (from the first approved submission for this descriptor).
 async function fetchCase(where, params) {
   const { rows } = await db.query(
     'SELECT c.*, (' + COMPUTED_STATUS + ') AS computed_status, ' +
@@ -43,7 +44,12 @@ async function fetchCase(where, params) {
     'cb.last_name AS created_by_last_name, ' +
     '(SELECT r.icon || \' \' || r.name FROM ranks r' +
     '  WHERE r.points_threshold <= COALESCE(cb.total_points, 0)' +
-    '  ORDER BY r.points_threshold DESC LIMIT 1) AS created_by_rank ' +
+    '  ORDER BY r.points_threshold DESC LIMIT 1) AS created_by_rank, ' +
+    '(SELECT m.name FROM submissions s' +
+    '  JOIN descriptors d ON d.id = s.descriptor_id' +
+    '  JOIN merchants   m ON m.id = s.merchant_id' +
+    '  WHERE lower(d.text) = lower(c.descriptor) AND s.status = \'approved\'' +
+    '  ORDER BY s.created_at ASC LIMIT 1) AS solved_merchant_name ' +
     'FROM cases c' +
     ' LEFT JOIN users cb ON cb.id = c.created_by' +
     ' LEFT JOIN detectives det ON det.case_id = c.id' +

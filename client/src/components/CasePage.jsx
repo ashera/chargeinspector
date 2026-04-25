@@ -349,8 +349,25 @@ export default function CasePage({ caseData: initialData, navigate }) {
       <div className="cp-card">
         <div className="cp-card-title">The mystery</div>
         <div className="cp-card-body">
-          This billing descriptor hasn't been identified yet. Work through each investigation step below.
-          At any point you can accept the evidence and submit a merchant match to solve the case.
+          {status === 'solved' ? (
+            (() => {
+              const usedSteps = STEPS.filter(s => evidence[s.key]);
+              const how = usedSteps.length > 0
+                ? usedSteps.map(s => s.label).join(' and ')
+                : 'community investigation';
+              return (
+                <>
+                  Case closed.{data.solved_merchant_name ? <> The descriptor <strong>&ldquo;{data.descriptor}&rdquo;</strong> was identified as <strong>{data.solved_merchant_name}</strong>.</> : ' This descriptor has been matched to a merchant.'}{' '}
+                  Cracked using {how}.
+                </>
+              );
+            })()
+          ) : (
+            <>
+              This billing descriptor hasn&rsquo;t been identified yet. Work through each investigation step below.
+              At any point you can accept the evidence and submit a merchant match to solve the case.
+            </>
+          )}
         </div>
       </div>
 
