@@ -163,7 +163,7 @@ export default function Nav({ page, navigate, isAuthenticated, user, onPointsCli
               <button className="nav-pts" onClick={onPointsClick}>{user.total_points ?? 0} pts</button>
               <div className="nav-identity" onClick={() => { navigate('profile'); setOpen(false); }}>
                 <span className="nav-rank">
-                  {rank.icon} {rank.name}{user.last_name ? ` · ${user.last_name}` : ''}
+                  {rank.icon} {rank.name}{user.last_name ? ` ${user.last_name}` : ''}
                 </span>
                 <span className="nav-email">{user.email}</span>
               </div>
@@ -195,7 +195,7 @@ export default function Nav({ page, navigate, isAuthenticated, user, onPointsCli
             {isAuthenticated && user && (
               <div className="nav-drawer-bottom">
                 <div>
-                  <div className="nav-drawer-rank">{rank.icon} {rank.name}{user.last_name ? ` · ${user.last_name}` : ''}</div>
+                  <div className="nav-drawer-rank">{rank.icon} {rank.name}{user.last_name ? ` ${user.last_name}` : ''}</div>
                   <span className="nav-drawer-email">{user.email}</span>
                 </div>
                 <button className="nav-drawer-logout" onClick={() => { logout(); setOpen(false); }}>
