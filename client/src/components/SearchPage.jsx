@@ -5,39 +5,39 @@ const CSS = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&display=swap');
   .sp-hero { text-align: center; padding: 3rem 0 2rem; }
   .sp-headline {
-    font-family: 'DM Serif Display', serif;
+    font-family: var(--font-display);
     font-size: clamp(2rem, 5vw, 3.5rem);
     line-height: 1.1;
     margin-bottom: .75rem;
   }
-  .sp-headline em { font-style: italic; color: #6ee7a0; }
-  .sp-sub { font-size: .75rem; color: #888; line-height: 1.6; margin-bottom: 2rem; }
+  .sp-headline em { font-style: italic; color: var(--accent); }
+  .sp-sub { font-size: .75rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 2rem; }
   .sp-form-wrap { position: relative; max-width: 600px; margin: 0 auto; }
   .sp-form { display: flex; gap: .75rem; }
   .sp-input {
     flex: 1;
     padding: .85rem 1.1rem;
-    background: #111;
-    border: 1px solid #1e1e1e;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
     border-radius: 2px;
-    color: #f0ede6;
-    font-family: 'DM Mono', monospace;
+    color: var(--text);
+    font-family: var(--font-ui);
     font-size: .85rem;
     outline: none;
     transition: border-color .2s;
   }
-  .sp-input:focus { border-color: #6ee7a0; }
-  .sp-input::placeholder { color: #4b4b4b; }
+  .sp-input:focus { border-color: var(--accent); }
+  .sp-input::placeholder { color: var(--text-dim); }
   .sp-btn {
     padding: .85rem 1.5rem;
-    background: #6ee7a0;
+    background: var(--accent);
     border: none;
     border-radius: 2px;
-    font-family: 'DM Mono', monospace;
+    font-family: var(--font-ui);
     font-size: .7rem;
     letter-spacing: .12em;
     text-transform: uppercase;
-    color: #0a0a0a;
+    color: var(--bg-page);
     font-weight: 500;
     cursor: pointer;
     white-space: nowrap;
@@ -48,8 +48,8 @@ const CSS = `
     top: calc(100% + 4px);
     left: 0;
     right: 0;
-    background: #111;
-    border: 1px solid #1e1e1e;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
     border-radius: 2px;
     z-index: 200;
     overflow: hidden;
@@ -57,21 +57,21 @@ const CSS = `
   .sp-suggestion {
     display: flex; align-items: baseline; gap: .75rem;
     padding: .7rem 1.1rem; cursor: pointer;
-    border-bottom: 1px solid #1a1a1a;
+    border-bottom: 1px solid var(--bg-hover);
     transition: background .15s;
   }
   .sp-suggestion:last-child { border-bottom: none; }
-  .sp-suggestion:hover, .sp-suggestion.active { background: #1a1a1a; }
+  .sp-suggestion:hover, .sp-suggestion.active { background: var(--bg-hover); }
   .sp-sug-descriptor {
-    font-family: 'DM Mono', monospace; font-size: .75rem;
-    letter-spacing: .08em; color: #6ee7a0; flex-shrink: 0;
+    font-family: var(--font-ui); font-size: .75rem;
+    letter-spacing: .08em; color: var(--accent); flex-shrink: 0;
   }
-  .sp-sug-merchant { font-size: .7rem; color: #888; }
+  .sp-sug-merchant { font-size: .7rem; color: var(--text-muted); }
   .sp-results { margin-top: 2.5rem; }
-  .sp-empty { text-align: center; color: #888; font-size: .75rem; padding: 3rem 0; }
+  .sp-empty { text-align: center; color: var(--text-muted); font-size: .75rem; padding: 3rem 0; }
   .sp-card {
-    background: #111;
-    border: 1px solid #1e1e1e;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
     border-radius: 3px;
     padding: 1.5rem;
     margin-bottom: 1rem;
@@ -81,36 +81,36 @@ const CSS = `
   }
   .sp-logo {
     width: 56px; height: 56px; border-radius: 3px;
-    object-fit: contain; background: #1a1a1a; flex-shrink: 0;
+    object-fit: contain; background: var(--bg-hover); flex-shrink: 0;
   }
   .sp-logo-placeholder {
     width: 56px; height: 56px; border-radius: 3px;
-    background: #1a1a1a; border: 1px solid #1e1e1e; flex-shrink: 0;
+    background: var(--bg-hover); border: 1px solid var(--border); flex-shrink: 0;
     display: flex; align-items: center; justify-content: center; font-size: 1.5rem;
   }
   .sp-card-body { flex: 1; min-width: 0; }
   .sp-descriptor {
     font-size: .7rem; letter-spacing: .14em; text-transform: uppercase;
-    color: #6ee7a0; margin-bottom: .4rem;
+    color: var(--accent); margin-bottom: .4rem;
   }
   .sp-merchant-name {
-    font-family: 'DM Serif Display', serif; font-size: 1.3rem; margin-bottom: .3rem;
+    font-family: var(--font-display); font-size: 1.3rem; margin-bottom: .3rem;
   }
   .sp-meta {
-    font-size: .7rem; color: #888;
+    font-size: .7rem; color: var(--text-muted);
     display: flex; flex-wrap: wrap; gap: .75rem; margin-top: .5rem;
   }
-  .sp-meta a { color: #6ee7a0; text-decoration: none; }
+  .sp-meta a { color: var(--accent); text-decoration: none; }
   .sp-meta a:hover { text-decoration: underline; }
-  .sp-votes { font-size: .65rem; color: #888; margin-top: .5rem; }
+  .sp-votes { font-size: .65rem; color: var(--text-muted); margin-top: .5rem; }
   .sp-card-action { margin-left: auto; flex-shrink: 0; align-self: center; }
   .sp-details-btn {
-    padding: .55rem 1rem; border: 1px solid #1e1e1e; border-radius: 2px;
-    background: none; color: #888; font-family: 'DM Mono', monospace;
+    padding: .55rem 1rem; border: 1px solid var(--border); border-radius: 2px;
+    background: none; color: var(--text-muted); font-family: var(--font-ui);
     font-size: .6rem; letter-spacing: .1em; text-transform: uppercase;
     cursor: pointer; white-space: nowrap; transition: color .2s, border-color .2s;
   }
-  .sp-details-btn:hover { color: #f0ede6; border-color: #888; }
+  .sp-details-btn:hover { color: var(--text); border-color: var(--text-muted); }
   @media (max-width: 480px) {
     .sp-form { flex-direction: column; }
     .sp-btn { width: 100%; }
@@ -125,39 +125,39 @@ const CSS = `
     padding: 1.5rem;
   }
   .sp-modal {
-    background: #111; border: 1px solid #1e1e1e; border-radius: 4px;
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 4px;
     padding: 2rem; max-width: 400px; width: 100%; text-align: center;
   }
   .sp-modal-title {
-    font-family: 'DM Serif Display', serif; font-style: italic;
-    font-size: 1.6rem; color: #6ee7a0; margin-bottom: .6rem; line-height: 1.1;
+    font-family: var(--font-display); font-style: italic;
+    font-size: 1.6rem; color: var(--accent); margin-bottom: .6rem; line-height: 1.1;
   }
   .sp-modal-eyebrow {
     font-size: .6rem; letter-spacing: .2em; text-transform: uppercase;
-    color: #888; margin-bottom: .85rem;
+    color: var(--text-muted); margin-bottom: .85rem;
   }
   .sp-modal-descriptor {
-    font-family: 'DM Mono', monospace; font-size: .75rem;
-    color: #f0b429; letter-spacing: .08em; margin-bottom: 1.25rem;
+    font-family: var(--font-ui); font-size: .75rem;
+    color: var(--amber); letter-spacing: .08em; margin-bottom: 1.25rem;
   }
   .sp-modal-body {
     font-size: .78rem; color: #8a8a8a; line-height: 1.7; margin-bottom: 1.5rem;
   }
   .sp-modal-btn {
-    width: 100%; padding: .85rem; background: #6ee7a0;
+    width: 100%; padding: .85rem; background: var(--accent);
     border: none; border-radius: 2px;
-    font-family: 'DM Mono', monospace; font-size: .7rem;
+    font-family: var(--font-ui); font-size: .7rem;
     letter-spacing: .14em; text-transform: uppercase;
-    color: #0a0a0a; font-weight: 500; cursor: pointer; margin-bottom: .75rem;
+    color: var(--bg-page); font-weight: 500; cursor: pointer; margin-bottom: .75rem;
   }
   .sp-modal-btn:disabled { opacity: .4; cursor: not-allowed; }
   .sp-modal-dismiss {
     display: block; width: 100%; background: none; border: none;
-    font-family: 'DM Mono', monospace; font-size: .6rem;
+    font-family: var(--font-ui); font-size: .6rem;
     letter-spacing: .1em; text-transform: uppercase;
-    color: #888; cursor: pointer; text-align: center; padding: .5rem 0;
+    color: var(--text-muted); cursor: pointer; text-align: center; padding: .5rem 0;
   }
-  .sp-modal-dismiss:hover { color: #f0ede6; }
+  .sp-modal-dismiss:hover { color: var(--text); }
   @keyframes cotd-pulse {
     0%, 100% { box-shadow: 0 0 0 0 rgba(240,180,41,.18), 0 0 18px 0 rgba(240,180,41,.06); }
     50%       { box-shadow: 0 0 0 4px rgba(240,180,41,.06), 0 0 32px 4px rgba(240,180,41,.14); }
@@ -168,8 +168,8 @@ const CSS = `
   }
   .sp-cotd {
     max-width: 600px; margin: 0 auto 1.5rem;
-    background: linear-gradient(160deg, #141008 0%, #111 60%);
-    border: 1px solid #f0b429;
+    background: linear-gradient(160deg, #141008 0%, var(--bg-card) 60%);
+    border: 1px solid var(--amber);
     border-radius: 4px;
     padding: .55rem 1rem;
     display: flex; align-items: center; gap: .65rem;
@@ -183,8 +183,8 @@ const CSS = `
   }
   .sp-cotd-divider { width: 1px; height: .75rem; background: #3a2a08; flex-shrink: 0; }
   .sp-cotd-user {
-    font-family: 'DM Mono', monospace; font-size: .75rem;
-    color: #f0b429; letter-spacing: .04em;
+    font-family: var(--font-ui); font-size: .75rem;
+    color: var(--amber); letter-spacing: .04em;
   }
   .sp-cotd-count {
     font-size: .6rem; color: #6a5018; letter-spacing: .08em;
@@ -354,11 +354,11 @@ export default function SearchPage({ navigate }) {
           {results.length === 0 ? null : (
             <>
               <div style={{ marginBottom: '1.25rem' }}>
-                <p style={{ fontFamily: "'DM Serif Display', serif", fontStyle: 'italic', fontSize: '1.5rem', color: '#6ee7a0', marginBottom: '.35rem' }}>
+                <p style={{ fontFamily: "'DM Serif Display', serif", fontStyle: 'italic', fontSize: '1.5rem', color: 'var(--accent)', marginBottom: '.35rem' }}>
                   Mystery solved!
                 </p>
-                <p style={{ fontSize: '.75rem', color: '#888', lineHeight: 1.6 }}>
-                  The following merchant{results.length !== 1 ? 's match' : ' matches'} that descriptor. Click <strong style={{ color: '#f0ede6' }}>View Details</strong> to see more information about the merchant.
+                <p style={{ fontSize: '.75rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>
+                  The following merchant{results.length !== 1 ? 's match' : ' matches'} that descriptor. Click <strong style={{ color: 'var(--text)' }}>View Details</strong> to see more information about the merchant.
                 </p>
               </div>
               {results.map(r => (
@@ -392,10 +392,10 @@ export default function SearchPage({ navigate }) {
                   </div>
                 </div>
               ))}
-              <p style={{ textAlign: 'center', fontSize: '.75rem', color: '#888', marginTop: '1.5rem' }}>
+              <p style={{ textAlign: 'center', fontSize: '.75rem', color: 'var(--text-muted)', marginTop: '1.5rem' }}>
                 Not the right match?{' '}
                 <span
-                  style={{ color: '#6ee7a0', cursor: 'pointer' }}
+                  style={{ color: 'var(--accent)', cursor: 'pointer' }}
                   onClick={() => navigate('submit', { descriptor: query })}
                 >
                   Submit a new one →

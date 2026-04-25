@@ -1,21 +1,21 @@
 import { useEffect, useState } from 'react';
 
 const CSS = `
-  .lb-title { font-family: 'DM Serif Display', serif; font-size: 2rem; margin-bottom: .5rem; }
-  .lb-sub { font-size: .75rem; color: #888; margin-bottom: 2rem; }
+  .lb-title { font-family: var(--font-display); font-size: 2rem; margin-bottom: .5rem; }
+  .lb-sub { font-size: .75rem; color: var(--text-muted); margin-bottom: 2rem; }
   .lb-table { width: 100%; border-collapse: collapse; font-size: .8rem; }
   .lb-table th {
     text-align: left; font-size: .6rem; letter-spacing: .12em;
-    text-transform: uppercase; color: #888; padding: .5rem 0;
-    border-bottom: 1px solid #1e1e1e;
+    text-transform: uppercase; color: var(--text-muted); padding: .5rem 0;
+    border-bottom: 1px solid var(--border);
   }
-  .lb-table td { padding: .75rem 0; border-bottom: 1px solid #111; }
-  .lb-rank { color: #888; font-size: .7rem; width: 2rem; }
+  .lb-table td { padding: .75rem 0; border-bottom: 1px solid var(--bg-card); }
+  .lb-rank { color: var(--text-muted); font-size: .7rem; width: 2rem; }
   .lb-rank-1 { color: #ffd700; }
   .lb-rank-2 { color: #c0c0c0; }
   .lb-rank-3 { color: #cd7f32; }
-  .lb-email { color: #f0ede6; }
-  .lb-pts { color: #6ee7a0; font-weight: 500; }
+  .lb-email { color: var(--text); }
+  .lb-pts { color: var(--accent); font-weight: 500; }
   .lb-badge { font-size: .75rem; }
   .lb-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
   .lb-table { min-width: 400px; }
@@ -46,9 +46,9 @@ export default function LeaderboardPage() {
       <p className="lb-sub">Top contributors ranked by points earned.</p>
 
       {loading
-        ? <p style={{ color: '#4b4b4b', fontSize: '.75rem' }}>Loading…</p>
+        ? <p style={{ color: 'var(--text-dim)', fontSize: '.75rem' }}>Loading…</p>
         : rows.length === 0
-          ? <p style={{ color: '#4b4b4b', fontSize: '.75rem' }}>No contributors yet — be the first to submit!</p>
+          ? <p style={{ color: 'var(--text-dim)', fontSize: '.75rem' }}>No contributors yet — be the first to submit!</p>
           : (
             <div className="lb-table-wrap"><table className="lb-table">
               <thead>
@@ -66,7 +66,7 @@ export default function LeaderboardPage() {
                     <td className={`lb-rank ${i < 3 ? `lb-rank-${i + 1}` : ''}`}>{rankSymbol(i)}</td>
                     <td className="lb-email">{r.email.replace(/(.{2}).*(@.*)/, '$1***$2')}</td>
                     <td className="lb-pts">{r.total_points}</td>
-                    <td style={{ color: '#4b4b4b' }}>{r.approved_submissions}</td>
+                    <td style={{ color: 'var(--text-dim)' }}>{r.approved_submissions}</td>
                     <td className="lb-badge">{r.top_badge}</td>
                   </tr>
                 ))}

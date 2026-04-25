@@ -9,17 +9,13 @@ import { useAuth } from '../hooks/useAuth';
 
 // ── Styles (scoped via a style tag) ──────────────────────────
 const CSS = `
-  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&display=swap');
-
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  .ap-root {
+.ap-root {
     min-height: 100dvh;
     display: grid;
     grid-template-columns: 1fr 1fr;
-    font-family: 'DM Mono', monospace;
-    background: #0a0a0a;
-    color: #f0ede6;
+    font-family: var(--font-ui);
+    background: var(--bg-page);
+    color: var(--text);
   }
 
   @media (max-width: 720px) {
@@ -35,7 +31,7 @@ const CSS = `
     justify-content: flex-end;
     padding: 3rem;
     overflow: hidden;
-    border-right: 1px solid #1e1e1e;
+    border-right: 1px solid var(--border);
   }
 
   .ap-brand-bg {
@@ -44,7 +40,7 @@ const CSS = `
     background:
       radial-gradient(ellipse 60% 50% at 30% 60%, #1a3a2a 0%, transparent 70%),
       radial-gradient(ellipse 40% 60% at 70% 20%, #0f1f3a 0%, transparent 65%),
-      #0a0a0a;
+      var(--bg-page);
   }
 
   .ap-brand-grid {
@@ -65,22 +61,22 @@ const CSS = `
     font-size: .65rem;
     letter-spacing: .18em;
     text-transform: uppercase;
-    color: #6ee7a0;
+    color: var(--accent);
     margin-bottom: 1rem;
     opacity: .8;
   }
 
   .ap-brand-headline {
-    font-family: 'DM Serif Display', serif;
+    font-family: var(--font-display);
     font-size: clamp(2.5rem, 4vw, 3.75rem);
     line-height: 1.08;
-    color: #f0ede6;
+    color: var(--text);
     margin-bottom: 1.5rem;
   }
 
   .ap-brand-headline em {
     font-style: italic;
-    color: #6ee7a0;
+    color: var(--accent);
   }
 
   .ap-brand-body {
@@ -99,12 +95,12 @@ const CSS = `
 
   .ap-pill {
     padding: .3rem .75rem;
-    border: 1px solid #1e1e1e;
+    border: 1px solid var(--border);
     border-radius: 2px;
     font-size: .6rem;
     letter-spacing: .12em;
     text-transform: uppercase;
-    color: #888;
+    color: var(--text-muted);
   }
 
   /* ── Form Panel ── */
@@ -121,42 +117,42 @@ const CSS = `
   }
 
   .ap-logo {
-    font-family: 'DM Serif Display', serif;
+    font-family: var(--font-display);
     font-size: 1.1rem;
     letter-spacing: .02em;
     margin-bottom: 2.5rem;
-    color: #f0ede6;
+    color: var(--text);
   }
 
-  .ap-logo span { color: #6ee7a0; }
+  .ap-logo span { color: var(--accent); }
 
   /* Tab toggle */
   .ap-tabs {
     display: flex;
     gap: 0;
     margin-bottom: 2rem;
-    border-bottom: 1px solid #1e1e1e;
+    border-bottom: 1px solid var(--border);
   }
 
   .ap-tab {
     flex: 1;
     padding: .65rem 1rem;
-    font-family: 'DM Mono', monospace;
+    font-family: var(--font-ui);
     font-size: .7rem;
     letter-spacing: .1em;
     text-transform: uppercase;
     background: none;
     border: none;
     border-bottom: 2px solid transparent;
-    color: #888;
+    color: var(--text-muted);
     cursor: pointer;
     transition: color .2s, border-color .2s;
     margin-bottom: -1px;
   }
 
   .ap-tab.active {
-    color: #f0ede6;
-    border-bottom-color: #6ee7a0;
+    color: var(--text);
+    border-bottom-color: var(--accent);
   }
 
   /* Fields */
@@ -169,32 +165,32 @@ const CSS = `
     font-size: .6rem;
     letter-spacing: .14em;
     text-transform: uppercase;
-    color: #888;
+    color: var(--text-muted);
     margin-bottom: .5rem;
   }
 
   .ap-input {
     width: 100%;
     padding: .75rem 1rem;
-    background: #111;
-    border: 1px solid #1e1e1e;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
     border-radius: 2px;
-    color: #f0ede6;
-    font-family: 'DM Mono', monospace;
+    color: var(--text);
+    font-family: var(--font-ui);
     font-size: .8rem;
     transition: border-color .2s;
     outline: none;
   }
 
-  .ap-input:focus { border-color: #6ee7a0; }
-  .ap-input::placeholder { color: #4b4b4b; }
+  .ap-input:focus { border-color: var(--accent); }
+  .ap-input::placeholder { color: var(--text-dim); }
 
-  .ap-input.error { border-color: #e05c5c; }
+  .ap-input.error { border-color: var(--error); }
 
   /* Strength bar */
   .ap-strength {
     height: 2px;
-    background: #1e1e1e;
+    background: var(--border);
     margin-top: .4rem;
     border-radius: 2px;
     overflow: hidden;
@@ -211,14 +207,14 @@ const CSS = `
     width: 100%;
     padding: .85rem;
     margin-top: .5rem;
-    background: #6ee7a0;
+    background: var(--accent);
     border: none;
     border-radius: 2px;
-    font-family: 'DM Mono', monospace;
+    font-family: var(--font-ui);
     font-size: .7rem;
     letter-spacing: .14em;
     text-transform: uppercase;
-    color: #0a0a0a;
+    color: var(--bg-page);
     font-weight: 500;
     cursor: pointer;
     transition: opacity .2s, transform .1s;
@@ -231,7 +227,7 @@ const CSS = `
   /* Error / status */
   .ap-error {
     font-size: .7rem;
-    color: #e05c5c;
+    color: var(--error);
     margin-top: 1rem;
     line-height: 1.5;
     min-height: 1.2rem;
@@ -240,13 +236,13 @@ const CSS = `
   .ap-footer {
     margin-top: 2rem;
     font-size: .6rem;
-    color: #4b4b4b;
+    color: var(--text-dim);
     line-height: 1.6;
     letter-spacing: .04em;
   }
 
   .ap-footer a {
-    color: #888;
+    color: var(--text-muted);
     text-decoration: underline;
     cursor: pointer;
   }
@@ -258,7 +254,7 @@ const CSS = `
     width: .85em;
     height: .85em;
     border: 2px solid rgba(10,10,10,.3);
-    border-top-color: #0a0a0a;
+    border-top-color: var(--bg-page);
     border-radius: 50%;
     animation: ap-spin .6s linear infinite;
     vertical-align: middle;
@@ -277,12 +273,12 @@ function passwordStrength(pw) {
   if (/[^A-Za-z0-9]/.test(pw)) s++;
 
   const levels = [
-    { label: 'Very weak', color: '#e05c5c' },
+    { label: 'Very weak', color: 'var(--error)' },
     { label: 'Weak',      color: '#e07a5c' },
-    { label: 'Fair',      color: '#e0c05c' },
+    { label: 'Fair',      color: 'var(--warning)' },
     { label: 'Good',      color: '#8ce05c' },
-    { label: 'Strong',    color: '#6ee7a0' },
-    { label: 'Strong',    color: '#6ee7a0' },
+    { label: 'Strong',    color: 'var(--accent)' },
+    { label: 'Strong',    color: 'var(--accent)' },
   ];
   return { score: s, ...levels[s] };
 }

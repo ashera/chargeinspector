@@ -3,11 +3,11 @@ import { useAuth } from '../hooks/useAuth.jsx';
 
 const CSS = `
   .sub-title {
-    font-family: 'DM Serif Display', serif;
+    font-family: var(--font-display);
     font-size: 2rem;
     margin-bottom: .5rem;
   }
-  .sub-desc { font-size: .75rem; color: #888; margin-bottom: 2rem; line-height: 1.6; }
+  .sub-desc { font-size: .75rem; color: var(--text-muted); margin-bottom: 2rem; line-height: 1.6; }
   .sub-form { max-width: 520px; }
   .sub-field { margin-bottom: 1.25rem; position: relative; }
   .sub-label {
@@ -15,75 +15,75 @@ const CSS = `
     font-size: .6rem;
     letter-spacing: .14em;
     text-transform: uppercase;
-    color: #888;
+    color: var(--text-muted);
     margin-bottom: .5rem;
   }
   .sub-input {
     width: 100%;
     padding: .75rem 1rem;
-    background: #111;
-    border: 1px solid #1e1e1e;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
     border-radius: 2px;
-    color: #f0ede6;
-    font-family: 'DM Mono', monospace;
+    color: var(--text);
+    font-family: var(--font-ui);
     font-size: .8rem;
     outline: none;
     transition: border-color .2s;
     box-sizing: border-box;
   }
-  .sub-input:focus { border-color: #6ee7a0; }
-  .sub-input::placeholder { color: #4b4b4b; }
+  .sub-input:focus { border-color: var(--accent); }
+  .sub-input::placeholder { color: var(--text-dim); }
   .sub-btn {
     width: 100%;
     padding: .85rem;
-    background: #6ee7a0;
+    background: var(--accent);
     border: none;
     border-radius: 2px;
-    font-family: 'DM Mono', monospace;
+    font-family: var(--font-ui);
     font-size: .7rem;
     letter-spacing: .14em;
     text-transform: uppercase;
-    color: #0a0a0a;
+    color: var(--bg-page);
     font-weight: 500;
     cursor: pointer;
     margin-top: .5rem;
   }
   .sub-btn:disabled { opacity: .4; cursor: not-allowed; }
-  .sub-error { font-size: .7rem; color: #e05c5c; margin-top: 1rem; }
-  .sub-success { font-size: .75rem; color: #6ee7a0; margin-top: 1rem; line-height: 1.6; }
+  .sub-error { font-size: .7rem; color: var(--error); margin-top: 1rem; }
+  .sub-success { font-size: .75rem; color: var(--accent); margin-top: 1rem; line-height: 1.6; }
   .sub-conflict {
-    background: #111;
-    border: 1px solid #2e2e2e;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
     border-radius: 3px;
     padding: 1.25rem;
     margin-bottom: 1.5rem;
   }
-  .sub-conflict-title { font-size: .65rem; letter-spacing: .14em; text-transform: uppercase; color: #e0c05c; margin-bottom: .75rem; }
-  .sub-conflict-merchant { font-family: 'DM Serif Display', serif; font-size: 1.2rem; margin-bottom: .25rem; }
-  .sub-conflict-meta { font-size: .7rem; color: #888; }
+  .sub-conflict-title { font-size: .65rem; letter-spacing: .14em; text-transform: uppercase; color: var(--warning); margin-bottom: .75rem; }
+  .sub-conflict-merchant { font-family: var(--font-display); font-size: 1.2rem; margin-bottom: .25rem; }
+  .sub-conflict-meta { font-size: .7rem; color: var(--text-muted); }
   .sub-conflict-btns { display: flex; gap: .75rem; margin-top: 1rem; }
   .sub-conflict-btn {
     flex: 1;
     padding: .7rem;
     border-radius: 2px;
-    font-family: 'DM Mono', monospace;
+    font-family: var(--font-ui);
     font-size: .65rem;
     letter-spacing: .1em;
     text-transform: uppercase;
     cursor: pointer;
-    border: 1px solid #1e1e1e;
+    border: 1px solid var(--border);
     background: none;
-    color: #888;
+    color: var(--text-muted);
     transition: color .2s, border-color .2s;
   }
-  .sub-conflict-btn:hover { color: #f0ede6; border-color: #888; }
-  .sub-conflict-btn.primary { background: #6ee7a0; color: #0a0a0a; border-color: #6ee7a0; }
+  .sub-conflict-btn:hover { color: var(--text); border-color: var(--text-muted); }
+  .sub-conflict-btn.primary { background: var(--accent); color: var(--bg-page); border-color: var(--accent); }
   .sub-suggestions {
     position: absolute;
     top: 100%;
     left: 0; right: 0;
-    background: #111;
-    border: 1px solid #1e1e1e;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
     border-top: none;
     border-radius: 0 0 2px 2px;
     z-index: 200;
@@ -92,13 +92,13 @@ const CSS = `
   .sub-suggestion {
     padding: .65rem 1rem;
     cursor: pointer;
-    border-bottom: 1px solid #1a1a1a;
+    border-bottom: 1px solid var(--bg-hover);
     transition: background .15s;
   }
   .sub-suggestion:last-child { border-bottom: none; }
-  .sub-suggestion:hover, .sub-suggestion.active { background: #1a1a1a; }
-  .sub-sug-name { font-size: .8rem; color: #f0ede6; }
-  .sub-sug-meta { font-size: .65rem; color: #888; margin-top: .1rem; }
+  .sub-suggestion:hover, .sub-suggestion.active { background: var(--bg-hover); }
+  .sub-sug-name { font-size: .8rem; color: var(--text); }
+  .sub-sug-meta { font-size: .65rem; color: var(--text-muted); margin-top: .1rem; }
 `;
 
 const EMPTY = { descriptor: '', merchantName: '', merchantLocation: '', website: '', logoUrl: '' };

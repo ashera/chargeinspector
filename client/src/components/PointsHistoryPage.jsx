@@ -2,47 +2,47 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '../hooks/useAuth.jsx';
 
 const CSS = `
-  .ph-title { font-family: 'DM Serif Display', serif; font-size: 2rem; margin-bottom: .5rem; }
-  .ph-sub   { font-size: .75rem; color: #888; margin-bottom: 2rem; }
-  .ph-empty { font-size: .75rem; color: #888; padding: 3rem 0; text-align: center; }
+  .ph-title { font-family: var(--font-display); font-size: 2rem; margin-bottom: .5rem; }
+  .ph-sub   { font-size: .75rem; color: var(--text-muted); margin-bottom: 2rem; }
+  .ph-empty { font-size: .75rem; color: var(--text-muted); padding: 3rem 0; text-align: center; }
   .ph-table { width: 100%; border-collapse: collapse; }
   .ph-table th {
     font-size: .6rem; letter-spacing: .14em; text-transform: uppercase;
-    color: #888; text-align: left; padding: .6rem 1rem;
-    border-bottom: 1px solid #1e1e1e; font-weight: 400;
+    color: var(--text-muted); text-align: left; padding: .6rem 1rem;
+    border-bottom: 1px solid var(--border); font-weight: 400;
   }
   .ph-table td {
-    padding: .9rem 1rem; border-bottom: 1px solid #111;
+    padding: .9rem 1rem; border-bottom: 1px solid var(--bg-card);
     font-size: .78rem; vertical-align: middle;
   }
   .ph-table tr:last-child td { border-bottom: none; }
-  .ph-amount { font-family: 'DM Mono', monospace; color: #6ee7a0; font-size: .85rem; }
+  .ph-amount { font-family: var(--font-ui); color: var(--accent); font-size: .85rem; }
   .ph-descriptor {
-    font-family: 'DM Mono', monospace; font-size: .65rem;
-    letter-spacing: .1em; color: #6ee7a0;
+    font-family: var(--font-ui); font-size: .65rem;
+    letter-spacing: .1em; color: var(--accent);
   }
   .ph-merchant { font-weight: 400; }
   .ph-reason {
     font-size: .6rem; letter-spacing: .1em; text-transform: uppercase;
-    color: #888; white-space: nowrap;
+    color: var(--text-muted); white-space: nowrap;
   }
-  .ph-date { font-size: .65rem; color: #4b4b4b; white-space: nowrap; }
+  .ph-date { font-size: .65rem; color: var(--text-dim); white-space: nowrap; }
   .ph-total {
     display: flex; justify-content: flex-end; align-items: baseline;
     gap: .5rem; margin-bottom: 1.5rem;
   }
-  .ph-total-label { font-size: .65rem; color: #888; letter-spacing: .1em; text-transform: uppercase; }
-  .ph-total-value { font-family: 'DM Serif Display', serif; font-size: 1.75rem; color: #6ee7a0; }
+  .ph-total-label { font-size: .65rem; color: var(--text-muted); letter-spacing: .1em; text-transform: uppercase; }
+  .ph-total-value { font-family: var(--font-display); font-size: 1.75rem; color: var(--accent); }
   .ph-badge {
     display: flex; align-items: center; gap: 1rem;
-    background: #111; border: 1px solid #1e1e1e; border-radius: 3px;
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 3px;
     padding: 1rem 1.25rem; margin-bottom: 2rem;
   }
   .ph-badge-icon { font-size: 2rem; flex-shrink: 0; }
-  .ph-badge-label { font-size: .55rem; letter-spacing: .14em; text-transform: uppercase; color: #888; margin-bottom: .2rem; }
-  .ph-badge-name { font-family: 'DM Serif Display', serif; font-size: 1.1rem; margin-bottom: .15rem; }
-  .ph-badge-desc { font-size: .7rem; color: #888; }
-  .ph-badge-date { font-size: .65rem; color: #4b4b4b; margin-left: auto; white-space: nowrap; align-self: flex-start; }
+  .ph-badge-label { font-size: .55rem; letter-spacing: .14em; text-transform: uppercase; color: var(--text-muted); margin-bottom: .2rem; }
+  .ph-badge-name { font-family: var(--font-display); font-size: 1.1rem; margin-bottom: .15rem; }
+  .ph-badge-desc { font-size: .7rem; color: var(--text-muted); }
+  .ph-badge-date { font-size: .65rem; color: var(--text-dim); margin-left: auto; white-space: nowrap; align-self: flex-start; }
   .ph-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
   .ph-table { min-width: 460px; }
   @media (max-width: 500px) {

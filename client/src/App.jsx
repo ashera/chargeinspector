@@ -1,16 +1,5 @@
 import { useState } from 'react';
 import { AuthProvider, useAuth } from './hooks/useAuth.jsx';
-
-const GLOBAL_CSS = `
-  *, *::before, *::after { box-sizing: border-box; }
-  .app-main {
-    flex: 1; max-width: 900px; width: 100%;
-    margin: 0 auto; padding: 2rem 1.5rem;
-  }
-  @media (max-width: 480px) {
-    .app-main { padding: 1.5rem 1rem; }
-  }
-`;
 import AuthPage from './components/AuthPage.jsx';
 import SearchPage from './components/SearchPage.jsx';
 import SubmitPage from './components/SubmitPage.jsx';
@@ -29,7 +18,7 @@ function Router() {
   const [pageState, setPageState] = useState({});
   const [history, setHistory]     = useState([]);
 
-  if (loading) return <div style={{ color: '#f0ede6', padding: '2rem' }}>Loading…</div>;
+  if (loading) return <div style={{ color: 'var(--text)', padding: '2rem' }}>Loading…</div>;
 
   if (page === 'login' || page === 'register') {
     return <AuthPage onAuth={() => setPage('search')} />;
@@ -54,8 +43,7 @@ function Router() {
   };
 
   return (
-    <div style={{ minHeight: '100dvh', background: '#0a0a0a', color: '#f0ede6', display: 'flex', flexDirection: 'column' }}>
-      <style>{GLOBAL_CSS}</style>
+    <div style={{ minHeight: '100dvh', background: 'var(--bg-page)', color: 'var(--text)', display: 'flex', flexDirection: 'column' }}>
       <Nav page={page} navigate={navigate} isAuthenticated={isAuthenticated} user={user} onPointsClick={() => navigate('points')} />
       <main className="app-main">
         {page === 'search'      && <SearchPage navigate={navigate} />}
@@ -68,7 +56,7 @@ function Router() {
         {page === 'case'        && <CasePage caseData={pageState.caseData} navigate={navigate} />}
         {page === 'admin'       && user?.role === 'admin' && <AdminPage />}
       </main>
-      <footer style={{ borderTop: '1px solid #1e1e1e', padding: '1.25rem 1.5rem', textAlign: 'center', fontSize: '.65rem', color: '#4b4b4b', fontFamily: "'DM Mono', monospace", letterSpacing: '.08em' }}>
+      <footer style={{ borderTop: '1px solid var(--border)', padding: '1.25rem 1.5rem', textAlign: 'center', fontSize: '.65rem', color: 'var(--text-dim)', fontFamily: 'var(--font-ui)', letterSpacing: '.08em' }}>
         ChargeInspector v{__APP_VERSION__} · {__GIT_COMMIT__}
       </footer>
     </div>

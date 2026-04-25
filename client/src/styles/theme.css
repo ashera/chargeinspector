@@ -1,0 +1,39 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg-page:       #0a0a0a;
+  --bg-card:       #111;
+  --bg-hover:      #1a1a1a;
+  --border:        #1e1e1e;
+  --border-subtle: #2e2e2e;
+  --text:          #f0ede6;
+  --text-muted:    #888;
+  --text-dim:      #4b4b4b;
+  --accent:        #6ee7a0;
+  --amber:         #f0b429;
+  --error:         #e05c5c;
+  --warning:       #e0c05c;
+  --font-ui:       'DM Mono', monospace;
+  --font-display:  'DM Serif Display', serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg-page);
+  color: var(--text);
+  font-family: var(--font-ui);
+}
+
+.app-main {
+  flex: 1;
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+@media (max-width: 480px) {
+  .app-main { padding: 1.5rem 1rem; }
+}

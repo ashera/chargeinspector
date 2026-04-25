@@ -6,57 +6,57 @@ import {
 const CSS = `
   .dd-back {
     font-size: .65rem; letter-spacing: .1em; text-transform: uppercase;
-    color: #888; cursor: pointer; background: none; border: none;
-    font-family: 'DM Mono', monospace; padding: 0; margin-bottom: 2rem;
+    color: var(--text-muted); cursor: pointer; background: none; border: none;
+    font-family: var(--font-ui); padding: 0; margin-bottom: 2rem;
     display: inline-block;
   }
-  .dd-back:hover { color: #f0ede6; }
+  .dd-back:hover { color: var(--text); }
   .dd-eyebrow {
     font-size: .65rem; letter-spacing: .14em; text-transform: uppercase;
-    color: #888; margin-bottom: .4rem;
+    color: var(--text-muted); margin-bottom: .4rem;
   }
   .dd-title {
-    font-family: 'DM Mono', monospace; font-size: 1.5rem;
-    letter-spacing: .08em; color: #6ee7a0; margin-bottom: 2rem;
+    font-family: var(--font-ui); font-size: 1.5rem;
+    letter-spacing: .08em; color: var(--accent); margin-bottom: 2rem;
   }
   .dd-section-title {
     font-size: .6rem; letter-spacing: .14em; text-transform: uppercase;
-    color: #888; margin-bottom: 1rem; border-bottom: 1px solid #1e1e1e;
+    color: var(--text-muted); margin-bottom: 1rem; border-bottom: 1px solid var(--border);
     padding-bottom: .5rem;
   }
   .dd-chart-wrap {
-    background: #111; border: 1px solid #1e1e1e; border-radius: 3px;
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 3px;
     padding: 1.25rem 1.25rem 0.5rem; margin-bottom: 2rem;
   }
   .dd-card {
-    background: #111; border: 1px solid #1e1e1e; border-radius: 3px;
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 3px;
     padding: 1.25rem; margin-bottom: 1rem;
     display: flex; gap: 1.25rem; align-items: flex-start;
   }
   .dd-logo {
     width: 52px; height: 52px; border-radius: 3px;
-    object-fit: contain; background: #1a1a1a; flex-shrink: 0;
+    object-fit: contain; background: var(--bg-hover); flex-shrink: 0;
   }
   .dd-logo-placeholder {
     width: 52px; height: 52px; border-radius: 3px;
-    background: #1a1a1a; border: 1px solid #1e1e1e; flex-shrink: 0;
+    background: var(--bg-hover); border: 1px solid var(--border); flex-shrink: 0;
     display: flex; align-items: center; justify-content: center; font-size: 1.4rem;
   }
   .dd-card-body { flex: 1; min-width: 0; }
-  .dd-merchant-name { font-family: 'DM Serif Display', serif; font-size: 1.2rem; margin-bottom: .25rem; }
-  .dd-meta { font-size: .7rem; color: #888; display: flex; flex-wrap: wrap; gap: .75rem; margin-top: .4rem; }
-  .dd-meta a { color: #6ee7a0; text-decoration: none; }
+  .dd-merchant-name { font-family: var(--font-display); font-size: 1.2rem; margin-bottom: .25rem; }
+  .dd-meta { font-size: .7rem; color: var(--text-muted); display: flex; flex-wrap: wrap; gap: .75rem; margin-top: .4rem; }
+  .dd-meta a { color: var(--accent); text-decoration: none; }
   .dd-meta a:hover { text-decoration: underline; }
-  .dd-votes { font-size: .65rem; color: #888; margin-top: .4rem; }
+  .dd-votes { font-size: .65rem; color: var(--text-muted); margin-top: .4rem; }
   .dd-card-action { margin-left: auto; flex-shrink: 0; align-self: center; }
   .dd-btn {
-    padding: .55rem 1rem; border: 1px solid #1e1e1e; border-radius: 2px;
-    background: none; color: #888; font-family: 'DM Mono', monospace;
+    padding: .55rem 1rem; border: 1px solid var(--border); border-radius: 2px;
+    background: none; color: var(--text-muted); font-family: var(--font-ui);
     font-size: .6rem; letter-spacing: .1em; text-transform: uppercase;
     cursor: pointer; white-space: nowrap; transition: color .2s, border-color .2s;
   }
-  .dd-btn:hover { color: #f0ede6; border-color: #888; }
-  .dd-empty { font-size: .75rem; color: #888; padding: 2rem 0; }
+  .dd-btn:hover { color: var(--text); border-color: var(--text-muted); }
+  .dd-empty { font-size: .75rem; color: var(--text-muted); padding: 2rem 0; }
   @media (max-width: 500px) {
     .dd-card { flex-wrap: wrap; }
     .dd-card-action { width: 100%; margin-left: 0; }
@@ -67,9 +67,9 @@ const CSS = `
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   return (
-    <div style={{ background: '#1a1a1a', border: '1px solid #2e2e2e', borderRadius: 2, padding: '8px 12px', fontFamily: "'DM Mono', monospace", fontSize: '.7rem', color: '#f0ede6' }}>
-      <div style={{ color: '#888', marginBottom: 2 }}>{label}</div>
-      <div style={{ color: '#6ee7a0' }}>{payload[0].value} view{payload[0].value !== 1 ? 's' : ''}</div>
+    <div style={{ background: 'var(--bg-hover)', border: '1px solid var(--border-subtle)', borderRadius: 2, padding: '8px 12px', fontFamily: "'DM Mono', monospace", fontSize: '.7rem', color: 'var(--text)' }}>
+      <div style={{ color: 'var(--text-muted)', marginBottom: 2 }}>{label}</div>
+      <div style={{ color: 'var(--accent)' }}>{payload[0].value} view{payload[0].value !== 1 ? 's' : ''}</div>
     </div>
   );
 };
@@ -120,28 +120,28 @@ export default function DescriptorDetailsPage({ descriptor, descriptorId, naviga
           <div className="dd-chart-wrap">
             <ResponsiveContainer width="100%" height={180}>
               <BarChart data={viewData} barSize={8}>
-                <CartesianGrid vertical={false} stroke="#1e1e1e" />
+                <CartesianGrid vertical={false} stroke="var(--border)" />
                 <XAxis
                   dataKey="date"
                   ticks={tickDates}
-                  tick={{ fill: '#888', fontFamily: "'DM Mono', monospace", fontSize: 10 }}
+                  tick={{ fill: 'var(--text-muted)', fontFamily: "'DM Mono', monospace", fontSize: 10 }}
                   tickLine={false}
                   axisLine={false}
                   tickFormatter={d => d.slice(5)}
                 />
                 <YAxis
                   allowDecimals={false}
-                  tick={{ fill: '#888', fontFamily: "'DM Mono', monospace", fontSize: 10 }}
+                  tick={{ fill: 'var(--text-muted)', fontFamily: "'DM Mono', monospace", fontSize: 10 }}
                   tickLine={false}
                   axisLine={false}
                   width={24}
                 />
-                <Tooltip content={<CustomTooltip />} cursor={{ fill: '#1a1a1a' }} />
-                <Bar dataKey="views" fill="#6ee7a0" radius={[2, 2, 0, 0]} />
+                <Tooltip content={<CustomTooltip />} cursor={{ fill: 'var(--bg-hover)' }} />
+                <Bar dataKey="views" fill="var(--accent)" radius={[2, 2, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
             {!loading && !hasViews && (
-              <p style={{ textAlign: 'center', fontSize: '.7rem', color: '#4b4b4b', paddingBottom: '.75rem' }}>No views recorded yet</p>
+              <p style={{ textAlign: 'center', fontSize: '.7rem', color: 'var(--text-dim)', paddingBottom: '.75rem' }}>No views recorded yet</p>
             )}
           </div>
         </>

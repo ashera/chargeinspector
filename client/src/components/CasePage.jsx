@@ -3,74 +3,74 @@ import { useState, useEffect } from 'react';
 const CSS = `
   .cp-back {
     font-size: .65rem; letter-spacing: .1em; text-transform: uppercase;
-    color: #888; cursor: pointer; background: none; border: none;
-    font-family: 'DM Mono', monospace; padding: 0; margin-bottom: 2rem;
+    color: var(--text-muted); cursor: pointer; background: none; border: none;
+    font-family: var(--font-ui); padding: 0; margin-bottom: 2rem;
     display: inline-block;
   }
-  .cp-back:hover { color: #f0ede6; }
+  .cp-back:hover { color: var(--text); }
   .cp-top {
     display: flex; gap: 2rem; align-items: flex-start; margin-bottom: 1.5rem;
   }
   .cp-top-left { flex: 1; min-width: 0; }
   .cp-eyebrow {
     font-size: .6rem; letter-spacing: .2em; text-transform: uppercase;
-    color: #888; margin-bottom: .3rem;
+    color: var(--text-muted); margin-bottom: .3rem;
   }
   .cp-ref {
-    font-family: 'DM Mono', monospace; font-size: .65rem;
-    color: #4b4b4b; letter-spacing: .12em; margin-bottom: 1.25rem;
+    font-family: var(--font-ui); font-size: .65rem;
+    color: var(--text-dim); letter-spacing: .12em; margin-bottom: 1.25rem;
   }
   .cp-descriptor {
-    font-family: 'DM Mono', monospace; font-size: 1.5rem;
-    color: #f0b429; letter-spacing: .08em; margin-bottom: 1.25rem; line-height: 1.2;
+    font-family: var(--font-ui); font-size: 1.5rem;
+    color: var(--amber); letter-spacing: .08em; margin-bottom: 1.25rem; line-height: 1.2;
   }
   .cp-status-row { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; }
   .cp-status {
     font-size: .6rem; letter-spacing: .14em; text-transform: uppercase;
     padding: .3rem .75rem; border-radius: 2px;
   }
-  .cp-status.open          { color: #e0c05c; border: 1px solid #3a3010; background: #1a1608; }
-  .cp-status.investigating { color: #6ee7a0; border: 1px solid #1e3a2a; background: #0d1a0f; }
-  .cp-status.solved        { color: #6ee7a0; border: 1px solid #1e3a2a; background: #0d1a0f; }
-  .cp-date { font-size: .65rem; color: #4b4b4b; }
+  .cp-status.open          { color: var(--warning); border: 1px solid #3a3010; background: #1a1608; }
+  .cp-status.investigating { color: var(--accent); border: 1px solid #1e3a2a; background: #0d1a0f; }
+  .cp-status.solved        { color: var(--accent); border: 1px solid #1e3a2a; background: #0d1a0f; }
+  .cp-date { font-size: .65rem; color: var(--text-dim); }
 
   .cp-team {
     flex-shrink: 0; text-align: right;
-    background: #111; border: 1px solid #1e1e1e; border-radius: 3px;
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 3px;
     padding: 1rem 1.25rem; min-width: 160px;
   }
   .cp-team-label {
     font-size: .55rem; letter-spacing: .16em; text-transform: uppercase;
-    color: #888; margin-bottom: .85rem;
+    color: var(--text-muted); margin-bottom: .85rem;
   }
   .cp-detective {
     display: flex; align-items: center; justify-content: flex-end;
     gap: .5rem; margin-bottom: .5rem;
   }
   .cp-detective:last-child { margin-bottom: 0; }
-  .cp-detective-name { font-size: .7rem; color: #f0ede6; }
+  .cp-detective-name { font-size: .7rem; color: var(--text); }
   .cp-detective-avatar {
     width: 22px; height: 22px; border-radius: 50%;
-    background: #1e1e1e; border: 1px solid #2e2e2e;
+    background: var(--border); border: 1px solid var(--border-subtle);
     display: flex; align-items: center; justify-content: center;
-    font-size: .65rem; color: #888; flex-shrink: 0;
-    text-transform: uppercase; font-family: 'DM Mono', monospace;
+    font-size: .65rem; color: var(--text-muted); flex-shrink: 0;
+    text-transform: uppercase; font-family: var(--font-ui);
   }
-  .cp-team-empty { font-size: .65rem; color: #4b4b4b; }
+  .cp-team-empty { font-size: .65rem; color: var(--text-dim); }
 
   .cp-card {
-    background: #111; border: 1px solid #1e1e1e; border-radius: 3px;
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 3px;
     padding: 1.5rem; margin-bottom: 1.5rem;
   }
   .cp-card-title {
     font-size: .6rem; letter-spacing: .14em; text-transform: uppercase;
-    color: #888; margin-bottom: .75rem;
+    color: var(--text-muted); margin-bottom: .75rem;
   }
-  .cp-card-body { font-size: .8rem; color: #888; line-height: 1.7; }
+  .cp-card-body { font-size: .8rem; color: var(--text-muted); line-height: 1.7; }
   .cp-btn {
-    padding: .85rem 1.75rem; background: #6ee7a0; border: none; border-radius: 2px;
-    font-family: 'DM Mono', monospace; font-size: .7rem; letter-spacing: .14em;
-    text-transform: uppercase; color: #0a0a0a; font-weight: 500; cursor: pointer;
+    padding: .85rem 1.75rem; background: var(--accent); border: none; border-radius: 2px;
+    font-family: var(--font-ui); font-size: .7rem; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--bg-page); font-weight: 500; cursor: pointer;
   }
   .cp-btn:hover { opacity: .9; }
   @media (max-width: 540px) {

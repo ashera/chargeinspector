@@ -2,33 +2,33 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '../hooks/useAuth.jsx';
 
 const CSS = `
-  .adm-title { font-family: 'DM Serif Display', serif; font-size: 2rem; margin-bottom: .5rem; }
-  .adm-sub { font-size: .75rem; color: #888; margin-bottom: 2rem; }
-  .adm-empty { font-size: .75rem; color: #888; padding: 2rem 0; }
+  .adm-title { font-family: var(--font-display); font-size: 2rem; margin-bottom: .5rem; }
+  .adm-sub { font-size: .75rem; color: var(--text-muted); margin-bottom: 2rem; }
+  .adm-empty { font-size: .75rem; color: var(--text-muted); padding: 2rem 0; }
   .adm-card {
-    background: #111; border: 1px solid #1e1e1e; border-radius: 3px;
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 3px;
     padding: 1.25rem; margin-bottom: 1rem;
   }
   .adm-descriptor {
     font-size: .7rem; letter-spacing: .14em; text-transform: uppercase;
-    color: #6ee7a0; margin-bottom: .5rem;
+    color: var(--accent); margin-bottom: .5rem;
   }
-  .adm-merchant { font-family: 'DM Serif Display', serif; font-size: 1.3rem; margin-bottom: .25rem; }
-  .adm-meta { font-size: .7rem; color: #888; display: flex; flex-wrap: wrap; gap: .75rem; margin-bottom: 1rem; }
-  .adm-meta a { color: #6ee7a0; text-decoration: none; }
-  .adm-submitter { font-size: .65rem; color: #4b4b4b; margin-bottom: 1rem; }
+  .adm-merchant { font-family: var(--font-display); font-size: 1.3rem; margin-bottom: .25rem; }
+  .adm-meta { font-size: .7rem; color: var(--text-muted); display: flex; flex-wrap: wrap; gap: .75rem; margin-bottom: 1rem; }
+  .adm-meta a { color: var(--accent); text-decoration: none; }
+  .adm-submitter { font-size: .65rem; color: var(--text-dim); margin-bottom: 1rem; }
   .adm-btns { display: flex; gap: .75rem; }
   .adm-btn {
     padding: .6rem 1.25rem; border-radius: 2px;
-    font-family: 'DM Mono', monospace; font-size: .65rem;
+    font-family: var(--font-ui); font-size: .65rem;
     letter-spacing: .1em; text-transform: uppercase;
-    cursor: pointer; border: 1px solid #1e1e1e;
-    background: none; color: #888;
+    cursor: pointer; border: 1px solid var(--border);
+    background: none; color: var(--text-muted);
     transition: color .2s, border-color .2s;
   }
   .adm-btn:disabled { opacity: .3; cursor: not-allowed; }
-  .adm-btn.approve { background: #6ee7a0; color: #0a0a0a; border-color: #6ee7a0; }
-  .adm-btn.reject:hover { color: #e05c5c; border-color: #e05c5c; }
+  .adm-btn.approve { background: var(--accent); color: var(--bg-page); border-color: var(--accent); }
+  .adm-btn.reject:hover { color: var(--error); border-color: var(--error); }
   .adm-logo { width: 40px; height: 40px; object-fit: contain; border-radius: 2px; float: right; }
 `;
 
@@ -76,7 +76,7 @@ export default function AdminPage() {
       </p>
 
       {error && (
-        <p style={{ color: '#e05c5c', fontSize: '.75rem', marginBottom: '1rem' }}>{error}</p>
+        <p style={{ color: 'var(--error)', fontSize: '.75rem', marginBottom: '1rem' }}>{error}</p>
       )}
 
       {!loading && items.length === 0 && (

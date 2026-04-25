@@ -3,33 +3,33 @@ import { useAuth } from '../hooks/useAuth.jsx';
 
 const CSS = `
   .nav {
-    border-bottom: 1px solid #1e1e1e;
+    border-bottom: 1px solid var(--border);
     padding: 0 1.5rem;
     display: flex;
     align-items: center;
-    font-family: 'DM Mono', monospace;
-    background: #0a0a0a;
+    font-family: var(--font-ui);
+    background: var(--bg-page);
     position: sticky;
     top: 0;
     z-index: 100;
   }
   .nav-logo {
-    font-family: 'DM Serif Display', serif;
+    font-family: var(--font-display);
     font-size: 1rem;
-    color: #f0ede6;
+    color: var(--text);
     margin-right: 2rem;
     padding: 1rem 0;
     cursor: pointer;
     white-space: nowrap;
   }
-  .nav-logo span { color: #6ee7a0; }
+  .nav-logo span { color: var(--accent); }
   .nav-links { display: flex; gap: 0; flex: 1; }
   .nav-link {
     padding: .85rem 1rem;
     font-size: .65rem;
     letter-spacing: .12em;
     text-transform: uppercase;
-    color: #888;
+    color: var(--text-muted);
     cursor: pointer;
     border-bottom: 2px solid transparent;
     margin-bottom: -1px;
@@ -37,25 +37,25 @@ const CSS = `
     border-top: none;
     border-left: none;
     border-right: none;
-    font-family: 'DM Mono', monospace;
+    font-family: var(--font-ui);
     transition: color .2s, border-color .2s;
   }
-  .nav-link:hover { color: #f0ede6; }
-  .nav-link.active { color: #f0ede6; border-bottom-color: #6ee7a0; }
+  .nav-link:hover { color: var(--text); }
+  .nav-link.active { color: var(--text); border-bottom-color: var(--accent); }
   .nav-right { margin-left: auto; display: flex; align-items: center; gap: 1rem; }
   .nav-pts {
-    font-size: .65rem; color: #6ee7a0; letter-spacing: .08em;
+    font-size: .65rem; color: var(--accent); letter-spacing: .08em;
     cursor: pointer; background: none; border: none;
-    font-family: 'DM Mono', monospace; padding: 0;
+    font-family: var(--font-ui); padding: 0;
   }
   .nav-pts:hover { text-decoration: underline; }
-  .nav-email { font-size: .65rem; color: #888; letter-spacing: .06em; }
+  .nav-email { font-size: .65rem; color: var(--text-muted); letter-spacing: .06em; }
   .nav-logout {
     font-size: .6rem; letter-spacing: .1em; text-transform: uppercase;
-    color: #888; cursor: pointer; background: none; border: none;
-    font-family: 'DM Mono', monospace;
+    color: var(--text-muted); cursor: pointer; background: none; border: none;
+    font-family: var(--font-ui);
   }
-  .nav-logout:hover { color: #e05c5c; }
+  .nav-logout:hover { color: var(--error); }
 
   .nav-burger {
     display: none; background: none; border: none;
@@ -65,35 +65,35 @@ const CSS = `
   }
   .nav-burger span {
     display: block; width: 20px; height: 2px;
-    background: #f0ede6; transition: background .2s;
+    background: var(--text); transition: background .2s;
   }
-  .nav-burger:hover span { background: #6ee7a0; }
+  .nav-burger:hover span { background: var(--accent); }
 
   .nav-drawer {
     position: absolute; top: 100%; left: 0; right: 0;
-    background: #0a0a0a; border-bottom: 1px solid #1e1e1e;
+    background: var(--bg-page); border-bottom: 1px solid var(--border);
   }
   .nav-drawer-item {
     display: block; width: 100%; text-align: left;
     padding: .9rem 1.5rem;
     font-size: .65rem; letter-spacing: .12em; text-transform: uppercase;
-    color: #888; cursor: pointer;
-    background: none; border: none; border-bottom: 1px solid #111;
-    font-family: 'DM Mono', monospace; transition: color .2s;
+    color: var(--text-muted); cursor: pointer;
+    background: none; border: none; border-bottom: 1px solid var(--bg-card);
+    font-family: var(--font-ui); transition: color .2s;
   }
-  .nav-drawer-item:hover { color: #f0ede6; }
-  .nav-drawer-item.active { color: #6ee7a0; }
+  .nav-drawer-item:hover { color: var(--text); }
+  .nav-drawer-item.active { color: var(--accent); }
   .nav-drawer-bottom {
-    padding: .9rem 1.5rem; border-top: 1px solid #1e1e1e;
+    padding: .9rem 1.5rem; border-top: 1px solid var(--border);
     display: flex; justify-content: space-between; align-items: center;
   }
-  .nav-drawer-email { font-size: .65rem; color: #888; }
+  .nav-drawer-email { font-size: .65rem; color: var(--text-muted); }
   .nav-drawer-logout {
-    background: none; border: none; font-family: 'DM Mono', monospace;
+    background: none; border: none; font-family: var(--font-ui);
     font-size: .6rem; letter-spacing: .1em; text-transform: uppercase;
-    color: #888; cursor: pointer;
+    color: var(--text-muted); cursor: pointer;
   }
-  .nav-drawer-logout:hover { color: #e05c5c; }
+  .nav-drawer-logout:hover { color: var(--error); }
 
   @media (max-width: 640px) {
     .nav { padding: 0 1rem; }
