@@ -300,7 +300,7 @@ export default function CasePage({ caseData: initialData, navigate }) {
 
       <div className="cp-top">
         <div className="cp-top-left">
-          <div className="cp-eyebrow">Open case</div>
+          <div className="cp-eyebrow">Case number</div>
           <div className="cp-ref">#{data.id.slice(0, 8).toUpperCase()}</div>
           <div className="cp-descriptor">Investigating: &ldquo;{data.descriptor}&rdquo;</div>
           <div className="cp-status-row">
