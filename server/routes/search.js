@@ -20,16 +20,16 @@ router.get('/', async (req, res) => {
          m.website,
          m.logo_url,
          s.id              AS submission_id,
-         s.upvote_count,
-         similarity(d.text, $1) AS score
+         s.upvote_count
        FROM descriptors d
        JOIN submissions  s ON s.id = d.canonical_submission_id
        JOIN merchants    m ON m.id = s.merchant_id
-       WHERE d.text % $1
-          OR d.text ILIKE $2
-       ORDER BY score DESC
+       WHERE d.text ILIKE $1
+       ORDER BY
+         CASE WHEN lower(d.text) LIKE lower($2) THEN 0 ELSE 1 END,
+         d.text
        LIMIT 20`,
-      [q, `%${q}%`]
+      [`%${q}%`, `${q}%`]
     );
 
     return res.json({ results: rows });
