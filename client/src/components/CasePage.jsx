@@ -294,6 +294,11 @@ const CSS = `
     padding: 1rem 1.25rem; margin-bottom: 1.5rem;
     font-size: .78rem; color: #4ade80; line-height: 1.6;
   }
+  .cp-pending-msg {
+    margin-top: 1rem; padding: .85rem 1rem; border-radius: 3px;
+    background: #1a1608; border: 1px solid #3a3010;
+    font-size: .72rem; color: var(--warning); line-height: 1.6;
+  }
 
   /* Submit button */
   .cp-submit-btn {
@@ -504,6 +509,10 @@ export default function CasePage({ caseData: initialData, navigate }) {
         const caseBody = await caseRes.json();
         if (caseBody.case) setData(caseBody.case);
       } else {
+        // Pending moderation — reload case to pick up pending_submission_id → read-only UI
+        const caseRes  = await fetch(`/api/cases/${initialData.id}`);
+        const caseBody = await caseRes.json();
+        if (caseBody.case) setData(caseBody.case);
         setSolveSuccess(true);
       }
     } catch (err) {
@@ -514,8 +523,9 @@ export default function CasePage({ caseData: initialData, navigate }) {
     }
   }
 
-  const status     = data.computed_status || 'open';
-  const detectives = data.detectives || [];
+  const status              = data.computed_status || 'open';
+  const isPendingModeration = !!data.pending_submission_id;
+  const detectives          = data.detectives || [];
 
   return (
     <>
@@ -612,9 +622,10 @@ export default function CasePage({ caseData: initialData, navigate }) {
             const ev           = evidence[step.key];
             const hasData      = !!ev;
             const isSolved     = status === 'solved';
+            const isReadOnly   = isSolved || isPendingModeration;
             const prevDone     = idx === 0 || !!evidence[STEPS[idx - 1].key];
             const isLocked     = !prevDone;
-            const isOpen       = idx <= activeStepIdx;
+            const isOpen       = idx <= activeStepIdx || (isPendingModeration && step.key === 'local_knowledge');
             const isNext       = idx < STEPS.length - 1;
             const isCollecting = collecting === step.key;
 
@@ -622,12 +633,12 @@ export default function CasePage({ caseData: initialData, navigate }) {
             if (isSolved && !hasData) return null;
 
             return (
-              <div key={step.key} className={`cp-step${hasData ? ' has-data' : ''}${isLocked && !isSolved ? ' locked' : ''}`}>
+              <div key={step.key} className={`cp-step${hasData ? ' has-data' : ''}${isLocked && !isReadOnly ? ' locked' : ''}`}>
                 <div className="cp-step-header">
                   <div className="cp-step-num">{idx + 1}</div>
                   <span className="cp-step-icon">{step.icon}</span>
                   <span className="cp-step-label">{step.label}</span>
-                  {!isSolved && isLocked && <span className="cp-step-lock">Locked</span>}
+                  {!isReadOnly && isLocked && <span className="cp-step-lock">Locked</span>}
                   {hasData && <span className="cp-step-done">✓ Done</span>}
                 </div>
 
@@ -635,7 +646,7 @@ export default function CasePage({ caseData: initialData, navigate }) {
                   {hasData ? (
                     <>
                       <EvidenceResults ev={ev} />
-                      {!isSolved && (
+                      {!isReadOnly && (
                         <div className="cp-step-actions">
                           <button className="cp-solve-btn" onClick={() => openConfirm(step.key)}>
                             Accept &amp; solve case →
@@ -694,6 +705,11 @@ export default function CasePage({ caseData: initialData, navigate }) {
                   )}
                   {errors[step.key] && (
                     <span className="cp-step-error">{errors[step.key]}</span>
+                  )}
+                  {isPendingModeration && step.key === 'local_knowledge' && (
+                    <div className="cp-pending-msg">
+                      ⏳ Your identification is pending review by our moderation team. Once approved, the case will be marked as solved and will appear in search results.
+                    </div>
                   )}
                 </div>}
               </div>
