@@ -543,8 +543,8 @@ export default function CasePage({ caseData: initialData, navigate }) {
             })()
           ) : (
             <>
-              This billing descriptor hasn&rsquo;t been identified yet. Work through each investigation step below.
-              At any point you can accept the evidence and submit a merchant match to solve the case.
+              The billing descriptor &ldquo;{data.descriptor}&rdquo; hasn&rsquo;t been identified yet.
+              Work through each investigation step below and accept the evidence to solve the case.
             </>
           )}
         </div>
