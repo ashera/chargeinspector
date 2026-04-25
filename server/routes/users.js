@@ -9,7 +9,7 @@ const router  = express.Router();
 router.get('/me/stats', requireAuth, async (req, res) => {
   try {
     const { rows: [user] } = await db.query(
-      `SELECT id, email, role, total_points, created_at FROM users WHERE id = $1`,
+      `SELECT id, email, role, total_points, first_name, last_name, avatar_url, created_at FROM users WHERE id = $1`,
       [req.user.sub]
     );
     if (!user) return res.status(404).json({ error: 'User not found' });
@@ -102,6 +102,24 @@ router.get('/leaderboard', async (req, res) => {
     return res.json({ leaderboard: rows });
   } catch (err) {
     console.error('[GET /api/users/leaderboard]', err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// PUT /api/users/me
+router.put('/me', requireAuth, async (req, res) => {
+  const { first_name, last_name, avatar_url } = req.body;
+  try {
+    const { rows: [user] } = await db.query(
+      `UPDATE users
+       SET first_name = $1, last_name = $2, avatar_url = $3
+       WHERE id = $4
+       RETURNING id, email, role, total_points, first_name, last_name, avatar_url`,
+      [first_name?.trim() || null, last_name?.trim() || null, avatar_url?.trim() || null, req.user.sub]
+    );
+    return res.json({ user });
+  } catch (err) {
+    console.error('[PUT /api/users/me]', err);
     return res.status(500).json({ error: 'Internal server error' });
   }
 });
