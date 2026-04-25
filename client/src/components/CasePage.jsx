@@ -258,6 +258,12 @@ const CSS = `
   }
   .cp-modal-cancel:hover { border-color: var(--text-muted); color: var(--text); }
 
+  .cp-success-banner {
+    background: #0d1a0f; border: 1px solid #1e3a2a; border-radius: 3px;
+    padding: 1rem 1.25rem; margin-bottom: 1.5rem;
+    font-size: .78rem; color: #4ade80; line-height: 1.6;
+  }
+
   /* Submit button */
   .cp-submit-btn {
     padding: .85rem 1.75rem; background: var(--accent); border: none; border-radius: 2px;
@@ -381,6 +387,7 @@ export default function CasePage({ caseData: initialData, navigate }) {
   const [confirmModal, setConfirmModal] = useState(null); // { data, formData|null }
   const [solveError, setSolveError]   = useState(null);
   const [solving, setSolving]         = useState(false);
+  const [solveSuccess, setSolveSuccess] = useState(false);
 
   useEffect(() => {
     fetch(`/api/cases/${initialData.id}`)
@@ -450,20 +457,16 @@ export default function CasePage({ caseData: initialData, navigate }) {
         setCollecting(null);
       }
 
-      // Create the auto-approved submission
+      // Submit the match for moderation
       const subRes  = await apiFetch('/api/submissions/case-solve', {
         method: 'POST',
         body: JSON.stringify({ descriptor: data.descriptor, merchantName: modalData.merchant_name }),
       });
       const subBody = await subRes.json();
-      if (!subRes.ok) throw new Error(subBody.error || 'Failed to solve case');
-
-      // Reload case data so status updates to "solved"
-      const caseRes  = await fetch(`/api/cases/${initialData.id}`);
-      const caseBody = await caseRes.json();
-      if (caseBody.case) setData(caseBody.case);
+      if (!subRes.ok) throw new Error(subBody.error || 'Failed to submit match');
 
       setConfirmModal(null);
+      setSolveSuccess(true);
     } catch (err) {
       setSolveError(err.message);
       setCollecting(null);
@@ -528,6 +531,13 @@ export default function CasePage({ caseData: initialData, navigate }) {
           }
         </div>
       </div>
+
+      {solveSuccess && (
+        <div className="cp-success-banner">
+          ✓ Match submitted — your identification is pending review by our moderation team.
+          Once approved it will appear in search results and the case will be marked as solved.
+        </div>
+      )}
 
       <div className="cp-card">
         <div className="cp-card-title">The mystery</div>

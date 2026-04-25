@@ -195,24 +195,15 @@ router.post('/case-solve', requireAuth, async (req, res) => {
       return res.status(200).json({ duplicate: true });
     }
 
-    // Create as approved
+    // Create as pending — goes through normal moderation
     const { rows: [submission] } = await client.query(
-      `INSERT INTO submissions (descriptor_id, merchant_id, submitted_by, status)
-       VALUES ($1, $2, $3, 'approved') RETURNING id`,
+      `INSERT INTO submissions (descriptor_id, merchant_id, submitted_by)
+       VALUES ($1, $2, $3) RETURNING id`,
       [desc.id, merchant.id, req.user.sub]
     );
 
-    // Set canonical if none yet
-    await client.query(
-      `UPDATE descriptors SET canonical_submission_id = $1
-       WHERE id = $2 AND canonical_submission_id IS NULL`,
-      [submission.id, desc.id]
-    );
-
-    await awardPoints(client, req.user.sub, POINTS_SUBMISSION_APPROVED, 'submission_approved', submission.id);
-
     await client.query('COMMIT');
-    return res.status(201).json({ message: 'Case solved!', submissionId: submission.id });
+    return res.status(201).json({ message: 'Submission received and pending review.', submissionId: submission.id });
   } catch (err) {
     await client.query('ROLLBACK');
     console.error('[POST /api/submissions/case-solve]', err);
