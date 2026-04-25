@@ -112,6 +112,11 @@ const CSS = `
   .prof-status-rejected { color: var(--error); }
   .prof-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
   .prof-table { min-width: 480px; }
+  .prof-case-open         { color: var(--warning); }
+  .prof-case-investigating { color: var(--accent); }
+  .prof-case-solved       { color: var(--accent); }
+  .prof-case-row { cursor: pointer; }
+  .prof-case-row:hover td { background: var(--bg-hover); }
   @media (max-width: 500px) {
     .prof-header { gap: 1rem; }
     .prof-edit-row { flex-direction: column; gap: 0; }
@@ -158,7 +163,7 @@ function Avatar({ user }) {
   return <div className="prof-avatar">👤</div>;
 }
 
-export default function ProfilePage() {
+export default function ProfilePage({ navigate }) {
   const { apiFetch, updateUser } = useAuth();
   const [data, setData]       = useState(null);
   const [loading, setLoading] = useState(true);
@@ -220,7 +225,7 @@ export default function ProfilePage() {
   if (loading) return <p style={{ color: 'var(--text-dim)', fontSize: '.75rem' }}>Loading…</p>;
   if (!data)   return <p style={{ color: 'var(--error)', fontSize: '.75rem' }}>Failed to load profile.</p>;
 
-  const { user, currentRank, nextRank, submissions } = data;
+  const { user, currentRank, nextRank, submissions, cases } = data;
   const progressPct = currentRank && nextRank
     ? Math.round(((user.total_points - currentRank.points_threshold) /
         (nextRank.points_threshold - currentRank.points_threshold)) * 100)
@@ -338,6 +343,35 @@ export default function ProfilePage() {
                     <td>{s.merchant_name}</td>
                     <td className={`prof-status-${s.status}`}>{s.status}</td>
                     <td>{s.upvote_count}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table></div>
+          )
+        }
+      </div>
+
+      <div className="prof-section">
+        <div className="prof-section-title">Your cases</div>
+        {cases.length === 0
+          ? <p style={{ fontSize: '.75rem', color: 'var(--text-dim)' }}>No cases yet.</p>
+          : (
+            <div className="prof-table-wrap"><table className="prof-table">
+              <thead>
+                <tr>
+                  <th>Descriptor</th>
+                  <th>Status</th>
+                  <th>Role</th>
+                  <th>Opened</th>
+                </tr>
+              </thead>
+              <tbody>
+                {cases.map(c => (
+                  <tr key={c.id} className="prof-case-row" onClick={() => navigate('case', { caseData: c })}>
+                    <td style={{ fontFamily: 'monospace', fontSize: '.7rem', color: 'var(--amber)' }}>{c.descriptor}</td>
+                    <td className={`prof-case-${c.computed_status}`}>{c.computed_status}</td>
+                    <td style={{ color: 'var(--text-dim)', fontSize: '.7rem' }}>{c.connection}</td>
+                    <td style={{ color: 'var(--text-dim)' }}>{new Date(c.created_at).toLocaleDateString()}</td>
                   </tr>
                 ))}
               </tbody>

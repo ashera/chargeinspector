@@ -40,7 +40,31 @@ router.get('/me/stats', requireAuth, async (req, res) => {
       [req.user.sub]
     );
 
-    return res.json({ user, currentRank: currentRank ?? null, nextRank: nextRank ?? null, submissions });
+    const { rows: cases } = await db.query(
+      `SELECT c.id, c.descriptor, c.created_at,
+              CASE WHEN c.created_by = $1 THEN 'creator' ELSE 'detective' END AS connection,
+              CASE
+                WHEN EXISTS (
+                  SELECT 1 FROM submissions s
+                  JOIN descriptors d ON d.id = s.descriptor_id
+                  WHERE lower(d.text) = lower(c.descriptor) AND s.status = 'approved'
+                ) THEN 'solved'
+                WHEN EXISTS (
+                  SELECT 1 FROM submissions s
+                  JOIN descriptors d ON d.id = s.descriptor_id
+                  WHERE lower(d.text) = lower(c.descriptor)
+                ) THEN 'investigating'
+                ELSE 'open'
+              END AS computed_status
+       FROM cases c
+       WHERE c.created_by = $1
+          OR EXISTS (SELECT 1 FROM detectives det WHERE det.case_id = c.id AND det.user_id = $1)
+       ORDER BY c.created_at DESC
+       LIMIT 20`,
+      [req.user.sub]
+    );
+
+    return res.json({ user, currentRank: currentRank ?? null, nextRank: nextRank ?? null, submissions, cases });
   } catch (err) {
     console.error('[GET /api/users/me/stats]', err);
     return res.status(500).json({ error: 'Internal server error' });
