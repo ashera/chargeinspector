@@ -298,6 +298,14 @@ export default function SearchPage({ navigate }) {
             </div>
           ) : (
             <>
+              <div style={{ marginBottom: '1.25rem' }}>
+                <p style={{ fontFamily: "'DM Serif Display', serif", fontSize: '1.1rem', marginBottom: '.35rem' }}>
+                  Mystery solved!
+                </p>
+                <p style={{ fontSize: '.75rem', color: '#4b4b4b', lineHeight: 1.6 }}>
+                  The following merchant{results.length !== 1 ? 's match' : ' matches'} that descriptor. Click <strong style={{ color: '#f0ede6' }}>View Details</strong> to see more information about the merchant.
+                </p>
+              </div>
               {results.map(r => (
                 <div key={r.descriptor_id} className="sp-card">
                   {r.logo_url
