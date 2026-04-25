@@ -202,6 +202,7 @@ export default function SearchPage({ navigate }) {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [contributor, setContributor]   = useState(undefined);
   const [showModal, setShowModal]       = useState(false);
+  const [existingCase, setExistingCase] = useState(null);
   const [caseCreating, setCaseCreating] = useState(false);
   const inputRef       = useRef(null);
   const debounceRef    = useRef(null);
@@ -221,12 +222,18 @@ export default function SearchPage({ navigate }) {
     setShowSuggestions(false);
     setSuggestions([]);
     setShowModal(false);
+    setExistingCase(null);
     setBusy(true);
     try {
       const res  = await fetch(`/api/search?q=${encodeURIComponent(term)}`);
       const data = await res.json();
       setResults(data.results);
-      if (data.results.length === 0) setShowModal(true);
+      if (data.results.length === 0) {
+        const lookupRes = await fetch(`/api/cases/lookup?descriptor=${encodeURIComponent(term)}`);
+        const lookupData = await lookupRes.json();
+        setExistingCase(lookupData.case ?? null);
+        setShowModal(true);
+      }
     } catch {
       setResults([]);
     } finally {
@@ -406,10 +413,16 @@ export default function SearchPage({ navigate }) {
             <div className="sp-modal-eyebrow">Unidentified descriptor</div>
             <div className="sp-modal-descriptor">"{query}"</div>
             <div className="sp-modal-body">
-              We don't recognise this descriptor! Would you like to help solve the mystery?
+              {existingCase
+                ? 'We have an open case to try and solve this mystery, would you like to help investigate?'
+                : "We don't recognise this descriptor! Would you like to help solve the mystery?"}
             </div>
             <button className="sp-modal-btn" onClick={handleInvestigate} disabled={caseCreating}>
-              {caseCreating ? 'Opening case…' : 'Investigate'}
+              {caseCreating
+                ? 'Opening case…'
+                : existingCase
+                  ? `Join the Investigation — Case #${existingCase.id.slice(0, 8).toUpperCase()}`
+                  : 'Investigate'}
             </button>
             <button className="sp-modal-dismiss" onClick={() => setShowModal(false)}>
               Dismiss

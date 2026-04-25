@@ -45,6 +45,24 @@ router.post('/', optionalAuth, async (req, res) => {
   }
 });
 
+// GET /api/cases/lookup?descriptor=  — check if a case exists without creating one
+router.get('/lookup', async (req, res) => {
+  const descriptor = (req.query.descriptor || '').trim();
+  if (!descriptor) return res.json({ case: null });
+
+  try {
+    const { rows } = await db.query(
+      'SELECT *, (' + COMPUTED_STATUS + ') AS computed_status FROM cases c' +
+      ' WHERE lower(c.descriptor) = lower($1) LIMIT 1',
+      [descriptor]
+    );
+    return res.json({ case: rows[0] ?? null });
+  } catch (err) {
+    console.error('[GET /api/cases/lookup]', err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // GET /api/cases/:id
 router.get('/:id', async (req, res) => {
   try {
