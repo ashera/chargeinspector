@@ -160,13 +160,13 @@ export default function Nav({ page, navigate, isAuthenticated, user, onPointsCli
         <div className="nav-right">
           {isAuthenticated && user && (
             <>
-              <button className="nav-pts" onClick={onPointsClick}>{user.total_points ?? 0} pts</button>
               <div className="nav-identity" onClick={() => { navigate('profile'); setOpen(false); }}>
                 <span className="nav-rank">
                   {rank.icon} {rank.name}{user.last_name ? ` ${user.last_name}` : ''}
                 </span>
                 <span className="nav-email">{user.email}</span>
               </div>
+              <button className="nav-pts" onClick={onPointsClick}>{user.total_points ?? 0} pts</button>
             </>
           )}
           {isAuthenticated
