@@ -360,44 +360,50 @@ export default function CasePage({ caseData: initialData, navigate }) {
         </div>
         <div className="cp-steps">
           {STEPS.map((step, idx) => {
-            const ev         = evidence[step.key];
-            const hasData    = !!ev;
-            const prevDone   = idx === 0 || !!evidence[STEPS[idx - 1].key];
-            const isLocked   = !prevDone;
-            const isNext     = idx < STEPS.length - 1;
+            const ev           = evidence[step.key];
+            const hasData      = !!ev;
+            const isSolved     = status === 'solved';
+            const prevDone     = idx === 0 || !!evidence[STEPS[idx - 1].key];
+            const isLocked     = !prevDone;
+            const isNext       = idx < STEPS.length - 1;
             const isCollecting = collecting === step.key;
 
+            // Solved case: hide steps that produced no evidence
+            if (isSolved && !hasData) return null;
+
             return (
-              <div key={step.key} className={`cp-step${hasData ? ' has-data' : ''}${isLocked ? ' locked' : ''}`}>
+              <div key={step.key} className={`cp-step${hasData ? ' has-data' : ''}${isLocked && !isSolved ? ' locked' : ''}`}>
                 <div className="cp-step-header">
                   <div className="cp-step-num">{idx + 1}</div>
                   <span className="cp-step-icon">{step.icon}</span>
                   <span className="cp-step-label">{step.label}</span>
-                  {isLocked  && <span className="cp-step-lock">Locked</span>}
-                  {hasData   && <span className="cp-step-done">✓ Done</span>}
+                  {!isSolved && isLocked && <span className="cp-step-lock">Locked</span>}
+                  {hasData && <span className="cp-step-done">✓ Done</span>}
                 </div>
 
                 <div className="cp-step-body">
                   {hasData ? (
                     <>
                       <EvidenceResults ev={ev} />
-                      <div className="cp-step-actions">
-                        <button className="cp-solve-btn" onClick={() => acceptAndSolve(step.key)}>
-                          Accept &amp; solve case →
-                        </button>
-                        {isNext && !evidence[STEPS[idx + 1].key] && (
-                          <button className="cp-next-btn" onClick={() => {}}>
-                            Continue to {STEPS[idx + 1].label} ↓
+                      {!isSolved && (
+                        <div className="cp-step-actions">
+                          <button className="cp-solve-btn" onClick={() => acceptAndSolve(step.key)}>
+                            Accept &amp; solve case →
                           </button>
-                        )}
-                        <button
-                          className="cp-recollect-btn"
-                          onClick={() => collect(step.key)}
-                          disabled={isCollecting}
-                        >
-                          {isCollecting ? 'Re-collecting…' : '↺ Re-collect'}
-                        </button>
-                      </div>
+                          {isNext && !evidence[STEPS[idx + 1].key] && (
+                            <button className="cp-next-btn" onClick={() => {}}>
+                              Continue to {STEPS[idx + 1].label} ↓
+                            </button>
+                          )}
+                          <button
+                            className="cp-recollect-btn"
+                            onClick={() => collect(step.key)}
+                            disabled={isCollecting}
+                          >
+                            {isCollecting ? 'Re-collecting…' : '↺ Re-collect'}
+                          </button>
+                        </div>
+                      )}
                     </>
                   ) : (
                     <>
