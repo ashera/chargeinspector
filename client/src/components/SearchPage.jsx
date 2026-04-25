@@ -299,7 +299,7 @@ export default function SearchPage({ navigate }) {
           ) : (
             <>
               <div style={{ marginBottom: '1.25rem' }}>
-                <p style={{ fontFamily: "'DM Serif Display', serif", fontSize: '1.1rem', marginBottom: '.35rem' }}>
+                <p style={{ fontFamily: "'DM Serif Display', serif", fontStyle: 'italic', fontSize: '1.5rem', color: '#6ee7a0', marginBottom: '.35rem' }}>
                   Mystery solved!
                 </p>
                 <p style={{ fontSize: '.75rem', color: '#4b4b4b', lineHeight: 1.6 }}>
