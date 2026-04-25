@@ -259,7 +259,7 @@ function EvidenceResults({ ev }) {
   );
 }
 
-function LocalKnowledgeForm({ onSubmit, submitting }) {
+function LocalKnowledgeForm({ onSubmit, submitting, label }) {
   const [form, setForm] = useState({ merchant_name: '', business_type: '', description: '', confidence: 'medium' });
   const set = k => e => setForm(f => ({ ...f, [k]: e.target.value }));
 
@@ -290,7 +290,7 @@ function LocalKnowledgeForm({ onSubmit, submitting }) {
         onClick={() => onSubmit(form)}
         disabled={submitting || !form.merchant_name.trim()}
       >
-        {submitting ? 'Saving…' : 'Save local knowledge'}
+        {submitting ? 'Collecting…' : `Run ${label}`}
       </button>
     </div>
   );
@@ -495,6 +495,7 @@ export default function CasePage({ caseData: initialData, navigate }) {
                           <LocalKnowledgeForm
                             onSubmit={form => collect(step.key, form)}
                             submitting={isCollecting}
+                            label={step.label}
                           />
                         ) : (
                           <>
