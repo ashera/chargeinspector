@@ -142,6 +142,86 @@ router.post('/', requireAuth, async (req, res) => {
   }
 });
 
+// POST /api/submissions/case-solve
+// Creates an auto-approved submission from a case investigation.
+// Awards points immediately — no admin review step.
+router.post('/case-solve', requireAuth, async (req, res) => {
+  const { descriptor, merchantName, merchantLocation, website, logoUrl } = req.body ?? {};
+
+  if (!descriptor?.trim())   return res.status(400).json({ error: 'descriptor is required' });
+  if (!merchantName?.trim()) return res.status(400).json({ error: 'merchantName is required' });
+
+  const client = await db.connect();
+  try {
+    await client.query('BEGIN');
+
+    // Upsert merchant
+    const { rows: [merchant] } = await client.query(
+      `WITH ins AS (
+         INSERT INTO merchants (name, location, website, logo_url)
+         VALUES ($1, $2, $3, $4)
+         ON CONFLICT (lower(name), lower(COALESCE(location, ''))) DO NOTHING
+         RETURNING id
+       )
+       SELECT id FROM ins
+       UNION ALL
+       SELECT id FROM merchants
+       WHERE lower(name) = lower($1)
+         AND lower(COALESCE(location, '')) = lower(COALESCE($2, ''))
+       LIMIT 1`,
+      [merchantName.trim(), merchantLocation?.trim() || null, website?.trim() || null, logoUrl?.trim() || null]
+    );
+
+    // Upsert descriptor
+    let { rows: [desc] } = await client.query(
+      'SELECT id FROM descriptors WHERE text ILIKE $1',
+      [descriptor.trim()]
+    );
+    if (!desc) {
+      const result = await client.query(
+        'INSERT INTO descriptors (text) VALUES ($1) RETURNING id',
+        [descriptor.trim().toUpperCase()]
+      );
+      desc = result.rows[0];
+    }
+
+    // Skip if exact duplicate already exists
+    const { rows: exact } = await client.query(
+      `SELECT id FROM submissions WHERE descriptor_id = $1 AND merchant_id = $2 LIMIT 1`,
+      [desc.id, merchant.id]
+    );
+    if (exact.length > 0) {
+      await client.query('ROLLBACK');
+      return res.status(200).json({ duplicate: true });
+    }
+
+    // Create as approved
+    const { rows: [submission] } = await client.query(
+      `INSERT INTO submissions (descriptor_id, merchant_id, submitted_by, status)
+       VALUES ($1, $2, $3, 'approved') RETURNING id`,
+      [desc.id, merchant.id, req.user.sub]
+    );
+
+    // Set canonical if none yet
+    await client.query(
+      `UPDATE descriptors SET canonical_submission_id = $1
+       WHERE id = $2 AND canonical_submission_id IS NULL`,
+      [submission.id, desc.id]
+    );
+
+    await awardPoints(client, req.user.sub, POINTS_SUBMISSION_APPROVED, 'submission_approved', submission.id);
+
+    await client.query('COMMIT');
+    return res.status(201).json({ message: 'Case solved!', submissionId: submission.id });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('[POST /api/submissions/case-solve]', err);
+    return res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    client.release();
+  }
+});
+
 // POST /api/submissions  (conflict confirmed — force new submission)
 // Body: { descriptor, merchantName, merchantLocation, website, logoUrl, forceNew: true }
 router.post('/conflict', requireAuth, async (req, res) => {

@@ -301,7 +301,7 @@ function EvidenceResults({ ev }) {
   );
 }
 
-function ConfirmModal({ modal, onConfirm, onCancel, confirming }) {
+function ConfirmModal({ modal, onConfirm, onCancel, confirming, error }) {
   const d = modal.data;
   return (
     <div className="cp-modal-overlay" onClick={e => { if (e.target === e.currentTarget) onCancel(); }}>
@@ -318,10 +318,11 @@ function ConfirmModal({ modal, onConfirm, onCancel, confirming }) {
           {d.business_type && <span className="cp-modal-btype">{d.business_type}</span>}
         </div>
         {d.description && <div className="cp-modal-desc">{d.description}</div>}
+        {error && <div style={{ fontSize: '.7rem', color: '#e05', marginTop: '.75rem' }}>{error}</div>}
         <div className="cp-modal-actions">
           <button className="cp-modal-cancel" onClick={onCancel} disabled={confirming}>Cancel</button>
           <button className="cp-modal-confirm" onClick={onConfirm} disabled={confirming}>
-            {confirming ? 'Saving…' : 'Confirm & solve case →'}
+            {confirming ? 'Solving…' : 'Confirm & solve case →'}
           </button>
         </div>
       </div>
@@ -374,6 +375,8 @@ export default function CasePage({ caseData: initialData, navigate }) {
   const [errors, setErrors]     = useState({});
   const [activeStepIdx, setActiveStepIdx] = useState(0);
   const [confirmModal, setConfirmModal] = useState(null); // { data, formData|null }
+  const [solveError, setSolveError]   = useState(null);
+  const [solving, setSolving]         = useState(false);
 
   useEffect(() => {
     fetch(`/api/cases/${initialData.id}`)
@@ -425,31 +428,44 @@ export default function CasePage({ caseData: initialData, navigate }) {
 
   async function handleConfirm() {
     const { type, data: modalData, formData } = confirmModal;
-    setConfirmModal(null);
+    setSolveError(null);
+    setSolving(true);
 
-    if (formData) {
-      setCollecting(type);
-      setErrors(e => ({ ...e, [type]: null }));
-      try {
-        const res = await apiFetch(`/api/cases/${initialData.id}/evidence/collect`, {
+    try {
+      // Save Local Knowledge evidence first if it hasn't been stored yet
+      if (formData) {
+        setCollecting(type);
+        setErrors(e => ({ ...e, [type]: null }));
+        const evRes  = await apiFetch(`/api/cases/${initialData.id}/evidence/collect`, {
           method: 'POST',
           body: JSON.stringify({ type, ...formData }),
         });
-        const body = await res.json();
-        if (!res.ok) throw new Error(body.error || 'Collection failed');
-        setEvidence(ev => ({ ...ev, [type]: body.evidence }));
-      } catch (err) {
-        setErrors(e => ({ ...e, [type]: err.message }));
+        const evBody = await evRes.json();
+        if (!evRes.ok) throw new Error(evBody.error || 'Failed to save evidence');
+        setEvidence(ev => ({ ...ev, [type]: evBody.evidence }));
         setCollecting(null);
-        return;
       }
-      setCollecting(null);
-    }
 
-    navigate('submit', {
-      descriptor: data.descriptor,
-      merchant:   modalData.merchant_name || '',
-    });
+      // Create the auto-approved submission
+      const subRes  = await apiFetch('/api/submissions/case-solve', {
+        method: 'POST',
+        body: JSON.stringify({ descriptor: data.descriptor, merchantName: modalData.merchant_name }),
+      });
+      const subBody = await subRes.json();
+      if (!subRes.ok) throw new Error(subBody.error || 'Failed to solve case');
+
+      // Reload case data so status updates to "solved"
+      const caseRes  = await fetch(`/api/cases/${initialData.id}`);
+      const caseBody = await caseRes.json();
+      if (caseBody.case) setData(caseBody.case);
+
+      setConfirmModal(null);
+    } catch (err) {
+      setSolveError(err.message);
+      setCollecting(null);
+    } finally {
+      setSolving(false);
+    }
   }
 
   const status     = data.computed_status || 'open';
@@ -629,8 +645,9 @@ export default function CasePage({ caseData: initialData, navigate }) {
         <ConfirmModal
           modal={confirmModal}
           onConfirm={handleConfirm}
-          onCancel={() => setConfirmModal(null)}
-          confirming={collecting === confirmModal.type}
+          onCancel={() => { setConfirmModal(null); setSolveError(null); }}
+          confirming={solving}
+          error={solveError}
         />
       )}
     </>
