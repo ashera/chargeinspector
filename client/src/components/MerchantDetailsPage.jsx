@@ -80,6 +80,13 @@ const CSS = `
     flex-shrink: 0;
   }
   .md-descriptor-btn:hover { color: var(--text); border-color: var(--text-muted); }
+  .md-confidence {
+    display: inline-block; font-size: .55rem; letter-spacing: .1em; text-transform: uppercase;
+    padding: .15rem .5rem; border-radius: 2px; margin-top: .35rem;
+  }
+  .md-confidence.high   { color: #4ade80;  border: 1px solid #1e3a2a; background: #0d1a0f; }
+  .md-confidence.medium { color: #fbbf24;  border: 1px solid #3a3010; background: #1a1608; }
+  .md-confidence.low    { color: var(--text-dim); border: 1px solid var(--border); }
   @media (max-width: 500px) {
     .md-header { gap: 1rem; }
     .md-name { font-size: 1.5rem; }
@@ -96,6 +103,7 @@ export default function MerchantDetailsPage({ merchant, navigate }) {
   const [busy, setBusy]           = useState(false);
   const [msg, setMsg]             = useState(null);
   const [descriptors, setDescriptors] = useState([]);
+  const [confidence, setConfidence]   = useState(null);
 
   useEffect(() => {
     fetch(`/api/merchants/${merchant.merchant_id}/descriptors`)
@@ -103,6 +111,24 @@ export default function MerchantDetailsPage({ merchant, navigate }) {
       .then(d => setDescriptors(d.descriptors || []))
       .catch(() => {});
   }, [merchant.merchant_id]);
+
+  useEffect(() => {
+    fetch(`/api/cases/lookup?descriptor=${encodeURIComponent(merchant.descriptor)}`)
+      .then(r => r.json())
+      .then(async ({ case: c }) => {
+        if (!c) return;
+        const evRes  = await fetch(`/api/cases/${c.id}/evidence`);
+        const evData = await evRes.json();
+        const rows   = evData.evidence || [];
+        const order  = { high: 3, medium: 2, low: 1 };
+        const best   = rows.reduce((acc, e) => {
+          if (e.confidence && (order[e.confidence] ?? 0) > (order[acc] ?? 0)) return e.confidence;
+          return acc;
+        }, null);
+        if (best) setConfidence(best);
+      })
+      .catch(() => {});
+  }, [merchant.descriptor]);
 
   const vote = async () => {
     setBusy(true);
@@ -162,6 +188,14 @@ export default function MerchantDetailsPage({ merchant, navigate }) {
             {merchant.descriptor}
           </span>
         </div>
+        {confidence && (
+          <div className="md-row">
+            <span className="md-label">Confidence</span>
+            <span className="md-value">
+              <span className={`md-confidence ${confidence}`}>{confidence}</span>
+            </span>
+          </div>
+        )}
       </div>
 
       {descriptors.length > 0 && (
