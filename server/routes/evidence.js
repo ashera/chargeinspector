@@ -2,10 +2,12 @@
 
 const express = require('express');
 const db      = require('../db');
-const { requireAuth }          = require('../middleware/auth');
-const { collectWebIntelligence } = require('../agents/webIntelligence');
+const { requireAuth }    = require('../middleware/auth');
+const { collectEvidence } = require('../agents/collect');
 
 const router = express.Router();
+
+const STEP_ORDER = ['web_intelligence', 'witness_tips', 'transaction_mafia'];
 
 // GET /api/cases/:id/evidence
 router.get('/:id/evidence', async (req, res) => {
@@ -23,7 +25,11 @@ router.get('/:id/evidence', async (req, res) => {
 
 // POST /api/cases/:id/evidence/collect
 router.post('/:id/evidence/collect', requireAuth, async (req, res) => {
-  const { type = 'web_intelligence' } = req.body ?? {};
+  const { type } = req.body ?? {};
+
+  if (!STEP_ORDER.includes(type)) {
+    return res.status(400).json({ error: 'Unknown evidence type' });
+  }
 
   try {
     const { rows: [caseRow] } = await db.query(
@@ -32,18 +38,28 @@ router.post('/:id/evidence/collect', requireAuth, async (req, res) => {
     );
     if (!caseRow) return res.status(404).json({ error: 'Case not found' });
 
-    if (type !== 'web_intelligence') {
-      return res.status(400).json({ error: 'Unknown evidence type' });
+    // Enforce sequential order
+    const stepIdx = STEP_ORDER.indexOf(type);
+    if (stepIdx > 0) {
+      const prevType = STEP_ORDER[stepIdx - 1];
+      const { rows } = await db.query(
+        'SELECT id FROM evidence WHERE case_id = $1 AND type = $2 LIMIT 1',
+        [req.params.id, prevType]
+      );
+      if (rows.length === 0) {
+        return res.status(400).json({ error: `Complete "${prevType}" first` });
+      }
     }
 
-    const result = await collectWebIntelligence(caseRow.descriptor);
+    const result = await collectEvidence(type, caseRow.descriptor);
 
     const { rows: [evidence] } = await db.query(
       `INSERT INTO evidence (case_id, type, merchant_name, confidence, business_type, description, sources)
-       VALUES ($1, 'web_intelligence', $2, $3, $4, $5, $6)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING *`,
       [
         req.params.id,
+        type,
         result.merchant_name,
         result.confidence,
         result.business_type,

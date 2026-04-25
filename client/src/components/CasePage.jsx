@@ -17,17 +17,21 @@ const PRESET_MAP = {
   'preset:skull':      { emoji: '💀', bg: '#2a0a0a' },
 };
 
+const STEPS = [
+  { key: 'web_intelligence',  icon: '🌐', label: 'Web Intelligence',  desc: 'AI-powered web search to identify the merchant behind this descriptor' },
+  { key: 'witness_tips',      icon: '💬', label: 'Witness Tips',      desc: 'Community reports, forums and consumer complaints about this charge'   },
+  { key: 'transaction_mafia', icon: '💰', label: 'Transaction Mafia', desc: 'Payment forensics: processor registrations, MCC codes and patterns'    },
+];
+
 const CSS = `
   .cp-back {
     font-size: .65rem; letter-spacing: .1em; text-transform: uppercase;
     color: var(--text-muted); cursor: pointer; background: none; border: none;
-    font-family: var(--font-ui); padding: 0; margin-bottom: 2rem;
-    display: inline-block;
+    font-family: var(--font-ui); padding: 0; margin-bottom: 2rem; display: inline-block;
   }
   .cp-back:hover { color: var(--text); }
-  .cp-top {
-    display: flex; gap: 2rem; align-items: flex-start; margin-bottom: 1.5rem;
-  }
+
+  .cp-top { display: flex; gap: 2rem; align-items: flex-start; margin-bottom: 1.5rem; }
   .cp-top-left { flex: 1; min-width: 0; }
   .cp-eyebrow {
     font-size: .6rem; letter-spacing: .2em; text-transform: uppercase;
@@ -47,8 +51,8 @@ const CSS = `
     padding: .3rem .75rem; border-radius: 2px;
   }
   .cp-status.open          { color: var(--warning); border: 1px solid #3a3010; background: #1a1608; }
-  .cp-status.investigating { color: var(--accent); border: 1px solid #1e3a2a; background: #0d1a0f; }
-  .cp-status.solved        { color: var(--accent); border: 1px solid #1e3a2a; background: #0d1a0f; }
+  .cp-status.investigating { color: var(--accent);  border: 1px solid #1e3a2a; background: #0d1a0f; }
+  .cp-status.solved        { color: var(--accent);  border: 1px solid #1e3a2a; background: #0d1a0f; }
   .cp-date { font-size: .65rem; color: var(--text-dim); }
 
   .cp-team {
@@ -87,83 +91,115 @@ const CSS = `
     color: var(--text-muted); margin-bottom: .75rem;
   }
   .cp-card-body { font-size: .8rem; color: var(--text-muted); line-height: 1.7; }
-  .cp-btn {
-    padding: .85rem 1.75rem; background: var(--accent); border: none; border-radius: 2px;
-    font-family: var(--font-ui); font-size: .7rem; letter-spacing: .14em;
-    text-transform: uppercase; color: var(--bg-page); font-weight: 500; cursor: pointer;
-  }
-  .cp-btn:hover { opacity: .9; }
-  .cp-btn:disabled { opacity: .5; cursor: default; }
 
-  .cp-evidence-room { margin-bottom: 1.5rem; }
-  .cp-evidence-header {
-    display: flex; align-items: baseline; gap: .75rem; margin-bottom: 1rem;
+  /* Investigation Steps */
+  .cp-steps-header {
+    display: flex; align-items: baseline; gap: .75rem; margin-bottom: 1.25rem;
     border-bottom: 1px solid var(--border); padding-bottom: .5rem;
   }
-  .cp-evidence-title {
+  .cp-steps-title {
     font-size: .6rem; letter-spacing: .16em; text-transform: uppercase; color: var(--text-muted);
   }
-  .cp-evidence-count {
-    font-size: .6rem; letter-spacing: .08em; color: var(--text-dim);
+
+  .cp-steps { display: flex; flex-direction: column; gap: 0; margin-bottom: 1.5rem; }
+  .cp-step {
+    border: 1px solid var(--border); border-radius: 3px; overflow: hidden;
+    margin-bottom: .75rem; transition: border-color .2s;
   }
-  .cp-evidence-grid {
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: .75rem;
+  .cp-step.has-data { border-color: var(--border-subtle); }
+  .cp-step.locked   { opacity: .45; pointer-events: none; }
+
+  .cp-step-header {
+    display: flex; align-items: center; gap: .85rem;
+    padding: .9rem 1.1rem; background: var(--bg-card); border-bottom: 1px solid var(--border);
   }
-  .cp-evidence-slot {
-    border: 1px dashed var(--border); border-radius: 3px;
-    padding: 1rem 1.1rem; display: flex; flex-direction: column; gap: .4rem;
+  .cp-step.has-data .cp-step-header { border-bottom-color: var(--border-subtle); }
+  .cp-step-num {
+    width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
+    background: var(--border); border: 1px solid var(--border-subtle);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-ui); font-size: .6rem; color: var(--text-dim);
   }
-  .cp-evidence-slot.has-data { border-style: solid; border-color: var(--border-subtle); }
-  .cp-evidence-slot-icon { font-size: 1.2rem; line-height: 1; }
-  .cp-evidence-slot-label {
-    font-size: .65rem; letter-spacing: .08em; color: var(--text-muted);
+  .cp-step.has-data .cp-step-num { background: #1e3a2a; border-color: var(--accent); color: var(--accent); }
+  .cp-step-icon { font-size: 1rem; line-height: 1; }
+  .cp-step-label {
+    font-size: .65rem; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--text-muted); flex: 1;
   }
-  .cp-evidence-slot-desc {
-    font-size: .62rem; color: var(--text-dim); line-height: 1.5;
+  .cp-step.has-data .cp-step-label { color: var(--text); }
+  .cp-step-lock {
+    font-size: .55rem; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--text-dim); padding: .2rem .5rem; border: 1px solid var(--border); border-radius: 2px;
   }
-  .cp-evidence-slot-empty {
-    font-size: .58rem; letter-spacing: .1em; text-transform: uppercase;
-    color: var(--border-subtle); margin-top: .25rem;
+  .cp-step-done {
+    font-size: .55rem; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--accent); padding: .2rem .5rem; border: 1px solid #1e3a2a;
+    border-radius: 2px; background: #0d1a0f;
   }
+
+  .cp-step-body { padding: 1.1rem 1.25rem; }
+
+  .cp-step-desc { font-size: .75rem; color: var(--text-muted); line-height: 1.6; margin-bottom: .85rem; }
+
   .cp-collect-btn {
-    margin-top: .5rem; padding: .4rem .75rem; background: none;
-    border: 1px solid var(--border); border-radius: 2px;
-    font-family: var(--font-ui); font-size: .6rem; letter-spacing: .1em;
+    padding: .55rem 1.1rem; border: 1px solid var(--border); border-radius: 2px;
+    background: none; font-family: var(--font-ui); font-size: .62rem; letter-spacing: .1em;
     text-transform: uppercase; color: var(--text-muted); cursor: pointer;
-    align-self: flex-start;
   }
   .cp-collect-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
   .cp-collect-btn:disabled { opacity: .5; cursor: default; }
   .cp-collecting {
-    font-size: .62rem; color: var(--accent); margin-top: .5rem; letter-spacing: .06em;
+    font-size: .65rem; color: var(--accent); margin-top: .6rem; letter-spacing: .04em; display: block;
   }
 
-  .cp-wi-merchant { font-size: .8rem; color: var(--text); font-weight: 500; margin-top: .35rem; }
-  .cp-wi-confidence {
+  /* Evidence results */
+  .cp-result-merchant { font-size: .9rem; color: var(--text); font-weight: 500; margin-bottom: .3rem; }
+  .cp-result-unknown  { font-size: .8rem; color: var(--text-dim); font-style: italic; margin-bottom: .3rem; }
+  .cp-confidence {
     display: inline-block; font-size: .55rem; letter-spacing: .1em; text-transform: uppercase;
-    padding: .15rem .5rem; border-radius: 2px; margin-top: .2rem;
+    padding: .15rem .5rem; border-radius: 2px; margin-bottom: .35rem;
   }
-  .cp-wi-confidence.high   { color: var(--accent);  border: 1px solid #1e3a2a; background: #0d1a0f; }
-  .cp-wi-confidence.medium { color: var(--warning); border: 1px solid #3a3010; background: #1a1608; }
-  .cp-wi-confidence.low    { color: var(--text-dim); border: 1px solid var(--border); background: transparent; }
-  .cp-wi-btype { font-size: .62rem; color: var(--text-dim); margin-top: .2rem; }
-  .cp-wi-desc { font-size: .68rem; color: var(--text-muted); line-height: 1.55; margin-top: .5rem; }
-  .cp-wi-sources { margin-top: .6rem; display: flex; flex-direction: column; gap: .3rem; }
-  .cp-wi-source {
-    font-size: .6rem; color: var(--accent); text-decoration: none;
+  .cp-confidence.high   { color: var(--accent);  border: 1px solid #1e3a2a; background: #0d1a0f; }
+  .cp-confidence.medium { color: var(--warning); border: 1px solid #3a3010; background: #1a1608; }
+  .cp-confidence.low    { color: var(--text-dim); border: 1px solid var(--border); }
+  .cp-result-btype  { font-size: .65rem; color: var(--text-dim); margin-bottom: .55rem; }
+  .cp-result-desc   { font-size: .72rem; color: var(--text-muted); line-height: 1.6; margin-bottom: .65rem; }
+  .cp-result-sources { display: flex; flex-direction: column; gap: .3rem; margin-bottom: .85rem; }
+  .cp-result-source {
+    font-size: .62rem; color: var(--accent); text-decoration: none;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
-  .cp-wi-source:hover { text-decoration: underline; }
-  .cp-wi-recollect {
-    margin-top: .6rem; font-size: .58rem; letter-spacing: .08em; text-transform: uppercase;
-    background: none; border: none; color: var(--text-dim); cursor: pointer; padding: 0;
-    font-family: var(--font-ui);
-  }
-  .cp-wi-recollect:hover { color: var(--text-muted); }
-  .cp-wi-error { font-size: .65rem; color: #e05; margin-top: .4rem; }
+  .cp-result-source:hover { text-decoration: underline; }
 
-  @media (max-width: 600px) { .cp-evidence-grid { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 400px) { .cp-evidence-grid { grid-template-columns: 1fr; } }
+  .cp-step-actions { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; margin-top: .85rem; padding-top: .85rem; border-top: 1px solid var(--border); }
+  .cp-solve-btn {
+    padding: .6rem 1.25rem; background: var(--accent); border: none; border-radius: 2px;
+    font-family: var(--font-ui); font-size: .65rem; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--bg-page); font-weight: 500; cursor: pointer;
+  }
+  .cp-solve-btn:hover { opacity: .9; }
+  .cp-next-btn {
+    padding: .6rem 1.1rem; background: none; border: 1px solid var(--border); border-radius: 2px;
+    font-family: var(--font-ui); font-size: .65rem; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--text-muted); cursor: pointer;
+  }
+  .cp-next-btn:hover { border-color: var(--text-muted); color: var(--text); }
+  .cp-recollect-btn {
+    background: none; border: none; font-family: var(--font-ui); font-size: .6rem;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--text-dim); cursor: pointer;
+    padding: 0; margin-left: auto;
+  }
+  .cp-recollect-btn:hover { color: var(--text-muted); }
+  .cp-step-error { font-size: .65rem; color: #e05; margin-top: .4rem; display: block; }
+  .cp-sign-in-note { font-size: .65rem; color: var(--text-dim); font-style: italic; }
+
+  /* Submit button */
+  .cp-submit-btn {
+    padding: .85rem 1.75rem; background: var(--accent); border: none; border-radius: 2px;
+    font-family: var(--font-ui); font-size: .7rem; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--bg-page); font-weight: 500; cursor: pointer;
+  }
+  .cp-submit-btn:hover { opacity: .9; }
 
   @media (max-width: 540px) {
     .cp-top { flex-direction: column-reverse; }
@@ -175,113 +211,37 @@ const CSS = `
 
 const STATUS_LABEL = { open: 'Open', investigating: 'Investigating', solved: 'Solved' };
 
-const EVIDENCE_TYPES = [
-  { key: 'web_intelligence',    icon: '🌐', label: 'Web Intelligence',      desc: 'Online mentions, search results and web traces'           },
-  { key: 'merchant_matches',    icon: '🏪', label: 'Merchant Matches',      desc: 'Community-identified merchants linked to this descriptor' },
-  { key: 'witness_tips',        icon: '💬', label: 'Witness Tips',          desc: 'Tips and insights submitted by investigators'            },
-  { key: 'similar_descriptors', icon: '🔗', label: 'Similar Descriptors',   desc: 'Related billing descriptors found in the database'       },
-  { key: 'transaction_data',    icon: '📊', label: 'Transaction Patterns',  desc: 'Reported amounts, frequencies and timing'                },
-  { key: 'visual_evidence',     icon: '📸', label: 'Visual Evidence',       desc: 'Logos, screenshots and imagery collected'                },
-];
-
-function WebIntelligenceSlot({ caseId, apiFetch, isAuthenticated }) {
-  const [wi, setWi]           = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [collecting, setCollecting] = useState(false);
-  const [error, setError]     = useState(null);
-
-  useEffect(() => {
-    fetch(`/api/cases/${caseId}/evidence`)
-      .then(r => r.json())
-      .then(d => {
-        const item = (d.evidence || []).find(e => e.type === 'web_intelligence');
-        setWi(item ?? null);
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [caseId]);
-
-  async function collect() {
-    setCollecting(true);
-    setError(null);
-    try {
-      const res = await apiFetch(`/api/cases/${caseId}/evidence/collect`, {
-        method: 'POST',
-        body: JSON.stringify({ type: 'web_intelligence' }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Collection failed');
-      setWi(data.evidence);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setCollecting(false);
-    }
-  }
-
-  const slot = EVIDENCE_TYPES[0];
-
+function EvidenceResults({ ev }) {
   return (
-    <div className={`cp-evidence-slot${wi ? ' has-data' : ''}`}>
-      <span className="cp-evidence-slot-icon">{slot.icon}</span>
-      <span className="cp-evidence-slot-label">{slot.label}</span>
-
-      {loading ? (
-        <span className="cp-evidence-slot-desc">Loading…</span>
-      ) : wi ? (
-        <>
-          {wi.merchant_name && (
-            <span className="cp-wi-merchant">{wi.merchant_name}</span>
-          )}
-          {wi.confidence && (
-            <span className={`cp-wi-confidence ${wi.confidence}`}>{wi.confidence} confidence</span>
-          )}
-          {wi.business_type && (
-            <span className="cp-wi-btype">{wi.business_type}</span>
-          )}
-          {wi.description && (
-            <span className="cp-wi-desc">{wi.description}</span>
-          )}
-          {Array.isArray(wi.sources) && wi.sources.length > 0 && (
-            <div className="cp-wi-sources">
-              {wi.sources.slice(0, 3).map((s, i) => (
-                <a key={i} href={s.url} target="_blank" rel="noopener noreferrer" className="cp-wi-source">
-                  {s.title || s.url}
-                </a>
-              ))}
-            </div>
-          )}
-          {isAuthenticated && (
-            <button className="cp-wi-recollect" onClick={collect} disabled={collecting}>
-              {collecting ? 'Re-collecting…' : '↺ Re-collect'}
-            </button>
-          )}
-        </>
-      ) : (
-        <>
-          <span className="cp-evidence-slot-desc">{slot.desc}</span>
-          {isAuthenticated ? (
-            <>
-              <button className="cp-collect-btn" onClick={collect} disabled={collecting}>
-                {collecting ? 'Collecting…' : 'Collect intelligence'}
-              </button>
-              {collecting && (
-                <span className="cp-collecting">Agent searching the web…</span>
-              )}
-            </>
-          ) : (
-            <span className="cp-evidence-slot-empty">Sign in to collect</span>
-          )}
-        </>
+    <>
+      {ev.merchant_name
+        ? <div className="cp-result-merchant">{ev.merchant_name}</div>
+        : <div className="cp-result-unknown">Merchant not identified</div>
+      }
+      {ev.confidence && (
+        <span className={`cp-confidence ${ev.confidence}`}>{ev.confidence} confidence</span>
       )}
-      {error && <span className="cp-wi-error">{error}</span>}
-    </div>
+      {ev.business_type && <div className="cp-result-btype">{ev.business_type}</div>}
+      {ev.description   && <div className="cp-result-desc">{ev.description}</div>}
+      {Array.isArray(ev.sources) && ev.sources.length > 0 && (
+        <div className="cp-result-sources">
+          {ev.sources.slice(0, 3).map((s, i) => (
+            <a key={i} href={s.url} target="_blank" rel="noopener noreferrer" className="cp-result-source">
+              {s.title || s.url}
+            </a>
+          ))}
+        </div>
+      )}
+    </>
   );
 }
 
 export default function CasePage({ caseData: initialData, navigate }) {
   const { apiFetch, isAuthenticated } = useAuth();
-  const [data, setData] = useState(initialData);
+  const [data, setData]       = useState(initialData);
+  const [evidence, setEvidence] = useState({});   // { type: most-recent-row }
+  const [collecting, setCollecting] = useState(null);
+  const [errors, setErrors]   = useState({});
 
   useEffect(() => {
     fetch(`/api/cases/${initialData.id}`)
@@ -289,6 +249,45 @@ export default function CasePage({ caseData: initialData, navigate }) {
       .then(d => { if (d.case) setData(d.case); })
       .catch(() => {});
   }, [initialData.id]);
+
+  useEffect(() => {
+    fetch(`/api/cases/${initialData.id}/evidence`)
+      .then(r => r.json())
+      .then(d => {
+        const map = {};
+        for (const row of (d.evidence || [])) {
+          if (!map[row.type]) map[row.type] = row; // already DESC, first = newest
+        }
+        setEvidence(map);
+      })
+      .catch(() => {});
+  }, [initialData.id]);
+
+  async function collect(type) {
+    setCollecting(type);
+    setErrors(e => ({ ...e, [type]: null }));
+    try {
+      const res  = await apiFetch(`/api/cases/${initialData.id}/evidence/collect`, {
+        method: 'POST',
+        body: JSON.stringify({ type }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Collection failed');
+      setEvidence(ev => ({ ...ev, [type]: data.evidence }));
+    } catch (err) {
+      setErrors(e => ({ ...e, [type]: err.message }));
+    } finally {
+      setCollecting(null);
+    }
+  }
+
+  function acceptAndSolve(type) {
+    const ev = evidence[type];
+    navigate('submit', {
+      descriptor: data.descriptor,
+      merchant:   ev?.merchant_name || '',
+    });
+  }
 
   const status     = data.computed_status || 'open';
   const detectives = data.detectives || [];
@@ -350,34 +349,87 @@ export default function CasePage({ caseData: initialData, navigate }) {
       <div className="cp-card">
         <div className="cp-card-title">The mystery</div>
         <div className="cp-card-body">
-          This billing descriptor hasn't been identified yet. The community is working to crack this case.
-          If you recognise this merchant, submit a match to help others solve the mystery.
+          This billing descriptor hasn't been identified yet. Work through each investigation step below.
+          At any point you can accept the evidence and submit a merchant match to solve the case.
         </div>
       </div>
 
-      <div className="cp-evidence-room">
-        <div className="cp-evidence-header">
-          <span className="cp-evidence-title">Evidence Room</span>
+      <div>
+        <div className="cp-steps-header">
+          <span className="cp-steps-title">Investigation</span>
         </div>
-        <div className="cp-evidence-grid">
-          <WebIntelligenceSlot
-            caseId={data.id}
-            apiFetch={apiFetch}
-            isAuthenticated={isAuthenticated}
-          />
-          {EVIDENCE_TYPES.slice(1).map(({ key, icon, label, desc }) => (
-            <div key={key} className="cp-evidence-slot">
-              <span className="cp-evidence-slot-icon">{icon}</span>
-              <span className="cp-evidence-slot-label">{label}</span>
-              <span className="cp-evidence-slot-desc">{desc}</span>
-              <span className="cp-evidence-slot-empty">No evidence yet</span>
-            </div>
-          ))}
+        <div className="cp-steps">
+          {STEPS.map((step, idx) => {
+            const ev         = evidence[step.key];
+            const hasData    = !!ev;
+            const prevDone   = idx === 0 || !!evidence[STEPS[idx - 1].key];
+            const isLocked   = !prevDone;
+            const isNext     = idx < STEPS.length - 1;
+            const isCollecting = collecting === step.key;
+
+            return (
+              <div key={step.key} className={`cp-step${hasData ? ' has-data' : ''}${isLocked ? ' locked' : ''}`}>
+                <div className="cp-step-header">
+                  <div className="cp-step-num">{idx + 1}</div>
+                  <span className="cp-step-icon">{step.icon}</span>
+                  <span className="cp-step-label">{step.label}</span>
+                  {isLocked  && <span className="cp-step-lock">Locked</span>}
+                  {hasData   && <span className="cp-step-done">✓ Done</span>}
+                </div>
+
+                <div className="cp-step-body">
+                  {hasData ? (
+                    <>
+                      <EvidenceResults ev={ev} />
+                      <div className="cp-step-actions">
+                        <button className="cp-solve-btn" onClick={() => acceptAndSolve(step.key)}>
+                          Accept &amp; solve case →
+                        </button>
+                        {isNext && !evidence[STEPS[idx + 1].key] && (
+                          <button className="cp-next-btn" onClick={() => {}}>
+                            Continue to {STEPS[idx + 1].label} ↓
+                          </button>
+                        )}
+                        <button
+                          className="cp-recollect-btn"
+                          onClick={() => collect(step.key)}
+                          disabled={isCollecting}
+                        >
+                          {isCollecting ? 'Re-collecting…' : '↺ Re-collect'}
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <p className="cp-step-desc">{step.desc}</p>
+                      {isAuthenticated ? (
+                        <button
+                          className="cp-collect-btn"
+                          onClick={() => collect(step.key)}
+                          disabled={isCollecting || isLocked}
+                        >
+                          {isCollecting ? 'Collecting…' : `Run ${step.label}`}
+                        </button>
+                      ) : (
+                        <span className="cp-sign-in-note">Sign in to run this investigation</span>
+                      )}
+                      {isCollecting && (
+                        <span className="cp-collecting">Agent searching the web — this may take a moment…</span>
+                      )}
+                    </>
+                  )}
+                  {errors[step.key] && (
+                    <span className="cp-step-error">{errors[step.key]}</span>
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 
-      <button className="cp-btn" onClick={() => navigate('submit', { descriptor: data.descriptor })}>
-        Submit a match →
+      <button className="cp-submit-btn" onClick={() => navigate('submit', { descriptor: data.descriptor })}>
+        Submit a match manually →
       </button>
     </>
   );

@@ -47,7 +47,7 @@ function Router() {
       <Nav page={page} navigate={navigate} isAuthenticated={isAuthenticated} user={user} onPointsClick={() => navigate('points')} />
       <main className="app-main">
         {page === 'search'      && <SearchPage navigate={navigate} />}
-        {page === 'submit'      && (isAuthenticated ? <SubmitPage navigate={navigate} initialDescriptor={pageState.descriptor ?? ''} /> : <AuthPage onAuth={() => setPage('submit')} />)}
+        {page === 'submit'      && (isAuthenticated ? <SubmitPage navigate={navigate} initialDescriptor={pageState.descriptor ?? ''} initialMerchant={pageState.merchant ?? ''} /> : <AuthPage onAuth={() => setPage('submit')} />)}
         {page === 'profile'     && (isAuthenticated ? <ProfilePage navigate={navigate} /> : <AuthPage onAuth={() => setPage('profile')} />)}
         {page === 'merchant'    && <MerchantDetailsPage merchant={pageState.merchant} navigate={navigate} />}
         {page === 'descriptor'  && <DescriptorDetailsPage descriptor={pageState.descriptor} descriptorId={pageState.descriptorId} navigate={navigate} />}

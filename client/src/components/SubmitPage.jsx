@@ -103,9 +103,9 @@ const CSS = `
 
 const EMPTY = { descriptor: '', merchantName: '', merchantLocation: '', website: '', logoUrl: '' };
 
-export default function SubmitPage({ navigate, initialDescriptor }) {
+export default function SubmitPage({ navigate, initialDescriptor, initialMerchant }) {
   const { apiFetch } = useAuth();
-  const [form, setForm]         = useState({ ...EMPTY, descriptor: initialDescriptor });
+  const [form, setForm]         = useState({ ...EMPTY, descriptor: initialDescriptor, merchantName: initialMerchant ?? '' });
   const [busy, setBusy]         = useState(false);
   const [error, setError]       = useState('');
   const [success, setSuccess]   = useState('');
