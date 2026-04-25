@@ -20,6 +20,31 @@ const COMPUTED_STATUS =
     ELSE 'open'
   END`;
 
+const DETECTIVES_AGG =
+  `COALESCE(
+    json_agg(
+      json_build_object('user_id', u.id, 'username', split_part(u.email, '@', 1))
+      ORDER BY det.joined_at ASC
+    ) FILTER (WHERE det.user_id IS NOT NULL),
+    '[]'
+  )`;
+
+// Returns a single case row with computed_status and detectives array.
+async function fetchCase(where, params) {
+  const { rows } = await db.query(
+    'SELECT c.*, (' + COMPUTED_STATUS + ') AS computed_status, ' +
+    DETECTIVES_AGG + ' AS detectives' +
+    ' FROM cases c' +
+    ' LEFT JOIN detectives det ON det.case_id = c.id' +
+    ' LEFT JOIN users u ON u.id = det.user_id' +
+    ' WHERE ' + where +
+    ' GROUP BY c.id' +
+    ' LIMIT 1',
+    params
+  );
+  return rows[0] ?? null;
+}
+
 // POST /api/cases  — get-or-create a case for a descriptor
 router.post('/', optionalAuth, async (req, res) => {
   const { descriptor } = req.body ?? {};
@@ -31,20 +56,24 @@ router.post('/', optionalAuth, async (req, res) => {
       '  INSERT INTO cases (descriptor, created_by) VALUES ($1, $2)' +
       '  ON CONFLICT (lower(descriptor)) DO NOTHING RETURNING *' +
       ')' +
-      ' SELECT *, (' + COMPUTED_STATUS + ') AS computed_status FROM ins c' +
+      ' SELECT id FROM ins' +
       ' UNION ALL' +
-      ' SELECT *, (' + COMPUTED_STATUS + ') AS computed_status FROM cases c' +
-      '   WHERE lower(descriptor) = lower($1)' +
+      ' SELECT id FROM cases WHERE lower(descriptor) = lower($1)' +
       ' LIMIT 1',
       [descriptor.trim().toUpperCase(), req.user?.sub ?? null]
     );
+
+    const caseId = rows[0].id;
+
     if (req.user?.sub) {
       await db.query(
         'INSERT INTO detectives (case_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
-        [rows[0].id, req.user.sub]
+        [caseId, req.user.sub]
       );
     }
-    return res.status(201).json({ case: rows[0] });
+
+    const caseRow = await fetchCase('c.id = $1', [caseId]);
+    return res.status(201).json({ case: caseRow });
   } catch (err) {
     console.error('[POST /api/cases]', err);
     return res.status(500).json({ error: 'Internal server error' });
@@ -57,12 +86,8 @@ router.get('/lookup', async (req, res) => {
   if (!descriptor) return res.json({ case: null });
 
   try {
-    const { rows } = await db.query(
-      'SELECT *, (' + COMPUTED_STATUS + ') AS computed_status FROM cases c' +
-      ' WHERE lower(c.descriptor) = lower($1) LIMIT 1',
-      [descriptor]
-    );
-    return res.json({ case: rows[0] ?? null });
+    const caseRow = await fetchCase('lower(c.descriptor) = lower($1)', [descriptor]);
+    return res.json({ case: caseRow });
   } catch (err) {
     console.error('[GET /api/cases/lookup]', err);
     return res.status(500).json({ error: 'Internal server error' });
@@ -72,12 +97,9 @@ router.get('/lookup', async (req, res) => {
 // GET /api/cases/:id
 router.get('/:id', async (req, res) => {
   try {
-    const { rows } = await db.query(
-      'SELECT *, (' + COMPUTED_STATUS + ') AS computed_status FROM cases c WHERE c.id = $1',
-      [req.params.id]
-    );
-    if (!rows.length) return res.status(404).json({ error: 'Case not found' });
-    return res.json({ case: rows[0] });
+    const caseRow = await fetchCase('c.id = $1', [req.params.id]);
+    if (!caseRow) return res.status(404).json({ error: 'Case not found' });
+    return res.json({ case: caseRow });
   } catch (err) {
     console.error('[GET /api/cases/:id]', err);
     return res.status(500).json({ error: 'Internal server error' });
