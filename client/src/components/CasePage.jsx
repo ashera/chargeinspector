@@ -520,11 +520,6 @@ export default function CasePage({ caseData: initialData, navigate }) {
         </div>
       </div>
 
-      {status !== 'solved' && (
-        <button className="cp-submit-btn" onClick={() => navigate('submit', { descriptor: data.descriptor })}>
-          Submit a match manually →
-        </button>
-      )}
     </>
   );
 }
