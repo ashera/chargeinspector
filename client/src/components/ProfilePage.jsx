@@ -89,12 +89,17 @@ const CSS = `
     color: var(--text-muted); margin-bottom: 1rem; border-bottom: 1px solid var(--border);
     padding-bottom: .5rem;
   }
-  .prof-badges { display: flex; flex-wrap: wrap; gap: .75rem; }
-  .prof-badge {
-    padding: .5rem 1rem; border: 1px solid var(--border); border-radius: 2px;
-    font-size: .7rem; color: var(--text); background: var(--bg-card);
+  .prof-rank-card {
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 3px;
+    padding: 1.25rem 1.5rem; display: flex; align-items: center; gap: 1.25rem;
+    margin-bottom: .85rem;
   }
-  .prof-badge-icon { margin-right: .4rem; }
+  .prof-rank-icon { font-size: 2.2rem; flex-shrink: 0; line-height: 1; }
+  .prof-rank-name { font-family: var(--font-display); font-size: 1.3rem; line-height: 1.1; margin-bottom: .2rem; }
+  .prof-rank-desc { font-size: .7rem; color: var(--text-muted); }
+  .prof-rank-bar-wrap { height: 4px; background: var(--bg-hover); border-radius: 2px; overflow: hidden; margin-bottom: .45rem; }
+  .prof-rank-bar-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width .4s; }
+  .prof-rank-bar-labels { display: flex; justify-content: space-between; font-size: .62rem; color: var(--text-muted); }
   .prof-table { width: 100%; border-collapse: collapse; font-size: .75rem; }
   .prof-table th {
     text-align: left; font-size: .6rem; letter-spacing: .12em;
@@ -214,7 +219,11 @@ export default function ProfilePage() {
   if (loading) return <p style={{ color: 'var(--text-dim)', fontSize: '.75rem' }}>Loading…</p>;
   if (!data)   return <p style={{ color: 'var(--error)', fontSize: '.75rem' }}>Failed to load profile.</p>;
 
-  const { user, badges, submissions } = data;
+  const { user, currentRank, nextRank, submissions } = data;
+  const progressPct = currentRank && nextRank
+    ? Math.round(((user.total_points - currentRank.points_threshold) /
+        (nextRank.points_threshold - currentRank.points_threshold)) * 100)
+    : 100;
   const displayName = [user.first_name, user.last_name].filter(Boolean).join(' ');
 
   return (
@@ -283,19 +292,28 @@ export default function ProfilePage() {
       )}
 
       <div className="prof-section">
-        <div className="prof-section-title">Badges</div>
-        {badges.length === 0
-          ? <p style={{ fontSize: '.75rem', color: 'var(--text-dim)' }}>No badges yet — start submitting to earn points!</p>
-          : (
-            <div className="prof-badges">
-              {badges.map(b => (
-                <div key={b.name} className="prof-badge" title={b.description}>
-                  <span className="prof-badge-icon">{b.icon}</span>{b.name}
-                </div>
-              ))}
+        <div className="prof-section-title">Rank</div>
+        {currentRank && (
+          <>
+            <div className="prof-rank-card">
+              <span className="prof-rank-icon">{currentRank.icon}</span>
+              <div>
+                <div className="prof-rank-name">{currentRank.name}</div>
+                <div className="prof-rank-desc">{currentRank.description}</div>
+              </div>
             </div>
-          )
-        }
+            <div className="prof-rank-bar-wrap">
+              <div className="prof-rank-bar-fill" style={{ width: `${progressPct}%` }} />
+            </div>
+            <div className="prof-rank-bar-labels">
+              <span>{user.total_points} pts</span>
+              {nextRank
+                ? <span>{nextRank.points_threshold - user.total_points} pts to {nextRank.name}</span>
+                : <span>Maximum rank achieved</span>
+              }
+            </div>
+          </>
+        )}
       </div>
 
       <div className="prof-section">

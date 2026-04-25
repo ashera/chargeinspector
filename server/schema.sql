@@ -245,3 +245,25 @@ INSERT INTO badges (name, description, points_threshold, icon) VALUES
   ('Expert',         'Reached 500 points',                500,  '🏆'),
   ('Legend',         'Reached 1000 points',               1000, '⭐')
 ON CONFLICT (name) DO NOTHING;
+
+-- ------------------------------------------------------------
+-- Ranks (progressive levels based on total_points)
+-- ------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS ranks (
+  id                UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  name              TEXT        NOT NULL UNIQUE,
+  description       TEXT        NOT NULL,
+  points_threshold  INT         NOT NULL UNIQUE,
+  icon              TEXT        NOT NULL,
+  created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+INSERT INTO ranks (name, description, points_threshold, icon) VALUES
+  ('Civilian',        'New recruit — just getting started',        0,    '👤'),
+  ('Tipster',         'Your first tip in the case files',          10,   '🗣️'),
+  ('Informant',       'A trusted source of intelligence',          50,   '👁️'),
+  ('Street Detective','Starting to connect the dots',              100,  '🔍'),
+  ('Private Eye',     'A respected independent investigator',      250,  '🕵️'),
+  ('Inspector',       'Commanding authority in the field',         500,  '🎩'),
+  ('Commissioner',    'The highest rank. A true legend.',          1000, '⭐')
+ON CONFLICT (name) DO NOTHING;

@@ -14,14 +14,18 @@ router.get('/me/stats', requireAuth, async (req, res) => {
     );
     if (!user) return res.status(404).json({ error: 'User not found' });
 
-    const { rows: badges } = await db.query(
-      `SELECT b.name, b.description, b.icon, ub.awarded_at
-       FROM user_badges ub
-       JOIN badges b ON b.id = ub.badge_id
-       WHERE ub.user_id = $1
-       ORDER BY ub.awarded_at DESC`,
-      [req.user.sub]
-    );
+    const [{ rows: [currentRank] }, { rows: [nextRank] }] = await Promise.all([
+      db.query(
+        `SELECT id, name, description, points_threshold, icon FROM ranks
+         WHERE points_threshold <= $1 ORDER BY points_threshold DESC LIMIT 1`,
+        [user.total_points]
+      ),
+      db.query(
+        `SELECT id, name, description, points_threshold, icon FROM ranks
+         WHERE points_threshold > $1 ORDER BY points_threshold ASC LIMIT 1`,
+        [user.total_points]
+      ),
+    ]);
 
     const { rows: submissions } = await db.query(
       `SELECT s.id, s.status, s.upvote_count, s.created_at,
@@ -36,7 +40,7 @@ router.get('/me/stats', requireAuth, async (req, res) => {
       [req.user.sub]
     );
 
-    return res.json({ user, badges, submissions });
+    return res.json({ user, currentRank: currentRank ?? null, nextRank: nextRank ?? null, submissions });
   } catch (err) {
     console.error('[GET /api/users/me/stats]', err);
     return res.status(500).json({ error: 'Internal server error' });
@@ -83,15 +87,11 @@ router.get('/leaderboard', async (req, res) => {
     const { rows } = await db.query(
       `SELECT u.id, u.email, u.total_points,
               COUNT(DISTINCT s.id) FILTER (WHERE s.status = 'approved') AS approved_submissions,
-              COALESCE(
-                (SELECT b.icon || ' ' || b.name
-                 FROM user_badges ub
-                 JOIN badges b ON b.id = ub.badge_id
-                 WHERE ub.user_id = u.id
-                 ORDER BY b.points_threshold DESC
-                 LIMIT 1),
-                ''
-              ) AS top_badge
+              (SELECT r.icon || ' ' || r.name
+               FROM ranks r
+               WHERE r.points_threshold <= u.total_points
+               ORDER BY r.points_threshold DESC
+               LIMIT 1) AS current_rank
        FROM users u
        LEFT JOIN submissions s ON s.submitted_by = u.id
        WHERE u.total_points > 0

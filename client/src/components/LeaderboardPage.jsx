@@ -57,7 +57,7 @@ export default function LeaderboardPage() {
                   <th>User</th>
                   <th>Points</th>
                   <th>Approved</th>
-                  <th>Badge</th>
+                  <th>Rank</th>
                 </tr>
               </thead>
               <tbody>
@@ -67,7 +67,7 @@ export default function LeaderboardPage() {
                     <td className="lb-email">{r.email.replace(/(.{2}).*(@.*)/, '$1***$2')}</td>
                     <td className="lb-pts">{r.total_points}</td>
                     <td style={{ color: 'var(--text-dim)' }}>{r.approved_submissions}</td>
-                    <td className="lb-badge">{r.top_badge}</td>
+                    <td className="lb-badge">{r.current_rank}</td>
                   </tr>
                 ))}
               </tbody>
