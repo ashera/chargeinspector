@@ -323,35 +323,6 @@ export default function ProfilePage({ navigate }) {
       </div>
 
       <div className="prof-section">
-        <div className="prof-section-title">Your submissions</div>
-        {submissions.length === 0
-          ? <p style={{ fontSize: '.75rem', color: 'var(--text-dim)' }}>No submissions yet.</p>
-          : (
-            <div className="prof-table-wrap"><table className="prof-table">
-              <thead>
-                <tr>
-                  <th>Descriptor</th>
-                  <th>Merchant</th>
-                  <th>Status</th>
-                  <th>Votes</th>
-                </tr>
-              </thead>
-              <tbody>
-                {submissions.map(s => (
-                  <tr key={s.id}>
-                    <td style={{ fontFamily: 'monospace', fontSize: '.7rem', color: 'var(--accent)' }}>{s.descriptor}</td>
-                    <td>{s.merchant_name}</td>
-                    <td className={`prof-status-${s.status}`}>{s.status}</td>
-                    <td>{s.upvote_count}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table></div>
-          )
-        }
-      </div>
-
-      <div className="prof-section">
         <div className="prof-section-title">Your cases</div>
         {cases.length === 0
           ? <p style={{ fontSize: '.75rem', color: 'var(--text-dim)' }}>No cases yet.</p>
