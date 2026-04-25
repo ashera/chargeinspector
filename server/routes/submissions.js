@@ -146,10 +146,13 @@ router.post('/', requireAuth, async (req, res) => {
 // Creates an auto-approved submission from a case investigation.
 // Awards points immediately — no admin review step.
 router.post('/case-solve', requireAuth, async (req, res) => {
-  const { descriptor, merchantName, merchantLocation, website, logoUrl } = req.body ?? {};
+  const { descriptor, merchantName, merchantLocation, website, logoUrl, evidenceType } = req.body ?? {};
 
   if (!descriptor?.trim())   return res.status(400).json({ error: 'descriptor is required' });
   if (!merchantName?.trim()) return res.status(400).json({ error: 'merchantName is required' });
+
+  // local_knowledge goes through moderation; AI-collected evidence is auto-approved
+  const requiresModeration = evidenceType === 'local_knowledge';
 
   const client = await db.connect();
   try {
@@ -195,15 +198,28 @@ router.post('/case-solve', requireAuth, async (req, res) => {
       return res.status(200).json({ duplicate: true });
     }
 
-    // Create as pending — goes through normal moderation
+    const status = requiresModeration ? 'pending' : 'approved';
     const { rows: [submission] } = await client.query(
-      `INSERT INTO submissions (descriptor_id, merchant_id, submitted_by)
-       VALUES ($1, $2, $3) RETURNING id`,
-      [desc.id, merchant.id, req.user.sub]
+      `INSERT INTO submissions (descriptor_id, merchant_id, submitted_by, status)
+       VALUES ($1, $2, $3, $4) RETURNING id`,
+      [desc.id, merchant.id, req.user.sub, status]
     );
 
+    if (!requiresModeration) {
+      await client.query(
+        `UPDATE descriptors SET canonical_submission_id = $1
+         WHERE id = $2 AND canonical_submission_id IS NULL`,
+        [submission.id, desc.id]
+      );
+      await awardPoints(client, req.user.sub, POINTS_SUBMISSION_APPROVED, 'submission_approved', submission.id);
+    }
+
     await client.query('COMMIT');
-    return res.status(201).json({ message: 'Submission received and pending review.', submissionId: submission.id });
+    return res.status(201).json({
+      message: requiresModeration ? 'Submission received and pending review.' : 'Case solved!',
+      submissionId: submission.id,
+      approved: !requiresModeration,
+    });
   } catch (err) {
     await client.query('ROLLBACK');
     console.error('[POST /api/submissions/case-solve]', err);

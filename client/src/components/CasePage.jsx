@@ -457,16 +457,24 @@ export default function CasePage({ caseData: initialData, navigate }) {
         setCollecting(null);
       }
 
-      // Submit the match for moderation
+      // Submit the match
       const subRes  = await apiFetch('/api/submissions/case-solve', {
         method: 'POST',
-        body: JSON.stringify({ descriptor: data.descriptor, merchantName: modalData.merchant_name }),
+        body: JSON.stringify({ descriptor: data.descriptor, merchantName: modalData.merchant_name, evidenceType: type }),
       });
       const subBody = await subRes.json();
       if (!subRes.ok) throw new Error(subBody.error || 'Failed to submit match');
 
       setConfirmModal(null);
-      setSolveSuccess(true);
+
+      if (subBody.approved) {
+        // Auto-approved — reload case so it transitions to solved
+        const caseRes  = await fetch(`/api/cases/${initialData.id}`);
+        const caseBody = await caseRes.json();
+        if (caseBody.case) setData(caseBody.case);
+      } else {
+        setSolveSuccess(true);
+      }
     } catch (err) {
       setSolveError(err.message);
       setCollecting(null);
