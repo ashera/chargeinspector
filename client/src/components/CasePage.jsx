@@ -192,6 +192,37 @@ const CSS = `
   .cp-step-error { font-size: .65rem; color: #e05; margin-top: .4rem; display: block; }
   .cp-sign-in-note { font-size: .65rem; color: var(--text-dim); font-style: italic; }
 
+  /* Agent loading animation */
+  @keyframes cp-ping {
+    0%   { transform: scale(.25); opacity: 1; }
+    100% { transform: scale(2.2); opacity: 0; }
+  }
+  @keyframes cp-blink {
+    0%, 100% { opacity: 1; } 50% { opacity: .3; }
+  }
+  .cp-loader {
+    display: flex; align-items: center; gap: 1.25rem;
+    padding: .75rem 0 .5rem;
+  }
+  .cp-loader-radar {
+    position: relative; width: 38px; height: 38px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .cp-loader-ring {
+    position: absolute; inset: 0; border-radius: 50%;
+    border: 1.5px solid var(--accent); opacity: 0;
+    animation: cp-ping 2s ease-out infinite;
+  }
+  .cp-loader-ring:nth-child(2) { animation-delay: .65s; }
+  .cp-loader-ring:nth-child(3) { animation-delay: 1.3s; }
+  .cp-loader-dot {
+    width: 7px; height: 7px; border-radius: 50%; background: var(--accent);
+    position: relative; z-index: 1;
+    animation: cp-blink 1.4s ease-in-out infinite;
+  }
+  .cp-loader-label { font-size: .72rem; color: var(--text-muted); letter-spacing: .03em; }
+  .cp-loader-sub   { font-size: .62rem; color: var(--text-dim);   margin-top: .2rem; }
+
   /* Local Knowledge form */
   .cp-lk-form { display: flex; flex-direction: column; gap: .75rem; }
   .cp-lk-field { display: flex; flex-direction: column; gap: .3rem; }
@@ -634,19 +665,27 @@ export default function CasePage({ caseData: initialData, navigate }) {
                             submitting={isCollecting}
                             label={step.label}
                           />
+                        ) : isCollecting ? (
+                          <div className="cp-loader">
+                            <div className="cp-loader-radar">
+                              <div className="cp-loader-ring" />
+                              <div className="cp-loader-ring" />
+                              <div className="cp-loader-ring" />
+                              <div className="cp-loader-dot" />
+                            </div>
+                            <div>
+                              <div className="cp-loader-label">Searching the web…</div>
+                              <div className="cp-loader-sub">Agent is investigating — this may take a moment</div>
+                            </div>
+                          </div>
                         ) : (
-                          <>
-                            <button
-                              className="cp-collect-btn"
-                              onClick={() => collect(step.key)}
-                              disabled={isCollecting || isLocked}
-                            >
-                              {isCollecting ? 'Collecting…' : `Run ${step.label}`}
-                            </button>
-                            {isCollecting && (
-                              <span className="cp-collecting">Agent searching the web — this may take a moment…</span>
-                            )}
-                          </>
+                          <button
+                            className="cp-collect-btn"
+                            onClick={() => collect(step.key)}
+                            disabled={isLocked}
+                          >
+                            {`Run ${step.label}`}
+                          </button>
                         )
                       ) : (
                         <span className="cp-sign-in-note">Sign in to run this investigation</span>
