@@ -410,7 +410,7 @@ export default function SearchPage({ navigate }) {
         <div className="sp-modal-overlay" onClick={e => { if (e.target === e.currentTarget) setShowModal(false); }}>
           <div className="sp-modal">
             <div className="sp-modal-title">Mystery Identified</div>
-            <div className="sp-modal-eyebrow">Unidentified descriptor</div>
+            <div className="sp-modal-eyebrow">{existingCase ? 'Open Investigation' : 'New Mystery Identified!'}</div>
             <div className="sp-modal-descriptor">"{query}"</div>
             <div className="sp-modal-body">
               {existingCase
