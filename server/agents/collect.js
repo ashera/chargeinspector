@@ -32,31 +32,34 @@ async function generateLogoSvg(merchantName, businessType, description) {
 
   const response = await client.messages.create({
     model: 'claude-haiku-4-5-20251001',
-    max_tokens: 1024,
+    max_tokens: 2048,
     messages: [{
       role: 'user',
-      content: `Design a simple SVG logo (viewBox="0 0 100 100") for this merchant:
-Name: ${merchantName}
+      content: `Output a single SVG element (viewBox="0 0 100 100") as raw markup — no prose, no markdown fences, nothing else before or after the tag.
+
+Merchant: ${merchantName}
 Type: ${businessType || 'Business'}
 ${description ? `Context: ${description}` : ''}
 
-Rules:
-- Use a dark background (fill the full 100x100 with a rounded rect or circle in a dark hue matching the business)
-- Place a bold single initial letter or a minimal icon in the centre in white or a light accent colour
-- Maximum 2 colours total
-- Use a <text> element with font-family="sans-serif" font-weight="bold" for the letter if using text
-- Return ONLY raw SVG markup, no explanation, no markdown fences`,
+Design rules:
+- Full 100×100 rounded-rect background in a dark colour that suits the business type
+- Centred bold initial letter in white using <text x="50" y="67" font-family="Arial,sans-serif" font-weight="bold" font-size="52" text-anchor="middle" fill="white">
+- Two colours maximum
+- Start your response with <svg and end it with </svg>`,
     }],
   });
 
   const text = response.content[0]?.text?.trim();
-  if (!text) return null;
+  if (!text) {
+    console.error('[generateLogoSvg] empty response for:', merchantName);
+    return null;
+  }
 
-  // Strip markdown fences and extract the <svg>...</svg> element
-  const stripped  = text.replace(/^```(?:svg|xml)?\s*/i, '').replace(/\s*```$/i, '').trim();
-  const svgMatch  = stripped.match(/<svg[\s\S]*<\/svg>/i);
+  // Remove any markdown code fences wherever they appear
+  const cleaned  = text.replace(/```(?:svg|xml)?/gi, '').replace(/```/g, '').trim();
+  const svgMatch = cleaned.match(/<svg[\s\S]*?<\/svg>/i);
   if (!svgMatch) {
-    console.error('[generateLogoSvg] no <svg> element found in response for:', merchantName, '| response snippet:', text.slice(0, 200));
+    console.error('[generateLogoSvg] no <svg>...</svg> found for:', merchantName, '| snippet:', text.slice(0, 300));
     return null;
   }
 
@@ -123,7 +126,10 @@ async function collectEvidence(type, descriptor, { location_hint } = {}) {
       result.merchant_name,
       result.business_type,
       result.description,
-    ).catch(() => null);
+    ).catch(err => {
+      console.error('[generateLogoSvg fallback] failed for', result.merchant_name, ':', err.message);
+      return null;
+    });
   }
 
   return {

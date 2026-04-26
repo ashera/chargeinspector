@@ -251,8 +251,14 @@ const CSS = `
   }
 
   /* Evidence results */
+  .cp-result-logo-wrap {
+    display: flex; align-items: center; justify-content: center;
+    width: 72px; height: 72px; border-radius: 6px;
+    background: var(--bg-page); border: 1px solid var(--border);
+    margin-bottom: .85rem; overflow: hidden; flex-shrink: 0;
+  }
+  .cp-result-logo { width: 72px; height: 72px; object-fit: contain; display: block; }
   .cp-result-header { display: flex; align-items: flex-start; gap: .85rem; margin-bottom: .15rem; }
-  .cp-result-logo   { width: 36px; height: 36px; object-fit: contain; border-radius: 3px; flex-shrink: 0; background: var(--bg-page); }
   .cp-result-merchant { font-size: .9rem; color: var(--text); font-weight: 500; margin-bottom: .3rem; }
   .cp-result-unknown  { font-size: .8rem; color: var(--text-dim); font-style: italic; margin-bottom: .3rem; }
   .cp-confidence {
@@ -491,15 +497,17 @@ const STATUS_LABEL = { open: 'Open', investigating: 'Investigating', solved: 'So
 function EvidenceResults({ ev }) {
   return (
     <>
-      <div className="cp-result-header">
-        {ev.logo_url && (
+      {ev.logo_url && (
+        <div className="cp-result-logo-wrap">
           <img
             className="cp-result-logo"
             src={ev.logo_url}
             alt=""
-            onError={e => { e.currentTarget.style.display = 'none'; }}
+            onError={e => { e.currentTarget.parentElement.style.display = 'none'; }}
           />
-        )}
+        </div>
+      )}
+      <div className="cp-result-header">
         <div>
           {ev.merchant_name
             ? <div className="cp-result-merchant">{ev.merchant_name}</div>
