@@ -707,9 +707,12 @@ export default function CasePage({ caseData: initialData, navigate }) {
                             Accept &amp; solve case →
                           </button>
                           {isNext && activeStepIdx === idx && (
-                            <button className="cp-next-btn" onClick={() => setActiveStepIdx(idx + 1)}>
-                              Continue to {STEPS[idx + 1].label} ↓
-                            </button>
+                            <>
+                              <span style={{ fontSize: '.65rem', color: 'var(--text-dim)' }}>or</span>
+                              <button className="cp-next-btn" onClick={() => setActiveStepIdx(idx + 1)}>
+                                Continue to {STEPS[idx + 1].label} ↓
+                              </button>
+                            </>
                           )}
                         </div>
                       )}
