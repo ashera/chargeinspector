@@ -50,6 +50,16 @@ async function fetchCase(where, params) {
     '  JOIN merchants   m ON m.id = s.merchant_id' +
     '  WHERE lower(d.text) = lower(c.descriptor) AND s.status = \'approved\'' +
     '  ORDER BY s.created_at ASC LIMIT 1) AS solved_merchant_name, ' +
+    '(SELECT json_build_object(' +
+    '  \'username\', split_part(u.email, \'@\', 1),' +
+    '  \'last_name\', u.last_name,' +
+    '  \'total_points\', u.total_points,' +
+    '  \'solved_at\', s.created_at' +
+    ') FROM submissions s' +
+    '  JOIN descriptors d ON d.id = s.descriptor_id' +
+    '  JOIN users       u ON u.id = s.submitted_by' +
+    '  WHERE lower(d.text) = lower(c.descriptor) AND s.status = \'approved\'' +
+    '  ORDER BY s.created_at ASC LIMIT 1) AS solved_by, ' +
     '(SELECT s.id FROM submissions s' +
     '  JOIN descriptors d ON d.id = s.descriptor_id' +
     '  WHERE lower(d.text) = lower(c.descriptor) AND s.status = \'pending\'' +

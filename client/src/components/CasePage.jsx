@@ -100,6 +100,13 @@ const CSS = `
     color: var(--text-muted); margin-bottom: .75rem;
   }
   .cp-card-body { font-size: .8rem; color: var(--text-muted); line-height: 1.7; }
+  .cp-solved-by {
+    display: flex; align-items: center; gap: .5rem; flex-wrap: wrap;
+    margin-top: .85rem; padding-top: .85rem; border-top: 1px solid var(--border);
+    font-size: .68rem; color: var(--text-muted);
+  }
+  .cp-solved-by-label { color: var(--text-dim); }
+  .cp-solved-by-name  { color: var(--text); }
 
   /* Location hint */
   .cp-hint-label {
@@ -883,10 +890,22 @@ export default function CasePage({ caseData: initialData, navigate }) {
               const how = usedSteps.length > 0
                 ? usedSteps.map(s => s.label).join(' and ')
                 : 'community investigation';
+              const sb   = data.solved_by;
+              const rank = sb ? getCurrentRank(sb.total_points ?? 0) : null;
+              const name = sb ? (sb.last_name || sb.username) : null;
+              const date = sb ? new Date(sb.solved_at).toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' }) : null;
               return (
                 <>
                   Case closed.{data.solved_merchant_name ? <> The descriptor <strong>&ldquo;{data.descriptor}&rdquo;</strong> was identified as <strong>{data.solved_merchant_name}</strong>.</> : ' This descriptor has been matched to a merchant.'}{' '}
                   Cracked using {how}.
+                  {sb && (
+                    <div className="cp-solved-by">
+                      <span className="cp-solved-by-label">Solved by</span>
+                      <span className="cp-solved-by-name">{rank.icon} {rank.name} {name}</span>
+                      <span className="cp-solved-by-label">·</span>
+                      <span className="cp-solved-by-label">{date}</span>
+                    </div>
+                  )}
                 </>
               );
             })()
