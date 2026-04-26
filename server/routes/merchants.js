@@ -2,7 +2,36 @@
 
 const express = require('express');
 const db      = require('../db');
+const { requireAuth, requireRole } = require('../middleware/auth');
 const router  = express.Router();
+
+// GET /api/merchants  — list all merchants (admin/moderator)
+router.get('/', requireAuth, requireRole('admin', 'moderator'), async (req, res) => {
+  const q = (req.query.q || '').trim();
+
+  const params = [];
+  const where  = q ? (params.push(`%${q}%`), `lower(m.name) LIKE lower($1)`) : '1=1';
+
+  try {
+    const { rows } = await db.query(
+      `SELECT m.id, m.name, m.location, m.website, m.logo_url,
+              COUNT(s.id)::int                                                        AS submission_count,
+              COUNT(s.id) FILTER (WHERE s.status = 'approved')::int                  AS approved_count,
+              COUNT(s.id) FILTER (WHERE s.status = 'pending')::int                   AS pending_count
+       FROM merchants m
+       LEFT JOIN submissions s ON s.merchant_id = m.id
+       WHERE ${where}
+       GROUP BY m.id
+       ORDER BY m.name ASC
+       LIMIT 500`,
+      params
+    );
+    return res.json({ merchants: rows });
+  } catch (err) {
+    console.error('[GET /api/merchants]', err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 // GET /api/merchants/autocomplete?q=<partial name>
 router.get('/autocomplete', async (req, res) => {

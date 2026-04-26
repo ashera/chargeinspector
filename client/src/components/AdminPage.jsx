@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../hooks/useAuth.jsx';
 import CaseArchivePage from './CaseArchivePage.jsx';
+import MerchantArchivePage from './MerchantArchivePage.jsx';
 
 const CSS = `
   .adm-tabs {
@@ -126,9 +127,13 @@ export default function AdminPage({ navigate }) {
         <button className={`adm-tab ${tab === 'cases' ? 'active' : ''}`} onClick={() => setTab('cases')}>
           Case Archive
         </button>
+        <button className={`adm-tab ${tab === 'merchants' ? 'active' : ''}`} onClick={() => setTab('merchants')}>
+          Merchants
+        </button>
       </div>
-      {tab === 'queue' && <ModerationQueue />}
-      {tab === 'cases' && <CaseArchivePage navigate={navigate} />}
+      {tab === 'queue'     && <ModerationQueue />}
+      {tab === 'cases'     && <CaseArchivePage navigate={navigate} />}
+      {tab === 'merchants' && <MerchantArchivePage />}
     </>
   );
 }
