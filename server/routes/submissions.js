@@ -219,6 +219,7 @@ router.post('/case-solve', requireAuth, async (req, res) => {
       message: requiresModeration ? 'Submission received and pending review.' : 'Case solved!',
       submissionId: submission.id,
       approved: !requiresModeration,
+      pointsAwarded: !requiresModeration ? POINTS_SUBMISSION_APPROVED : 0,
     });
   } catch (err) {
     await client.query('ROLLBACK');

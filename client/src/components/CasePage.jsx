@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth.jsx';
-import { getCurrentRank } from '../constants/ranks.js';
+import { RANKS, getCurrentRank } from '../constants/ranks.js';
 
 const PRESET_MAP = {
   'preset:detective':  { emoji: '🕵️', bg: '#0f1f3a' },
@@ -375,6 +375,73 @@ const CSS = `
   }
   .cp-modal-cancel:hover { border-color: var(--text-muted); color: var(--text); }
 
+  /* Congratulations modal */
+  .cp-congrats-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,.8);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000; padding: 1rem;
+  }
+  .cp-congrats-modal {
+    background: var(--bg-card); border: 1px solid var(--accent);
+    border-radius: 6px; width: 100%; max-width: 360px;
+    padding: 2.5rem 1.75rem 1.75rem;
+    text-align: center; position: relative; overflow: visible;
+  }
+  /* Fireworks */
+  .cp-sparks {
+    position: absolute; top: 2rem; left: 50%;
+    width: 0; height: 0; pointer-events: none;
+  }
+  @keyframes cp-spark-fly {
+    0%   { transform: translate(0,0) scale(1); opacity: 1; }
+    100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+  }
+  .cp-spark {
+    position: absolute; border-radius: 50%;
+    background: var(--color);
+    transform: translate(0,0);
+    animation: cp-spark-fly .85s ease-out var(--delay) both;
+  }
+  /* Modal content */
+  .cp-congrats-eyebrow {
+    font-size: .55rem; letter-spacing: .2em; text-transform: uppercase;
+    color: var(--text-muted); margin-bottom: .5rem;
+  }
+  .cp-congrats-title {
+    font-family: var(--font-display); font-size: 2rem; color: var(--text); margin-bottom: .25rem;
+  }
+  .cp-congrats-pts {
+    font-family: var(--font-display); font-size: 2.75rem;
+    color: var(--accent); margin-bottom: 1.5rem; letter-spacing: -.02em;
+  }
+  .cp-congrats-rank {
+    display: flex; align-items: center; gap: 1rem; justify-content: center;
+    background: var(--bg-page); border: 1px solid var(--border); border-radius: 3px;
+    padding: .85rem 1.25rem; margin-bottom: 1.25rem; text-align: left;
+  }
+  .cp-congrats-rank-icon { font-size: 1.75rem; line-height: 1; }
+  .cp-congrats-rank-name { font-size: .85rem; color: var(--text); margin-bottom: .15rem; }
+  .cp-congrats-rank-total { font-size: .65rem; color: var(--text-muted); }
+  .cp-congrats-progress { margin-bottom: 1.5rem; }
+  .cp-congrats-progress-label {
+    font-size: .65rem; color: var(--text-muted); margin-bottom: .45rem; text-align: left;
+  }
+  .cp-congrats-progress-track {
+    height: 5px; background: var(--border); border-radius: 3px; overflow: hidden;
+  }
+  .cp-congrats-progress-fill {
+    height: 100%; background: var(--accent); border-radius: 3px; transition: width .6s .2s ease;
+  }
+  .cp-congrats-maxrank {
+    font-size: .75rem; color: var(--accent); margin-bottom: 1.5rem; letter-spacing: .06em;
+  }
+  .cp-congrats-close {
+    width: 100%; padding: .85rem; background: var(--accent); border: none; border-radius: 2px;
+    font-family: var(--font-ui); font-size: .7rem; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--bg-page); font-weight: 500; cursor: pointer;
+  }
+  .cp-congrats-close:hover { opacity: .9; }
+
   .cp-success-banner {
     background: #0d1a0f; border: 1px solid #1e3a2a; border-radius: 3px;
     padding: 1rem 1.25rem; margin-bottom: 1.5rem;
@@ -499,8 +566,75 @@ function LocalKnowledgeForm({ onSubmit, submitting, label }) {
   );
 }
 
+// Precomputed so spark positions are stable across renders
+const SPARKS = Array.from({ length: 22 }, (_, i) => {
+  const colors = ['#4ade80', '#fbbf24', '#60a5fa', '#f472b6', '#a78bfa', '#fb923c'];
+  const angle  = (i / 22) * Math.PI * 2;
+  const dist   = 48 + (i % 5) * 14;
+  return {
+    tx:    Math.round(Math.cos(angle) * dist),
+    ty:    Math.round(Math.sin(angle) * dist),
+    color: colors[i % colors.length],
+    delay: `${(i * 0.035).toFixed(3)}s`,
+    size:  5 + (i % 3) * 3,
+  };
+});
+
+function CongratulationsModal({ modal, onClose }) {
+  const { pointsAwarded, totalPoints } = modal;
+  const rank     = getCurrentRank(totalPoints);
+  const nextRank = RANKS.find(r => r.threshold > totalPoints) ?? null;
+  const pct      = nextRank
+    ? Math.round(((totalPoints - rank.threshold) / (nextRank.threshold - rank.threshold)) * 100)
+    : 100;
+  const toNext = nextRank ? nextRank.threshold - totalPoints : 0;
+
+  return (
+    <div className="cp-congrats-overlay" onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="cp-congrats-modal">
+        <div className="cp-sparks" aria-hidden="true">
+          {SPARKS.map((s, i) => (
+            <div key={i} className="cp-spark" style={{
+              '--tx': `${s.tx}px`, '--ty': `${s.ty}px`,
+              '--color': s.color, '--delay': s.delay,
+              width: s.size, height: s.size,
+            }} />
+          ))}
+        </div>
+
+        <div className="cp-congrats-eyebrow">Case solved</div>
+        <div className="cp-congrats-title">Congratulations!</div>
+        <div className="cp-congrats-pts">+{pointsAwarded} pts</div>
+
+        <div className="cp-congrats-rank">
+          <span className="cp-congrats-rank-icon">{rank.icon}</span>
+          <div>
+            <div className="cp-congrats-rank-name">{rank.name}</div>
+            <div className="cp-congrats-rank-total">{totalPoints} total points</div>
+          </div>
+        </div>
+
+        {nextRank ? (
+          <div className="cp-congrats-progress">
+            <div className="cp-congrats-progress-label">
+              {toNext} pts to {nextRank.icon} {nextRank.name}
+            </div>
+            <div className="cp-congrats-progress-track">
+              <div className="cp-congrats-progress-fill" style={{ width: `${pct}%` }} />
+            </div>
+          </div>
+        ) : (
+          <div className="cp-congrats-maxrank">Maximum rank achieved!</div>
+        )}
+
+        <button className="cp-congrats-close" onClick={onClose}>Continue →</button>
+      </div>
+    </div>
+  );
+}
+
 export default function CasePage({ caseData: initialData, navigate }) {
-  const { apiFetch, isAuthenticated } = useAuth();
+  const { apiFetch, isAuthenticated, user, updateUser } = useAuth();
   const [data, setData]       = useState(initialData);
   const [evidence, setEvidence] = useState({});   // { type: most-recent-row }
   const [collecting, setCollecting] = useState(null);
@@ -516,6 +650,7 @@ export default function CasePage({ caseData: initialData, navigate }) {
   const [hintSaved, setHintSaved]       = useState(false);
   const [resetConfirm, setResetConfirm] = useState(false);
   const [resetting, setResetting]       = useState(false);
+  const [solveModal, setSolveModal]     = useState(null);
 
   useEffect(() => {
     fetch(`/api/cases/${initialData.id}`)
@@ -601,10 +736,13 @@ export default function CasePage({ caseData: initialData, navigate }) {
       setConfirmModal(null);
 
       if (subBody.approved) {
-        // Auto-approved — reload case so it transitions to solved
+        const pointsAwarded = subBody.pointsAwarded ?? 10;
+        const newTotal      = (user?.total_points ?? 0) + pointsAwarded;
+        updateUser({ total_points: newTotal });
         const caseRes  = await fetch(`/api/cases/${initialData.id}`);
         const caseBody = await caseRes.json();
         if (caseBody.case) setData(caseBody.case);
+        setSolveModal({ pointsAwarded, totalPoints: newTotal });
       } else {
         // Pending moderation — set client state immediately, then reload for DB-side pending_submission_id
         setPendingModeration(true);
@@ -914,6 +1052,12 @@ export default function CasePage({ caseData: initialData, navigate }) {
           onCancel={() => { setConfirmModal(null); setSolveError(null); }}
           confirming={solving}
           error={solveError}
+        />
+      )}
+      {solveModal && (
+        <CongratulationsModal
+          modal={solveModal}
+          onClose={() => setSolveModal(null)}
         />
       )}
     </>
