@@ -221,6 +221,7 @@ CREATE TABLE IF NOT EXISTS cases (
 
 CREATE UNIQUE INDEX IF NOT EXISTS cases_descriptor_idx ON cases (lower(descriptor));
 CREATE INDEX IF NOT EXISTS cases_created_idx           ON cases (created_at);
+ALTER TABLE cases ADD COLUMN IF NOT EXISTS location_hint TEXT;
 
 -- ------------------------------------------------------------
 -- Detectives (users investigating a case)

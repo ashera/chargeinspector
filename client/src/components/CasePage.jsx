@@ -101,6 +101,35 @@ const CSS = `
   }
   .cp-card-body { font-size: .8rem; color: var(--text-muted); line-height: 1.7; }
 
+  /* Location hint */
+  .cp-hint-label {
+    font-size: .6rem; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--text-muted); margin-bottom: .4rem;
+  }
+  .cp-hint-sub {
+    font-size: .75rem; color: var(--text-muted); line-height: 1.6; margin-bottom: .85rem;
+  }
+  .cp-hint-textarea {
+    width: 100%; box-sizing: border-box; resize: vertical; min-height: 72px;
+    background: var(--bg-page); border: 1px solid var(--border); border-radius: 2px;
+    color: var(--text); font-family: var(--font-ui); font-size: .78rem;
+    padding: .6rem .75rem; outline: none; transition: border-color .2s;
+    display: block;
+  }
+  .cp-hint-textarea:focus { border-color: var(--accent); }
+  .cp-hint-textarea::placeholder { color: var(--text-dim); }
+  .cp-hint-textarea:disabled { opacity: .45; cursor: not-allowed; }
+  .cp-hint-footer { display: flex; align-items: center; gap: .85rem; margin-top: .65rem; }
+  .cp-hint-save {
+    padding: .45rem 1rem; background: var(--accent); border: none; border-radius: 2px;
+    font-family: var(--font-ui); font-size: .62rem; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--bg-page); cursor: pointer; font-weight: 500;
+  }
+  .cp-hint-save:hover { opacity: .9; }
+  .cp-hint-save:disabled { opacity: .45; cursor: default; }
+  .cp-hint-saved { font-size: .65rem; color: var(--accent); letter-spacing: .04em; }
+  .cp-hint-note { font-size: .62rem; color: var(--text-dim); font-style: italic; }
+
   /* Investigation Steps */
   .cp-steps-header {
     display: flex; align-items: baseline; gap: .75rem; margin-bottom: 1.25rem;
@@ -461,6 +490,9 @@ export default function CasePage({ caseData: initialData, navigate }) {
   const [solving, setSolving]         = useState(false);
   const [solveSuccess, setSolveSuccess] = useState(false);
   const [pendingModeration, setPendingModeration] = useState(!!initialData.pending_submission_id);
+  const [locationHint, setLocationHint] = useState(initialData.location_hint || '');
+  const [hintSaving, setHintSaving]     = useState(false);
+  const [hintSaved, setHintSaved]       = useState(false);
 
   useEffect(() => {
     fetch(`/api/cases/${initialData.id}`)
@@ -566,6 +598,22 @@ export default function CasePage({ caseData: initialData, navigate }) {
     }
   }
 
+  async function saveHint() {
+    setHintSaving(true);
+    try {
+      await apiFetch(`/api/cases/${initialData.id}/hint`, {
+        method: 'PATCH',
+        body: JSON.stringify({ location_hint: locationHint }),
+      });
+      setHintSaved(true);
+      setTimeout(() => setHintSaved(false), 2500);
+    } catch {
+      // silently fail — non-critical
+    } finally {
+      setHintSaving(false);
+    }
+  }
+
   const status              = data.computed_status || 'open';
   const isPendingModeration = !!data.pending_submission_id || pendingModeration;
   const detectives          = data.detectives || [];
@@ -652,6 +700,37 @@ export default function CasePage({ caseData: initialData, navigate }) {
               The billing descriptor &ldquo;{data.descriptor}&rdquo; hasn&rsquo;t been identified yet.
               Work through each investigation step below and accept the evidence to solve the case.
             </>
+          )}
+        </div>
+      </div>
+
+      <div className="cp-card">
+        <div className="cp-hint-label">Location clues</div>
+        <p className="cp-hint-sub">
+          Do you remember where this charge might have occurred? A city, neighbourhood, type of venue,
+          or any other context can help narrow down the merchant.
+        </p>
+        <textarea
+          className="cp-hint-textarea"
+          placeholder="e.g. Used a parking machine in central London last Tuesday, or online purchase from a US-based store…"
+          value={locationHint}
+          onChange={e => setLocationHint(e.target.value)}
+          disabled={!isAuthenticated || hintSaving}
+        />
+        <div className="cp-hint-footer">
+          {isAuthenticated ? (
+            <>
+              <button
+                className="cp-hint-save"
+                onClick={saveHint}
+                disabled={hintSaving || locationHint === (data.location_hint || '')}
+              >
+                {hintSaving ? 'Saving…' : 'Save note'}
+              </button>
+              {hintSaved && <span className="cp-hint-saved">✓ Saved</span>}
+            </>
+          ) : (
+            <span className="cp-hint-note">Sign in to add location notes</span>
           )}
         </div>
       </div>

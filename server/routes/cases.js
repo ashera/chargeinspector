@@ -2,7 +2,7 @@
 
 const express = require('express');
 const db      = require('../db');
-const { optionalAuth } = require('../middleware/auth');
+const { optionalAuth, requireAuth } = require('../middleware/auth');
 const router  = express.Router();
 
 const COMPUTED_STATUS =
@@ -49,7 +49,11 @@ async function fetchCase(where, params) {
     '  JOIN descriptors d ON d.id = s.descriptor_id' +
     '  JOIN merchants   m ON m.id = s.merchant_id' +
     '  WHERE lower(d.text) = lower(c.descriptor) AND s.status = \'approved\'' +
-    '  ORDER BY s.created_at ASC LIMIT 1) AS solved_merchant_name ' +
+    '  ORDER BY s.created_at ASC LIMIT 1) AS solved_merchant_name, ' +
+    '(SELECT s.id FROM submissions s' +
+    '  JOIN descriptors d ON d.id = s.descriptor_id' +
+    '  WHERE lower(d.text) = lower(c.descriptor) AND s.status = \'pending\'' +
+    '  ORDER BY s.created_at DESC LIMIT 1) AS pending_submission_id ' +
     'FROM cases c' +
     ' LEFT JOIN users cb ON cb.id = c.created_by' +
     ' LEFT JOIN detectives det ON det.case_id = c.id' +
@@ -107,6 +111,21 @@ router.get('/lookup', async (req, res) => {
     return res.json({ case: caseRow });
   } catch (err) {
     console.error('[GET /api/cases/lookup]', err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// PATCH /api/cases/:id/hint  — save location hint (any authenticated user)
+router.patch('/:id/hint', requireAuth, async (req, res) => {
+  const { location_hint } = req.body ?? {};
+  try {
+    await db.query(
+      'UPDATE cases SET location_hint = $1 WHERE id = $2',
+      [location_hint?.trim() || null, req.params.id]
+    );
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error('[PATCH /api/cases/:id/hint]', err);
     return res.status(500).json({ error: 'Internal server error' });
   }
 });
