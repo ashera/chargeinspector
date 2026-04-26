@@ -65,13 +65,16 @@ async function collectEvidence(type, descriptor, { location_hint } = {}) {
     ? `Investigate this credit card billing descriptor: "${descriptor}"\n\nLocation context from the investigator: "${hint}"\nUse this to help narrow down where the charge may have occurred and identify the merchant.`
     : `Investigate this credit card billing descriptor: "${descriptor}"`;
 
-  const response = await client.messages.create({
-    model: 'claude-sonnet-4-6',
-    max_tokens: 2048,
-    system,
-    tools: [{ type: 'web_search_20250305', name: 'web_search' }],
-    messages: [{ role: 'user', content: userMessage }],
-  });
+  const response = await client.messages.create(
+    {
+      model: 'claude-sonnet-4-6',
+      max_tokens: 2048,
+      system,
+      tools: [{ type: 'web_search_20250305', name: 'web_search' }],
+      messages: [{ role: 'user', content: userMessage }],
+    },
+    { headers: { 'anthropic-beta': 'web-search-2025-03-05' } },
+  );
 
   // The model often emits a short preamble text block before searching, then a
   // final text block with the JSON.  Search all text blocks from last to first.

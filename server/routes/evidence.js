@@ -85,7 +85,11 @@ router.post('/:id/evidence/collect', requireAuth, async (req, res) => {
     return res.json({ evidence });
   } catch (err) {
     console.error('[POST /api/cases/:id/evidence/collect]', err);
-    return res.status(500).json({ error: err.message || 'Internal server error' });
+    const message = err?.message
+      || err?.error?.message
+      || (typeof err === 'string' ? err : null)
+      || 'Internal server error';
+    return res.status(500).json({ error: message });
   }
 });
 
