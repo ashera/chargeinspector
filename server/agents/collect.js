@@ -73,14 +73,30 @@ async function collectEvidence(type, descriptor, { location_hint } = {}) {
     messages: [{ role: 'user', content: userMessage }],
   });
 
-  const textBlock = response.content.find(b => b.type === 'text');
-  if (!textBlock?.text) throw new Error('No text response from agent');
+  // The model often emits a short preamble text block before searching, then a
+  // final text block with the JSON.  Search all text blocks from last to first.
+  const textBlocks = response.content.filter(b => b.type === 'text' && b.text?.trim());
 
-  const raw = textBlock.text.replace(/```(?:json)?\s*/gi, '').replace(/```\s*/g, '').trim();
-  const jsonMatch = raw.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) throw new Error('Agent response did not contain JSON');
+  let result = null;
+  for (let i = textBlocks.length - 1; i >= 0; i--) {
+    const raw   = textBlocks[i].text.replace(/```(?:json)?\s*/gi, '').replace(/```\s*/g, '').trim();
+    const match = raw.match(/\{[\s\S]*\}/);
+    if (!match) continue;
+    try {
+      result = JSON.parse(match[0]);
+      break;
+    } catch {
+      // malformed — try an earlier block
+    }
+  }
 
-  const result = JSON.parse(jsonMatch[0]);
+  if (!result) {
+    console.error('[collectEvidence] Could not extract JSON. stop_reason=%s blocks=%s',
+      response.stop_reason,
+      JSON.stringify(response.content.map(b => ({ type: b.type, len: b.text?.length ?? 0 }))),
+    );
+    throw new Error('Agent response did not contain JSON');
+  }
 
   let logoUrl = result.logo_url ?? null;
 
