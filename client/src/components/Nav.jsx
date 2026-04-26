@@ -132,10 +132,7 @@ export default function Nav({ page, navigate, isAuthenticated, user, onPointsCli
     { key: 'submit',      label: 'Contribute' },
     { key: 'leaderboard', label: 'Leaderboard' },
     ...(isAuthenticated ? [{ key: 'profile', label: 'Profile' }] : []),
-    ...(user?.role === 'admin' ? [
-      { key: 'admin',        label: 'Admin' },
-      { key: 'case-archive', label: 'Cases' },
-    ] : []),
+    ...(user?.role === 'admin' ? [{ key: 'admin', label: 'Admin' }] : []),
   ];
 
   const go = (key) => { navigate(key); setOpen(false); };

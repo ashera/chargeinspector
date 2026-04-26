@@ -1,5 +1,5 @@
-'use client';
 import { useState, useEffect, useRef } from 'react';
+import { useAuth } from '../hooks/useAuth.jsx';
 
 const CSS = `
   .ca-page { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
@@ -79,6 +79,7 @@ const STATUS_TABS = [
 ];
 
 export default function CaseArchivePage({ navigate }) {
+  const { apiFetch }            = useAuth();
   const [cases, setCases]       = useState([]);
   const [loading, setLoading]   = useState(true);
   const [error, setError]       = useState(null);
@@ -103,7 +104,7 @@ export default function CaseArchivePage({ navigate }) {
       const params = new URLSearchParams();
       if (query) params.set('q', query);
       const qs = params.toString();
-      const res = await fetch(`/api/cases${qs ? '?' + qs : ''}`);
+      const res = await apiFetch(`/api/cases${qs ? '?' + qs : ''}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to load');
       setCases(data.cases);
