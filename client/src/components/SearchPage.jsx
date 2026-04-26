@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useAuth } from '../hooks/useAuth.jsx';
+import { useMeta } from '../hooks/useMeta.js';
 
 const CSS = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&display=swap');
@@ -193,6 +194,7 @@ const CSS = `
 `;
 
 export default function SearchPage({ navigate }) {
+  useMeta({ title: 'Identify Any Credit Card Charge', description: 'Unknown charge on your bank statement? Search our community database of billing descriptors to find out who really charged you.' });
   const { apiFetch } = useAuth();
   const [query, setQuery]           = useState('');
   const [results, setResults]       = useState(null);

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
+import { useMeta } from '../hooks/useMeta.js';
 
 const CSS = `
   .dd-back {
@@ -75,6 +76,10 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 export default function DescriptorDetailsPage({ descriptor, descriptorId, navigate }) {
+  useMeta({
+    title: descriptor,
+    description: `Find out who is behind the "${descriptor}" charge on your bank statement. Community-verified merchant matches and billing descriptor details.`,
+  });
   const [submissions, setSubmissions] = useState([]);
   const [viewData, setViewData]       = useState([]);
   const [loading, setLoading]         = useState(true);

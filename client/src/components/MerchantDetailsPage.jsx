@@ -1,5 +1,6 @@
 import { useAuth } from '../hooks/useAuth.jsx';
 import { useState, useEffect } from 'react';
+import { useMeta } from '../hooks/useMeta.js';
 
 const CSS = `
   .md-back {
@@ -99,6 +100,10 @@ const CSS = `
 `;
 
 export default function MerchantDetailsPage({ merchant, navigate }) {
+  useMeta({
+    title: merchant.name,
+    description: `Find out about ${merchant.name} charges on your bank statement.${merchant.location ? ` Located in ${merchant.location}.` : ''}`,
+  });
   const { isAuthenticated, apiFetch } = useAuth();
   const [votes, setVotes]         = useState(merchant.upvote_count);
   const [busy, setBusy]           = useState(false);
