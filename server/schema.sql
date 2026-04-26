@@ -265,6 +265,9 @@ CREATE TABLE IF NOT EXISTS evidence (
 CREATE INDEX IF NOT EXISTS evidence_case_idx ON evidence (case_id);
 CREATE INDEX IF NOT EXISTS evidence_type_idx  ON evidence (type);
 
+ALTER TABLE evidence ADD COLUMN IF NOT EXISTS location TEXT;
+ALTER TABLE evidence ADD COLUMN IF NOT EXISTS logo_url TEXT;
+
 -- ------------------------------------------------------------
 -- Ranks (progressive levels based on total_points)
 -- ------------------------------------------------------------

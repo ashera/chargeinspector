@@ -8,6 +8,8 @@ const PROMPTS = {
 Search the web broadly for this descriptor. Look for:
 - The exact business or merchant name behind it
 - What type of business it is (SaaS, retail, restaurant, utility, etc.)
+- The merchant's location (city and country for physical businesses; "Online" for digital-only services)
+- A direct URL to the merchant's logo image — check their official website favicon/logo, or use sources like Clearbit (https://logo.clearbit.com/<domain>) if applicable
 - Official company pages, press mentions, or any web presence matching the descriptor
 - Any confirmed associations reported online
 
@@ -18,6 +20,8 @@ Respond with ONLY a valid JSON object — no markdown fences, no other text:
   "merchant_name": "Name of identified merchant, or null if genuinely unknown",
   "confidence": "high|medium|low",
   "business_type": "Short description of business type",
+  "location": "City and country e.g. 'London, UK', or 'Online' for digital services, or null if unknown",
+  "logo_url": "Direct URL to the merchant's logo image, or null if not found",
   "description": "Lestrade's report in his voice: 2-3 sentences on what was found and the evidence behind it",
   "sources": [{ "url": "https://...", "title": "Brief source description" }]
 }`,
@@ -89,6 +93,8 @@ async function collectEvidence(type, descriptor, { location_hint } = {}) {
     merchant_name: result.merchant_name ?? null,
     confidence: ['high', 'medium', 'low'].includes(result.confidence) ? result.confidence : 'low',
     business_type: result.business_type ?? null,
+    location: result.location ?? null,
+    logo_url: result.logo_url ?? null,
     description: result.description ?? null,
     sources: Array.isArray(result.sources) ? result.sources.slice(0, 8) : [],
   };

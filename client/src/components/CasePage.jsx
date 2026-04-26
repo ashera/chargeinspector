@@ -251,6 +251,8 @@ const CSS = `
   }
 
   /* Evidence results */
+  .cp-result-header { display: flex; align-items: flex-start; gap: .85rem; margin-bottom: .15rem; }
+  .cp-result-logo   { width: 36px; height: 36px; object-fit: contain; border-radius: 3px; flex-shrink: 0; background: var(--bg-page); }
   .cp-result-merchant { font-size: .9rem; color: var(--text); font-weight: 500; margin-bottom: .3rem; }
   .cp-result-unknown  { font-size: .8rem; color: var(--text-dim); font-style: italic; margin-bottom: .3rem; }
   .cp-confidence {
@@ -260,8 +262,9 @@ const CSS = `
   .cp-confidence.high   { color: var(--accent);  border: 1px solid #1e3a2a; background: #0d1a0f; }
   .cp-confidence.medium { color: var(--warning); border: 1px solid #3a3010; background: #1a1608; }
   .cp-confidence.low    { color: var(--text-dim); border: 1px solid var(--border); }
-  .cp-result-btype  { font-size: .65rem; color: var(--text-dim); margin-bottom: .55rem; }
-  .cp-result-desc   { font-size: .72rem; color: var(--text-muted); line-height: 1.6; margin-bottom: .65rem; }
+  .cp-result-btype     { font-size: .65rem; color: var(--text-dim); margin-bottom: .35rem; }
+  .cp-result-location  { font-size: .65rem; color: var(--text-muted); margin-bottom: .55rem; }
+  .cp-result-desc      { font-size: .72rem; color: var(--text-muted); line-height: 1.6; margin-bottom: .65rem; }
   .cp-result-sources { display: flex; flex-direction: column; gap: .3rem; margin-bottom: .85rem; }
   .cp-result-source {
     font-size: .62rem; color: var(--accent); text-decoration: none;
@@ -488,14 +491,27 @@ const STATUS_LABEL = { open: 'Open', investigating: 'Investigating', solved: 'So
 function EvidenceResults({ ev }) {
   return (
     <>
-      {ev.merchant_name
-        ? <div className="cp-result-merchant">{ev.merchant_name}</div>
-        : <div className="cp-result-unknown">Merchant not identified</div>
-      }
-      {ev.confidence && (
-        <span className={`cp-confidence ${ev.confidence}`}>{ev.confidence} confidence</span>
-      )}
+      <div className="cp-result-header">
+        {ev.logo_url && (
+          <img
+            className="cp-result-logo"
+            src={ev.logo_url}
+            alt=""
+            onError={e => { e.currentTarget.style.display = 'none'; }}
+          />
+        )}
+        <div>
+          {ev.merchant_name
+            ? <div className="cp-result-merchant">{ev.merchant_name}</div>
+            : <div className="cp-result-unknown">Merchant not identified</div>
+          }
+          {ev.confidence && (
+            <span className={`cp-confidence ${ev.confidence}`}>{ev.confidence} confidence</span>
+          )}
+        </div>
+      </div>
       {ev.business_type && <div className="cp-result-btype">{ev.business_type}</div>}
+      {ev.location      && <div className="cp-result-location">📍 {ev.location}</div>}
       {ev.description   && <div className="cp-result-desc">{ev.description}</div>}
       {Array.isArray(ev.sources) && ev.sources.length > 0 && (
         <div className="cp-result-sources">
@@ -749,7 +765,13 @@ export default function CasePage({ caseData: initialData, navigate }) {
       // Submit the match
       const subRes  = await apiFetch('/api/submissions/case-solve', {
         method: 'POST',
-        body: JSON.stringify({ descriptor: data.descriptor, merchantName: modalData.merchant_name, evidenceType: type }),
+        body: JSON.stringify({
+          descriptor:      data.descriptor,
+          merchantName:    modalData.merchant_name,
+          merchantLocation: modalData.location   ?? null,
+          logoUrl:          modalData.logo_url    ?? null,
+          evidenceType:     type,
+        }),
       });
       const subBody = await subRes.json();
       if (!subRes.ok) throw new Error(subBody.error || 'Failed to submit match');

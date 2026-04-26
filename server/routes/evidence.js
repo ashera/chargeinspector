@@ -66,8 +66,8 @@ router.post('/:id/evidence/collect', requireAuth, async (req, res) => {
     }
 
     const { rows: [evidence] } = await db.query(
-      `INSERT INTO evidence (case_id, type, merchant_name, confidence, business_type, description, sources)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
+      `INSERT INTO evidence (case_id, type, merchant_name, confidence, business_type, location, logo_url, description, sources)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
        RETURNING *`,
       [
         req.params.id,
@@ -75,6 +75,8 @@ router.post('/:id/evidence/collect', requireAuth, async (req, res) => {
         result.merchant_name,
         result.confidence,
         result.business_type,
+        result.location   ?? null,
+        result.logo_url   ?? null,
         result.description,
         JSON.stringify(result.sources),
       ]
