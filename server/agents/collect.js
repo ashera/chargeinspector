@@ -104,4 +104,4 @@ async function collectEvidence(type, descriptor, { location_hint } = {}) {
   };
 }
 
-module.exports = { collectEvidence };
+module.exports = { collectEvidence, generateLogoSvg };
