@@ -9,7 +9,7 @@ Search the web broadly for this descriptor. Look for:
 - The exact business or merchant name behind it
 - What type of business it is (SaaS, retail, restaurant, utility, etc.)
 - The merchant's location (city and country for physical businesses; "Online" for digital-only services)
-- A direct URL to the merchant's logo image — check their official website favicon/logo, or use sources like Clearbit (https://logo.clearbit.com/<domain>) if applicable
+- A direct URL to the merchant's logo image from their official website only (e.g. https://example.com/assets/logo.png). Do NOT use third-party logo APIs such as Clearbit, Brandfetch, or similar services — only return a URL if you found it directly on the merchant's own web pages
 - Official company pages, press mentions, or any web presence matching the descriptor
 - Any confirmed associations reported online
 
@@ -110,7 +110,12 @@ async function collectEvidence(type, descriptor, { location_hint } = {}) {
     throw new Error('Agent response did not contain JSON');
   }
 
+  // Reject URLs from third-party logo aggregators — they are unreliable or shut down
+  const LOGO_API_BLOCKLIST = ['clearbit.com', 'brandfetch.com', 'logo.dev', 'logoapi.com'];
   let logoUrl = result.logo_url ?? null;
+  if (logoUrl && LOGO_API_BLOCKLIST.some(host => logoUrl.includes(host))) {
+    logoUrl = null;
+  }
 
   // Fall back to a generated SVG logo when Lestrade couldn't find one
   if (!logoUrl && result.merchant_name) {
