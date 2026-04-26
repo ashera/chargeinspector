@@ -119,6 +119,14 @@ const CSS = `
     cursor: pointer;
   }
   .ma-edit-cancel:hover { color: var(--text); border-color: var(--text-muted); }
+  .ma-edit-gen-logo {
+    padding: .5rem .9rem; border-radius: 2px;
+    background: none; color: var(--text-muted); border: 1px solid var(--border);
+    font-family: var(--font-ui); font-size: .65rem; letter-spacing: .1em; text-transform: uppercase;
+    cursor: pointer; transition: background .2s, color .2s, border-color .2s; white-space: nowrap;
+  }
+  .ma-edit-gen-logo:hover:not(:disabled) { color: var(--text); border-color: var(--text-muted); }
+  .ma-edit-gen-logo:disabled { opacity: .4; cursor: not-allowed; }
   .ma-edit-error { font-size: .72rem; color: var(--error); }
   .ma-edit-saved { font-size: .72rem; color: var(--accent); }
 
@@ -135,10 +143,27 @@ function EditPanel({ merchant, onSave, onClose, apiFetch }) {
     website:  merchant.website  || '',
     logo_url: merchant.logo_url || '',
   });
-  const [saving, setSaving] = useState(false);
-  const [error, setError]   = useState(null);
-  const [saved, setSaved]   = useState(false);
+  const [saving, setSaving]         = useState(false);
+  const [genning, setGenning]       = useState(false);
+  const [error, setError]           = useState(null);
+  const [saved, setSaved]           = useState(false);
   const set = k => e => setForm(f => ({ ...f, [k]: e.target.value }));
+
+  async function generateLogo() {
+    setGenning(true);
+    setError(null);
+    try {
+      const res  = await apiFetch(`/api/admin/generate-logo/${merchant.id}`, { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Generation failed');
+      setForm(f => ({ ...f, logo_url: data.logo_url }));
+      onSave({ ...merchant, logo_url: data.logo_url });
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setGenning(false);
+    }
+  }
 
   async function save() {
     setSaving(true);
@@ -192,6 +217,10 @@ function EditPanel({ merchant, onSave, onClose, apiFetch }) {
           <label className="ma-edit-label">Logo URL</label>
           <input className="ma-edit-input" placeholder="https://example.com/logo.png or data:image/svg…" value={form.logo_url} onChange={set('logo_url')} />
         </div>
+
+        <button className="ma-edit-gen-logo" onClick={generateLogo} disabled={genning || saving}>
+          {genning ? 'Generating…' : 'Generate logo'}
+        </button>
 
         {error && <div className="ma-edit-error">{error}</div>}
         {saved && <div className="ma-edit-saved">✓ Saved</div>}
