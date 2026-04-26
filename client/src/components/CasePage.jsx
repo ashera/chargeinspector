@@ -225,13 +225,7 @@ const CSS = `
     text-transform: uppercase; color: var(--text-muted); cursor: pointer;
   }
   .cp-next-btn:hover { border-color: var(--text-muted); color: var(--text); }
-  .cp-recollect-btn {
-    background: none; border: none; font-family: var(--font-ui); font-size: .6rem;
-    letter-spacing: .08em; text-transform: uppercase; color: var(--text-dim); cursor: pointer;
-    padding: 0; margin-left: auto;
-  }
-  .cp-recollect-btn:hover { color: var(--text-muted); }
-  .cp-step-error { font-size: .65rem; color: #e05; margin-top: .4rem; display: block; }
+.cp-step-error { font-size: .65rem; color: #e05; margin-top: .4rem; display: block; }
   .cp-sign-in-note { font-size: .65rem; color: var(--text-dim); font-style: italic; }
 
   /* Agent loading animation */
@@ -717,13 +711,6 @@ export default function CasePage({ caseData: initialData, navigate }) {
                               Continue to {STEPS[idx + 1].label} ↓
                             </button>
                           )}
-                          <button
-                            className="cp-recollect-btn"
-                            onClick={() => step.manual ? setEvidence(ev => ({ ...ev, [step.key]: null })) : collect(step.key)}
-                            disabled={isCollecting}
-                          >
-                            ↺ Re-enter
-                          </button>
                         </div>
                       )}
                     </>
