@@ -910,10 +910,10 @@ export default function CasePage({ caseData: initialData, navigate }) {
           placeholder="e.g. Used a parking machine in central London last Tuesday, or online purchase from a US-based store…"
           value={locationHint}
           onChange={e => setLocationHint(e.target.value)}
-          disabled={!isAuthenticated || hintSaving}
+          disabled={!isAuthenticated || hintSaving || isSolved}
         />
         <div className="cp-hint-footer">
-          {isAuthenticated ? (
+          {isAuthenticated && !isSolved ? (
             <>
               <button
                 className="cp-hint-save"
@@ -924,9 +924,9 @@ export default function CasePage({ caseData: initialData, navigate }) {
               </button>
               {hintSaved && <span className="cp-hint-saved">✓ Saved</span>}
             </>
-          ) : (
+          ) : (!isAuthenticated && !isSolved) ? (
             <span className="cp-hint-note">Sign in to add location notes</span>
-          )}
+          ) : null}
         </div>
       </div>
 
