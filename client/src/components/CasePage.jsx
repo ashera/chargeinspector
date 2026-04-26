@@ -424,11 +424,17 @@ export default function CasePage({ caseData: initialData, navigate }) {
   const [solveError, setSolveError]   = useState(null);
   const [solving, setSolving]         = useState(false);
   const [solveSuccess, setSolveSuccess] = useState(false);
+  const [pendingModeration, setPendingModeration] = useState(!!initialData.pending_submission_id);
 
   useEffect(() => {
     fetch(`/api/cases/${initialData.id}`)
       .then(r => r.json())
-      .then(d => { if (d.case) setData(d.case); })
+      .then(d => {
+        if (d.case) {
+          setData(d.case);
+          if (d.case.pending_submission_id) setPendingModeration(true);
+        }
+      })
       .catch(() => {});
   }, [initialData.id]);
 
@@ -509,11 +515,12 @@ export default function CasePage({ caseData: initialData, navigate }) {
         const caseBody = await caseRes.json();
         if (caseBody.case) setData(caseBody.case);
       } else {
-        // Pending moderation — reload case to pick up pending_submission_id → read-only UI
+        // Pending moderation — set client state immediately, then reload for DB-side pending_submission_id
+        setPendingModeration(true);
+        setSolveSuccess(true);
         const caseRes  = await fetch(`/api/cases/${initialData.id}`);
         const caseBody = await caseRes.json();
         if (caseBody.case) setData(caseBody.case);
-        setSolveSuccess(true);
       }
     } catch (err) {
       setSolveError(err.message);
@@ -524,7 +531,7 @@ export default function CasePage({ caseData: initialData, navigate }) {
   }
 
   const status              = data.computed_status || 'open';
-  const isPendingModeration = !!data.pending_submission_id;
+  const isPendingModeration = !!data.pending_submission_id || pendingModeration;
   const detectives          = data.detectives || [];
 
   return (
