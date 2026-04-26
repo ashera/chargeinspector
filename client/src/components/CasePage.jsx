@@ -18,8 +18,18 @@ const PRESET_MAP = {
 };
 
 const STEPS = [
-  { key: 'web_intelligence', icon: '🌐', label: 'Web Intelligence', desc: 'AI-powered web search to identify the merchant behind this descriptor', manual: false },
-  { key: 'local_knowledge',  icon: '🗣️', label: 'Local Knowledge',  desc: 'Enter what you know about this merchant directly.',                   manual: true  },
+  {
+    key: 'web_intelligence', icon: '🌐', label: 'Web Intelligence', manual: false,
+    desc: 'Inspector Lestrade will search the open web and public records for intelligence on this descriptor.',
+    agent: {
+      name: 'Inspector Lestrade',
+      division: 'Web Intelligence Division',
+      loadingLabel: 'Inspector Lestrade is on the case…',
+      loadingSub: 'Combing through official records and web intelligence',
+    },
+  },
+  { key: 'local_knowledge', icon: '🗣️', label: 'Local Knowledge', manual: true,
+    desc: 'Enter what you know about this merchant directly.' },
 ];
 
 const CSS = `
@@ -134,6 +144,15 @@ const CSS = `
     font-size: .55rem; letter-spacing: .1em; text-transform: uppercase;
     color: var(--accent); padding: .2rem .5rem; border: 1px solid #1e3a2a;
     border-radius: 2px; background: #0d1a0f;
+  }
+  .cp-step-label-wrap { display: flex; flex-direction: column; gap: .15rem; flex: 1; }
+  .cp-step-sublabel {
+    font-size: .55rem; letter-spacing: .08em; color: var(--text-dim); line-height: 1;
+  }
+  .cp-agent-filed {
+    display: inline-block; margin-top: .65rem;
+    font-size: .58rem; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--text-dim); border-top: 1px solid var(--bg-card); padding-top: .5rem; width: 100%;
   }
 
   .cp-step-body { padding: 1.1rem 1.25rem; }
@@ -644,7 +663,14 @@ export default function CasePage({ caseData: initialData, navigate }) {
                 <div className="cp-step-header">
                   <div className="cp-step-num">{idx + 1}</div>
                   <span className="cp-step-icon">{step.icon}</span>
-                  <span className="cp-step-label">{step.label}</span>
+                  {step.agent ? (
+                    <div className="cp-step-label-wrap">
+                      <span className="cp-step-label">{step.label}</span>
+                      <span className="cp-step-sublabel">{step.agent.name} · {step.agent.division}</span>
+                    </div>
+                  ) : (
+                    <span className="cp-step-label">{step.label}</span>
+                  )}
                   {!isReadOnly && isLocked && <span className="cp-step-lock">Locked</span>}
                   {hasData && <span className="cp-step-done">✓ Done</span>}
                 </div>
@@ -653,6 +679,9 @@ export default function CasePage({ caseData: initialData, navigate }) {
                   {hasData ? (
                     <>
                       <EvidenceResults ev={ev} />
+                      {step.agent && (
+                        <span className="cp-agent-filed">Filed by {step.agent.name}, {step.agent.division}</span>
+                      )}
                       {!isReadOnly && (
                         <div className="cp-step-actions">
                           <button className="cp-solve-btn" onClick={() => openConfirm(step.key)}>
@@ -692,8 +721,8 @@ export default function CasePage({ caseData: initialData, navigate }) {
                               <div className="cp-loader-dot" />
                             </div>
                             <div>
-                              <div className="cp-loader-label">Searching the web…</div>
-                              <div className="cp-loader-sub">Agent is investigating — this may take a moment</div>
+                              <div className="cp-loader-label">{step.agent ? step.agent.loadingLabel : 'Searching the web…'}</div>
+                              <div className="cp-loader-sub">{step.agent ? step.agent.loadingSub : 'Agent is investigating — this may take a moment'}</div>
                             </div>
                           </div>
                         ) : (
@@ -702,7 +731,7 @@ export default function CasePage({ caseData: initialData, navigate }) {
                             onClick={() => collect(step.key)}
                             disabled={isLocked}
                           >
-                            {`Run ${step.label}`}
+                            {step.agent ? `Brief ${step.agent.name}` : `Run ${step.label}`}
                           </button>
                         )
                       ) : (
