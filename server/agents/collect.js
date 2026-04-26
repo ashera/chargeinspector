@@ -25,40 +25,34 @@ Respond with ONLY a valid JSON object — no markdown fences, no other text:
   "description": "Lestrade's report in his voice: 2-3 sentences on what was found and the evidence behind it",
   "sources": [{ "url": "https://...", "title": "Brief source description" }]
 }`,
-
-  witness_tips: `You are a community intelligence analyst. Your job is to find what real people are saying about this billing descriptor.
-Search for:
-- Reddit threads, forum posts, and community discussions mentioning this exact descriptor
-- Consumer complaint sites (complaintsboard.com, bbb.org, trustpilot, consumeraffairs.com)
-- Social media posts where users have identified or questioned this charge
-- Credit card help communities (e.g. r/personalfinance, r/CreditCards) where this descriptor appears
-
-Respond with ONLY a valid JSON object — no markdown fences, no other text:
-{
-  "merchant_name": "Name as identified by the community, or null if unknown",
-  "confidence": "high|medium|low",
-  "business_type": "What community members say this business is",
-  "description": "2-3 sentences summarising what people are reporting and saying",
-  "sources": [{ "url": "https://...", "title": "Brief source description" }]
-}`,
-
-  transaction_mafia: `You are a financial forensics analyst known as The Mafia. You follow the money.
-Search for:
-- Merchant Category Codes (MCC) associated with this descriptor
-- Payment processor registrations and merchant account records
-- Known transaction amounts, patterns, or frequencies reported by consumers
-- Business registrations, financial regulatory filings, or merchant database entries
-- Chargeback or dispute patterns associated with this descriptor
-
-Respond with ONLY a valid JSON object — no markdown fences, no other text:
-{
-  "merchant_name": "Legal business name from registrations or databases, or null",
-  "confidence": "high|medium|low",
-  "business_type": "Business type per merchant category or registration data",
-  "description": "2-3 sentences on the financial trail and transaction patterns you found",
-  "sources": [{ "url": "https://...", "title": "Brief source description" }]
-}`,
 };
+
+async function generateLogoSvg(merchantName, businessType, description) {
+  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
+  const response = await client.messages.create({
+    model: 'claude-haiku-4-5-20251001',
+    max_tokens: 1024,
+    messages: [{
+      role: 'user',
+      content: `Design a simple SVG logo (viewBox="0 0 100 100") for this merchant:
+Name: ${merchantName}
+Type: ${businessType || 'Business'}
+${description ? `Context: ${description}` : ''}
+
+Rules:
+- Use a dark background (fill the full 100x100 with a rounded rect or circle in a dark hue matching the business)
+- Place a bold single initial letter or a minimal icon in the centre in white or a light accent colour
+- Maximum 2 colours total
+- No <text> elements with fonts — use only geometric paths/shapes if you include an icon, OR a single <text> element with font-family="monospace" for a letter
+- Return ONLY raw SVG markup starting with <svg, nothing else`,
+    }],
+  });
+
+  const svg = response.content[0]?.text?.trim();
+  if (!svg || !svg.startsWith('<svg')) return null;
+  return `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`;
+}
 
 async function collectEvidence(type, descriptor, { location_hint } = {}) {
   const system = PROMPTS[type];
@@ -76,9 +70,7 @@ async function collectEvidence(type, descriptor, { location_hint } = {}) {
     max_tokens: 2048,
     system,
     tools: [{ type: 'web_search_20250305', name: 'web_search' }],
-    messages: [
-      { role: 'user', content: userMessage },
-    ],
+    messages: [{ role: 'user', content: userMessage }],
   });
 
   const textBlock = response.content.find(b => b.type === 'text');
@@ -89,12 +81,24 @@ async function collectEvidence(type, descriptor, { location_hint } = {}) {
   if (!jsonMatch) throw new Error('Agent response did not contain JSON');
 
   const result = JSON.parse(jsonMatch[0]);
+
+  let logoUrl = result.logo_url ?? null;
+
+  // Fall back to a generated SVG logo when Lestrade couldn't find one
+  if (!logoUrl && result.merchant_name) {
+    logoUrl = await generateLogoSvg(
+      result.merchant_name,
+      result.business_type,
+      result.description,
+    ).catch(() => null);
+  }
+
   return {
     merchant_name: result.merchant_name ?? null,
     confidence: ['high', 'medium', 'low'].includes(result.confidence) ? result.confidence : 'low',
     business_type: result.business_type ?? null,
     location: result.location ?? null,
-    logo_url: result.logo_url ?? null,
+    logo_url: logoUrl,
     description: result.description ?? null,
     sources: Array.isArray(result.sources) ? result.sources.slice(0, 8) : [],
   };
