@@ -44,14 +44,23 @@ Rules:
 - Use a dark background (fill the full 100x100 with a rounded rect or circle in a dark hue matching the business)
 - Place a bold single initial letter or a minimal icon in the centre in white or a light accent colour
 - Maximum 2 colours total
-- No <text> elements with fonts — use only geometric paths/shapes if you include an icon, OR a single <text> element with font-family="monospace" for a letter
-- Return ONLY raw SVG markup starting with <svg, nothing else`,
+- Use a <text> element with font-family="sans-serif" font-weight="bold" for the letter if using text
+- Return ONLY raw SVG markup, no explanation, no markdown fences`,
     }],
   });
 
-  const svg = response.content[0]?.text?.trim();
-  if (!svg || !svg.startsWith('<svg')) return null;
-  return `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`;
+  const text = response.content[0]?.text?.trim();
+  if (!text) return null;
+
+  // Strip markdown fences and extract the <svg>...</svg> element
+  const stripped  = text.replace(/^```(?:svg|xml)?\s*/i, '').replace(/\s*```$/i, '').trim();
+  const svgMatch  = stripped.match(/<svg[\s\S]*<\/svg>/i);
+  if (!svgMatch) {
+    console.error('[generateLogoSvg] no <svg> element found in response for:', merchantName, '| response snippet:', text.slice(0, 200));
+    return null;
+  }
+
+  return `data:image/svg+xml;base64,${Buffer.from(svgMatch[0]).toString('base64')}`;
 }
 
 async function collectEvidence(type, descriptor, { location_hint } = {}) {
