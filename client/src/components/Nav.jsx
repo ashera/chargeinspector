@@ -67,6 +67,14 @@ const CSS = `
   }
   .nav-logout:hover { color: var(--error); }
 
+  .nav-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 15px; height: 15px; padding: 0 4px;
+    background: var(--accent); color: var(--bg-page);
+    border-radius: 8px; font-size: .55rem; letter-spacing: 0;
+    margin-left: .35rem; line-height: 1; vertical-align: middle;
+  }
+
   .nav-burger {
     display: none; background: none; border: none;
     cursor: pointer; padding: .6rem .25rem;
@@ -117,8 +125,9 @@ const CSS = `
 `;
 
 export default function Nav({ page, navigate, isAuthenticated, user, onPointsClick }) {
-  const { logout } = useAuth();
-  const [open, setOpen] = useState(false);
+  const { logout, apiFetch } = useAuth();
+  const [open, setOpen]         = useState(false);
+  const [pendingCount, setPendingCount] = useState(0);
   const rank = user ? getCurrentRank(user.total_points ?? 0) : null;
 
   useEffect(() => {
@@ -127,12 +136,20 @@ export default function Nav({ page, navigate, isAuthenticated, user, onPointsCli
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
+  useEffect(() => {
+    if (user?.role !== 'admin') return;
+    apiFetch('/api/submissions/pending')
+      .then(r => r.json())
+      .then(d => setPendingCount(d.submissions?.length ?? 0))
+      .catch(() => {});
+  }, [user?.role, page]);
+
   const links = [
     { key: 'search',      label: 'Search' },
     { key: 'submit',      label: 'Contribute' },
     { key: 'leaderboard', label: 'Leaderboard' },
     ...(isAuthenticated ? [{ key: 'profile', label: 'Profile' }] : []),
-    ...(user?.role === 'admin' ? [{ key: 'admin', label: 'Admin' }] : []),
+    ...(user?.role === 'admin' ? [{ key: 'admin', label: 'Admin', badge: pendingCount }] : []),
   ];
 
   const go = (key) => { navigate(key); setOpen(false); };
@@ -153,6 +170,7 @@ export default function Nav({ page, navigate, isAuthenticated, user, onPointsCli
               onClick={() => navigate(l.key)}
             >
               {l.label}
+              {l.badge > 0 && <span className="nav-badge">{l.badge}</span>}
             </button>
           ))}
         </div>
@@ -187,6 +205,7 @@ export default function Nav({ page, navigate, isAuthenticated, user, onPointsCli
                 onClick={() => go(l.key)}
               >
                 {l.label}
+                {l.badge > 0 && <span className="nav-badge">{l.badge}</span>}
               </button>
             ))}
             {!isAuthenticated && (
