@@ -33,6 +33,27 @@ router.get('/', requireAuth, requireRole('admin', 'moderator'), async (req, res)
   }
 });
 
+// PUT /api/merchants/:id  — update merchant details (admin/moderator)
+router.put('/:id', requireAuth, requireRole('admin', 'moderator'), async (req, res) => {
+  const { name, location, website, logo_url } = req.body ?? {};
+  if (!name?.trim()) return res.status(400).json({ error: 'name is required' });
+
+  try {
+    const { rows: [merchant] } = await db.query(
+      `UPDATE merchants
+       SET name = $1, location = $2, website = $3, logo_url = $4
+       WHERE id = $5
+       RETURNING id, name, location, website, logo_url`,
+      [name.trim(), location?.trim() || null, website?.trim() || null, logo_url?.trim() || null, req.params.id]
+    );
+    if (!merchant) return res.status(404).json({ error: 'Merchant not found' });
+    return res.json({ merchant });
+  } catch (err) {
+    console.error('[PUT /api/merchants/:id]', err);
+    return res.status(500).json({ error: err.message || 'Internal server error' });
+  }
+});
+
 // GET /api/merchants/autocomplete?q=<partial name>
 router.get('/autocomplete', async (req, res) => {
   const q = (req.query.q || '').trim();
