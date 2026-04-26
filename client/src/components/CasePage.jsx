@@ -138,6 +138,27 @@ const CSS = `
   .cp-steps-title {
     font-size: .6rem; letter-spacing: .16em; text-transform: uppercase; color: var(--text-muted);
   }
+  .cp-reset-btn {
+    margin-left: auto; background: none; border: none; cursor: pointer;
+    font-family: var(--font-ui); font-size: .58rem; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--text-dim); padding: 0;
+  }
+  .cp-reset-btn:hover { color: var(--error); }
+  .cp-reset-confirm {
+    margin-left: auto; display: flex; align-items: center; gap: .6rem;
+  }
+  .cp-reset-confirm-text { font-size: .62rem; color: var(--text-muted); }
+  .cp-reset-confirm-yes {
+    padding: .25rem .65rem; background: none; border: 1px solid var(--error);
+    border-radius: 2px; font-family: var(--font-ui); font-size: .58rem; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--error); cursor: pointer;
+  }
+  .cp-reset-confirm-yes:disabled { opacity: .45; cursor: default; }
+  .cp-reset-confirm-no {
+    padding: .25rem .65rem; background: none; border: 1px solid var(--border);
+    border-radius: 2px; font-family: var(--font-ui); font-size: .58rem; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--text-muted); cursor: pointer;
+  }
 
   .cp-steps { display: flex; flex-direction: column; gap: 0; margin-bottom: 1.5rem; }
   .cp-step {
@@ -493,6 +514,8 @@ export default function CasePage({ caseData: initialData, navigate }) {
   const [locationHint, setLocationHint] = useState(initialData.location_hint || '');
   const [hintSaving, setHintSaving]     = useState(false);
   const [hintSaved, setHintSaved]       = useState(false);
+  const [resetConfirm, setResetConfirm] = useState(false);
+  const [resetting, setResetting]       = useState(false);
 
   useEffect(() => {
     fetch(`/api/cases/${initialData.id}`)
@@ -595,6 +618,25 @@ export default function CasePage({ caseData: initialData, navigate }) {
       setCollecting(null);
     } finally {
       setSolving(false);
+    }
+  }
+
+  async function resetInvestigation() {
+    setResetting(true);
+    try {
+      await apiFetch(`/api/cases/${initialData.id}/evidence`, { method: 'DELETE' });
+      setEvidence({});
+      setActiveStepIdx(0);
+      setPendingModeration(false);
+      setSolveSuccess(false);
+      setResetConfirm(false);
+      const caseRes  = await fetch(`/api/cases/${initialData.id}`);
+      const caseBody = await caseRes.json();
+      if (caseBody.case) setData(caseBody.case);
+    } catch {
+      // non-critical
+    } finally {
+      setResetting(false);
     }
   }
 
@@ -738,6 +780,23 @@ export default function CasePage({ caseData: initialData, navigate }) {
       <div>
         <div className="cp-steps-header">
           <span className="cp-steps-title">Investigation</span>
+          {isAuthenticated && !isSolved && Object.keys(evidence).length > 0 && (
+            resetConfirm ? (
+              <div className="cp-reset-confirm">
+                <span className="cp-reset-confirm-text">Clear all evidence?</span>
+                <button className="cp-reset-confirm-yes" onClick={resetInvestigation} disabled={resetting}>
+                  {resetting ? 'Resetting…' : 'Yes, start again'}
+                </button>
+                <button className="cp-reset-confirm-no" onClick={() => setResetConfirm(false)} disabled={resetting}>
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <button className="cp-reset-btn" onClick={() => setResetConfirm(true)}>
+                ↺ Start again
+              </button>
+            )
+          )}
         </div>
         <div className="cp-steps">
           {STEPS.map((step, idx) => {

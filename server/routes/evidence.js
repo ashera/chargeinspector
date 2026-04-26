@@ -87,4 +87,34 @@ router.post('/:id/evidence/collect', requireAuth, async (req, res) => {
   }
 });
 
+// DELETE /api/cases/:id/evidence  — reset all investigation evidence and cancel pending submissions
+router.delete('/:id/evidence', requireAuth, async (req, res) => {
+  const client = await db.connect();
+  try {
+    await client.query('BEGIN');
+
+    await client.query('DELETE FROM evidence WHERE case_id = $1', [req.params.id]);
+
+    // Cancel any pending submissions for this case's descriptor so the case unlocks
+    await client.query(
+      `DELETE FROM submissions
+       WHERE status = 'pending'
+         AND descriptor_id IN (
+           SELECT d.id FROM descriptors d, cases c
+           WHERE c.id = $1 AND lower(d.text) = lower(c.descriptor)
+         )`,
+      [req.params.id]
+    );
+
+    await client.query('COMMIT');
+    return res.json({ ok: true });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('[DELETE /api/cases/:id/evidence]', err);
+    return res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    client.release();
+  }
+});
+
 module.exports = router;
