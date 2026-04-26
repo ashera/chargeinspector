@@ -10,6 +10,7 @@ import MerchantDetailsPage from './components/MerchantDetailsPage.jsx';
 import PointsHistoryPage from './components/PointsHistoryPage.jsx';
 import DescriptorDetailsPage from './components/DescriptorDetailsPage.jsx';
 import CasePage from './components/CasePage.jsx';
+import CaseArchivePage from './components/CaseArchivePage.jsx';
 import Nav from './components/Nav.jsx';
 
 function Router() {
@@ -54,7 +55,8 @@ function Router() {
         {page === 'points'      && <PointsHistoryPage totalPoints={user?.total_points} />}
         {page === 'leaderboard' && <LeaderboardPage />}
         {page === 'case'        && <CasePage caseData={pageState.caseData} navigate={navigate} />}
-        {page === 'admin'       && user?.role === 'admin' && <AdminPage />}
+        {page === 'admin'         && user?.role === 'admin' && <AdminPage />}
+        {page === 'case-archive'  && user?.role === 'admin' && <CaseArchivePage navigate={navigate} />}
       </main>
       <footer style={{ borderTop: '1px solid var(--border)', padding: '1.25rem 1.5rem', textAlign: 'center', fontSize: '.65rem', color: 'var(--text-dim)', fontFamily: 'var(--font-ui)', letterSpacing: '.08em' }}>
         ChargeInspector v{__APP_VERSION__} · {__GIT_COMMIT__}

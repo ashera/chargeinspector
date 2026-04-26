@@ -888,7 +888,7 @@ export default function CasePage({ caseData: initialData, navigate }) {
             (() => {
               const usedSteps = STEPS.filter(s => evidence[s.key]);
               const how = usedSteps.length > 0
-                ? usedSteps.map(s => s.label).join(' and ')
+                ? usedSteps.map(s => s.key === 'web_intelligence' ? `${s.label} by Inspector Lestrade` : s.label).join(' and ')
                 : 'community investigation';
               const sb   = data.solved_by;
               const rank = sb ? getCurrentRank(sb.total_points ?? 0) : null;

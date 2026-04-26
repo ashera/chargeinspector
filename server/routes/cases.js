@@ -2,7 +2,7 @@
 
 const express = require('express');
 const db      = require('../db');
-const { optionalAuth, requireAuth } = require('../middleware/auth');
+const { optionalAuth, requireAuth, requireRole } = require('../middleware/auth');
 const router  = express.Router();
 
 const COMPUTED_STATUS =
@@ -107,6 +107,41 @@ router.post('/', optionalAuth, async (req, res) => {
     return res.status(201).json({ case: caseRow });
   } catch (err) {
     console.error('[POST /api/cases]', err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// GET /api/cases  — list all cases (admin/moderator)
+router.get('/', requireAuth, requireRole('admin', 'moderator'), async (req, res) => {
+  const q = (req.query.q || '').trim();
+
+  const params = [];
+  let where = '1=1';
+  if (q) {
+    params.push(`%${q}%`);
+    where = `lower(c.descriptor) LIKE lower($1)`;
+  }
+
+  try {
+    const { rows } = await db.query(
+      'SELECT c.id, c.descriptor, c.created_at, (' + COMPUTED_STATUS + ') AS computed_status,' +
+      ' (SELECT m.name FROM submissions s' +
+      '   JOIN descriptors d ON d.id = s.descriptor_id' +
+      '   JOIN merchants   m ON m.id = s.merchant_id' +
+      '   WHERE lower(d.text) = lower(c.descriptor) AND s.status = \'approved\'' +
+      '   ORDER BY s.created_at ASC LIMIT 1) AS solved_merchant_name,' +
+      ' COUNT(DISTINCT det.user_id)::int AS detective_count' +
+      ' FROM cases c' +
+      ' LEFT JOIN detectives det ON det.case_id = c.id' +
+      ' WHERE ' + where +
+      ' GROUP BY c.id' +
+      ' ORDER BY c.created_at DESC' +
+      ' LIMIT 500',
+      params
+    );
+    return res.json({ cases: rows });
+  } catch (err) {
+    console.error('[GET /api/cases]', err);
     return res.status(500).json({ error: 'Internal server error' });
   }
 });
