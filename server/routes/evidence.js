@@ -62,7 +62,7 @@ router.post('/:id/evidence/collect', requireAuth, async (req, res) => {
         sources: Array.isArray(sources) ? sources.slice(0, 8) : [],
       };
     } else {
-      result = await collectEvidence(type, caseRow.descriptor);
+      result = await collectEvidence(type, caseRow.descriptor, { location_hint: caseRow.location_hint });
     }
 
     const { rows: [evidence] } = await db.query(

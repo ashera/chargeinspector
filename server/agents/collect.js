@@ -56,11 +56,16 @@ Respond with ONLY a valid JSON object — no markdown fences, no other text:
 }`,
 };
 
-async function collectEvidence(type, descriptor) {
+async function collectEvidence(type, descriptor, { location_hint } = {}) {
   const system = PROMPTS[type];
   if (!system) throw new Error(`Unknown evidence type: ${type}`);
 
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
+  const hint = location_hint?.trim();
+  const userMessage = hint
+    ? `Investigate this credit card billing descriptor: "${descriptor}"\n\nLocation context from the investigator: "${hint}"\nUse this to help narrow down where the charge may have occurred and identify the merchant.`
+    : `Investigate this credit card billing descriptor: "${descriptor}"`;
 
   const response = await client.messages.create({
     model: 'claude-sonnet-4-6',
@@ -68,7 +73,7 @@ async function collectEvidence(type, descriptor) {
     system,
     tools: [{ type: 'web_search_20250305', name: 'web_search' }],
     messages: [
-      { role: 'user', content: `Investigate this credit card billing descriptor: "${descriptor}"` },
+      { role: 'user', content: userMessage },
     ],
   });
 
