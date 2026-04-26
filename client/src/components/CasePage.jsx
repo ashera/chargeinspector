@@ -435,12 +435,19 @@ const CSS = `
   .cp-congrats-maxrank {
     font-size: .75rem; color: var(--accent); margin-bottom: 1.5rem; letter-spacing: .06em;
   }
-  .cp-congrats-close {
-    width: 100%; padding: .85rem; background: var(--accent); border: none; border-radius: 2px;
-    font-family: var(--font-ui); font-size: .7rem; letter-spacing: .12em;
+  .cp-congrats-actions { display: flex; gap: .75rem; }
+  .cp-congrats-btn-primary {
+    flex: 1; padding: .8rem; background: var(--accent); border: none; border-radius: 2px;
+    font-family: var(--font-ui); font-size: .65rem; letter-spacing: .12em;
     text-transform: uppercase; color: var(--bg-page); font-weight: 500; cursor: pointer;
   }
-  .cp-congrats-close:hover { opacity: .9; }
+  .cp-congrats-btn-primary:hover { opacity: .9; }
+  .cp-congrats-btn-secondary {
+    flex: 1; padding: .8rem; background: none; border: 1px solid var(--border); border-radius: 2px;
+    font-family: var(--font-ui); font-size: .65rem; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--text-muted); cursor: pointer;
+  }
+  .cp-congrats-btn-secondary:hover { border-color: var(--text-muted); color: var(--text); }
 
   .cp-success-banner {
     background: #0d1a0f; border: 1px solid #1e3a2a; border-radius: 3px;
@@ -580,7 +587,7 @@ const SPARKS = Array.from({ length: 22 }, (_, i) => {
   };
 });
 
-function CongratulationsModal({ modal, onClose }) {
+function CongratulationsModal({ modal, onClose, navigate }) {
   const { pointsAwarded, totalPoints } = modal;
   const rank     = getCurrentRank(totalPoints);
   const nextRank = RANKS.find(r => r.threshold > totalPoints) ?? null;
@@ -627,7 +634,14 @@ function CongratulationsModal({ modal, onClose }) {
           <div className="cp-congrats-maxrank">Maximum rank achieved!</div>
         )}
 
-        <button className="cp-congrats-close" onClick={onClose}>Continue →</button>
+        <div className="cp-congrats-actions">
+          <button className="cp-congrats-btn-primary" onClick={() => { onClose(); navigate('profile'); }}>
+            My profile →
+          </button>
+          <button className="cp-congrats-btn-secondary" onClick={() => { onClose(); navigate('search'); }}>
+            Home
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -1058,6 +1072,7 @@ export default function CasePage({ caseData: initialData, navigate }) {
         <CongratulationsModal
           modal={solveModal}
           onClose={() => setSolveModal(null)}
+          navigate={navigate}
         />
       )}
     </>
