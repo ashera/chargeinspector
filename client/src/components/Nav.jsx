@@ -146,7 +146,6 @@ export default function Nav({ page, navigate, isAuthenticated, user, onPointsCli
 
   const links = [
     { key: 'search',      label: 'Search' },
-    { key: 'submit',      label: 'Contribute' },
     { key: 'leaderboard', label: 'Leaderboard' },
     ...(isAuthenticated ? [{ key: 'profile', label: 'Profile' }] : []),
     ...(user?.role === 'admin' ? [{ key: 'admin', label: 'Admin', badge: pendingCount }] : []),
