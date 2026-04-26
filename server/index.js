@@ -14,6 +14,7 @@ const merchantRoutes    = require('./routes/merchants');
 const analyticsRoutes   = require('./routes/analytics');
 const casesRoutes       = require('./routes/cases');
 const evidenceRoutes    = require('./routes/evidence');
+const adminRoutes       = require('./routes/admin');
 
 const app  = express();
 const PORT = process.env.PORT || 3001;
@@ -43,6 +44,7 @@ app.use('/api/merchants',   merchantRoutes);
 app.use('/api/analytics',  analyticsRoutes);
 app.use('/api/cases',      casesRoutes);
 app.use('/api/cases',      evidenceRoutes);
+app.use('/api/admin',      adminRoutes);
 
 if (isProd) {
   const clientDist = path.join(__dirname, '../client/dist');

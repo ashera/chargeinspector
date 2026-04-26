@@ -52,20 +52,39 @@ const CSS = `
   .ma-state.error   { color: var(--error); }
   .ma-state.empty   { color: var(--text-muted); }
 
+  .ma-backfill-bar {
+    display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 3px;
+    padding: .75rem 1rem; margin-bottom: 1.5rem;
+  }
+  .ma-backfill-text { font-size: .72rem; color: var(--text-muted); flex: 1; }
+  .ma-backfill-text strong { color: var(--text); }
+  .ma-backfill-btn {
+    padding: .5rem 1rem; border-radius: 2px; border: 1px solid var(--accent);
+    background: none; color: var(--accent); font-family: var(--font-ui);
+    font-size: .65rem; letter-spacing: .1em; text-transform: uppercase;
+    cursor: pointer; white-space: nowrap; transition: background .2s, color .2s;
+  }
+  .ma-backfill-btn:hover:not(:disabled) { background: var(--accent); color: var(--bg-page); }
+  .ma-backfill-btn:disabled { opacity: .4; cursor: not-allowed; }
+  .ma-backfill-result { font-size: .7rem; color: var(--accent); }
+
   @media (max-width: 640px) {
     .ma-th.hide-mobile, .ma-td.hide-mobile { display: none; }
   }
 `;
 
 export default function MerchantArchivePage() {
-  const { apiFetch }          = useAuth();
+  const { apiFetch }              = useAuth();
   const [merchants, setMerchants] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError]     = useState(null);
-  const [q, setQ]             = useState('');
-  const [sortKey, setSortKey] = useState('name');
-  const [sortDir, setSortDir] = useState('asc');
-  const debounceRef           = useRef(null);
+  const [loading, setLoading]     = useState(true);
+  const [error, setError]         = useState(null);
+  const [q, setQ]                 = useState('');
+  const [sortKey, setSortKey]     = useState('name');
+  const [sortDir, setSortDir]     = useState('asc');
+  const [backfilling, setBackfilling] = useState(false);
+  const [backfillResult, setBackfillResult] = useState(null);
+  const debounceRef               = useRef(null);
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -102,6 +121,22 @@ export default function MerchantArchivePage() {
     return 0;
   });
 
+  async function runBackfill() {
+    setBackfilling(true);
+    setBackfillResult(null);
+    try {
+      const res  = await apiFetch('/api/admin/backfill-logos', { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Backfill failed');
+      setBackfillResult(data);
+      load(q); // refresh merchant list so new logos appear
+    } catch (e) {
+      setBackfillResult({ error: e.message });
+    } finally {
+      setBackfilling(false);
+    }
+  }
+
   const toggleSort = (key) => {
     if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
     else { setSortKey(key); setSortDir('asc'); }
@@ -120,6 +155,29 @@ export default function MerchantArchivePage() {
           <div className="ma-title">Merchants</div>
           <div className="ma-sub">All merchants in the database</div>
         </div>
+
+        {(() => {
+          const missing = merchants.filter(m => !m.logo_url).length;
+          if (loading || missing === 0) return null;
+          return (
+            <div className="ma-backfill-bar">
+              <span className="ma-backfill-text">
+                <strong>{missing}</strong> merchant{missing !== 1 ? 's' : ''} without a logo
+              </span>
+              {backfillResult && !backfillResult.error && (
+                <span className="ma-backfill-result">
+                  ✓ {backfillResult.updated} generated, {backfillResult.skipped} skipped
+                </span>
+              )}
+              {backfillResult?.error && (
+                <span style={{ fontSize: '.7rem', color: 'var(--error)' }}>{backfillResult.error}</span>
+              )}
+              <button className="ma-backfill-btn" onClick={runBackfill} disabled={backfilling}>
+                {backfilling ? 'Generating…' : 'Generate missing logos'}
+              </button>
+            </div>
+          );
+        })()}
 
         <div className="ma-controls">
           <input
