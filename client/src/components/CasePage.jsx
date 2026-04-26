@@ -155,6 +155,29 @@ const CSS = `
     color: var(--text-dim); border-top: 1px solid var(--bg-card); padding-top: .5rem; width: 100%;
   }
 
+  /* CTA step — the next action the user should take */
+  .cp-step.is-cta { border-color: var(--accent); }
+  .cp-step.is-cta .cp-step-header {
+    background: rgba(74,222,128,.04); border-bottom-color: rgba(74,222,128,.18);
+  }
+  .cp-step.is-cta .cp-step-num {
+    background: #1e3a2a; border-color: var(--accent); color: var(--accent);
+  }
+  .cp-step.is-cta .cp-step-label { color: var(--text); }
+  .cp-step.is-cta .cp-step-sublabel { color: var(--text-muted); }
+  .cp-step.is-cta .cp-step-desc { color: var(--text-muted); }
+  .cp-start-badge {
+    font-size: .5rem; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--accent); padding: .15rem .5rem;
+    border: 1px solid rgba(74,222,128,.35); border-radius: 2px;
+    background: rgba(74,222,128,.07); white-space: nowrap;
+  }
+  .cp-collect-btn.cta {
+    border-color: var(--accent); color: var(--accent);
+    background: rgba(74,222,128,.06); padding: .65rem 1.5rem; font-size: .65rem;
+  }
+  .cp-collect-btn.cta:hover:not(:disabled) { background: var(--accent); color: var(--bg-page); }
+
   .cp-step-body { padding: 1.1rem 1.25rem; }
 
   .cp-step-desc { font-size: .75rem; color: var(--text-muted); line-height: 1.6; margin-bottom: .85rem; }
@@ -654,12 +677,13 @@ export default function CasePage({ caseData: initialData, navigate }) {
             const isOpen       = idx <= activeStepIdx || (isPendingModeration && step.key === 'local_knowledge');
             const isNext       = idx < STEPS.length - 1;
             const isCollecting = collecting === step.key;
+            const isCta        = !hasData && !isLocked && !isReadOnly && idx === activeStepIdx;
 
             // Solved case: hide steps that produced no evidence
             if (isSolved && !hasData) return null;
 
             return (
-              <div key={step.key} className={`cp-step${hasData ? ' has-data' : ''}${isLocked && !isReadOnly ? ' locked' : ''}`}>
+              <div key={step.key} className={`cp-step${hasData ? ' has-data' : ''}${isLocked && !isReadOnly ? ' locked' : ''}${isCta ? ' is-cta' : ''}`}>
                 <div className="cp-step-header">
                   <div className="cp-step-num">{idx + 1}</div>
                   <span className="cp-step-icon">{step.icon}</span>
@@ -671,6 +695,7 @@ export default function CasePage({ caseData: initialData, navigate }) {
                   ) : (
                     <span className="cp-step-label">{step.label}</span>
                   )}
+                  {isCta && <span className="cp-start-badge">→ Start here</span>}
                   {!isReadOnly && isLocked && <span className="cp-step-lock">Locked</span>}
                   {hasData && <span className="cp-step-done">✓ Done</span>}
                 </div>
@@ -727,7 +752,7 @@ export default function CasePage({ caseData: initialData, navigate }) {
                           </div>
                         ) : (
                           <button
-                            className="cp-collect-btn"
+                            className={`cp-collect-btn${isCta ? ' cta' : ''}`}
                             onClick={() => collect(step.key)}
                             disabled={isLocked}
                           >
