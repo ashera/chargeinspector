@@ -657,6 +657,7 @@ export default function CasePage({ caseData: initialData, navigate }) {
   }
 
   const status              = data.computed_status || 'open';
+  const isSolved            = status === 'solved';
   const isPendingModeration = !!data.pending_submission_id || pendingModeration;
   const detectives          = data.detectives || [];
 
@@ -802,7 +803,6 @@ export default function CasePage({ caseData: initialData, navigate }) {
           {STEPS.map((step, idx) => {
             const ev           = evidence[step.key];
             const hasData      = !!ev;
-            const isSolved     = status === 'solved';
             const isReadOnly   = isSolved || isPendingModeration;
             const prevDone     = idx === 0 || !!evidence[STEPS[idx - 1].key];
             const isLocked     = !prevDone;
