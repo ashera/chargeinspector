@@ -87,6 +87,7 @@ const CSS = `
   .md-confidence.high   { color: #4ade80;  border: 1px solid #1e3a2a; background: #0d1a0f; }
   .md-confidence.medium { color: #fbbf24;  border: 1px solid #3a3010; background: #1a1608; }
   .md-confidence.low    { color: var(--text-dim); border: 1px solid var(--border); }
+  .md-location-sub { font-size: .78rem; color: var(--text-muted); margin-top: .35rem; }
   @media (max-width: 500px) {
     .md-header { gap: 1rem; }
     .md-name { font-size: 1.5rem; }
@@ -163,6 +164,9 @@ export default function MerchantDetailsPage({ merchant, navigate }) {
         <div>
           <div className="md-descriptor">{merchant.descriptor}</div>
           <div className="md-name">{merchant.name}</div>
+          {merchant.location && (
+            <div className="md-location-sub">📍 {merchant.location}</div>
+          )}
         </div>
       </div>
 
