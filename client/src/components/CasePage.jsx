@@ -278,7 +278,9 @@ const CSS = `
   }
   .cp-result-source:hover { text-decoration: underline; }
 
-  .cp-step-actions { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; margin-top: .85rem; padding-top: .85rem; border-top: 1px solid var(--border); }
+  .cp-step-actions { display: flex; flex-direction: column; align-items: flex-start; gap: .75rem; margin-top: .85rem; padding-top: .85rem; border-top: 1px solid var(--border); }
+  .cp-step-actions-row { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; }
+  .cp-solve-hint { font-size: .72rem; color: var(--text-muted); line-height: 1.6; margin: 0; }
   .cp-solve-btn {
     padding: .6rem 1.25rem; background: var(--accent); border: none; border-radius: 2px;
     font-family: var(--font-ui); font-size: .65rem; letter-spacing: .12em;
@@ -1042,17 +1044,20 @@ export default function CasePage({ caseData: initialData, navigate }) {
                       )}
                       {!isReadOnly && (
                         <div className="cp-step-actions">
-                          <button className="cp-solve-btn" onClick={() => openConfirm(step.key)}>
-                            Accept &amp; solve case →
-                          </button>
-                          {isNext && activeStepIdx === idx && (
-                            <>
-                              <span style={{ fontSize: '.65rem', color: 'var(--text-dim)' }}>or</span>
-                              <button className="cp-next-btn" onClick={() => setActiveStepIdx(idx + 1)}>
-                                Continue to {STEPS[idx + 1].label} ↓
-                              </button>
-                            </>
-                          )}
+                          <p className="cp-solve-hint">If this is the correct merchant, click <strong>Accept &amp; Solve</strong> to lock it in and claim points towards your next promotion. If this doesn't look correct, continue to the next step in the investigation.</p>
+                          <div className="cp-step-actions-row">
+                            <button className="cp-solve-btn" onClick={() => openConfirm(step.key)}>
+                              Accept &amp; solve case →
+                            </button>
+                            {isNext && activeStepIdx === idx && (
+                              <>
+                                <span style={{ fontSize: '.65rem', color: 'var(--text-dim)' }}>or</span>
+                                <button className="cp-next-btn" onClick={() => setActiveStepIdx(idx + 1)}>
+                                  Continue to {STEPS[idx + 1].label} ↓
+                                </button>
+                              </>
+                            )}
+                          </div>
                         </div>
                       )}
                     </>
