@@ -874,6 +874,7 @@ export default function CasePage({ caseData: initialData, navigate }) {
         if (d.case) {
           setData(d.case);
           if (d.case.pending_submission_id) setPendingModeration(true);
+          if (d.case.location_hint) setLocationHint(d.case.location_hint);
         }
       })
       .catch(() => {});
