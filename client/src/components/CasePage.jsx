@@ -265,6 +265,7 @@ const CSS = `
   .cp-agent-filed {
     display: flex; align-items: center; gap: .6rem; margin-top: .65rem;
     border-top: 1px solid var(--bg-card); padding-top: .65rem; width: 100%;
+    margin-bottom: 1.25rem;
   }
   .cp-agent-avatar {
     width: 32px; height: 32px; border-radius: 50%; cursor: pointer; flex-shrink: 0;
