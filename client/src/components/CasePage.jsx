@@ -580,6 +580,12 @@ const CSS = `
     text-transform: uppercase; color: var(--text-muted); cursor: pointer;
   }
   .cp-congrats-btn-secondary:hover { border-color: var(--text-muted); color: var(--text); }
+  .cp-rank-link {
+    color: var(--accent); background: none; border: none; font-family: inherit;
+    font-size: inherit; padding: 0; cursor: pointer;
+    text-decoration: underline; text-underline-offset: 2px;
+  }
+  .cp-rank-link:hover { opacity: .75; }
 
   .cp-success-banner {
     background: #0d1a0f; border: 1px solid #1e3a2a; border-radius: 3px;
@@ -830,7 +836,10 @@ function CongratulationsModal({ modal, onClose, navigate }) {
         {nextRank ? (
           <div className="cp-congrats-progress">
             <div className="cp-congrats-progress-label">
-              {toNext} pts to {nextRank.icon} {nextRank.name}
+              {toNext} pts to{' '}
+              <button className="cp-rank-link" onClick={() => { onClose(); navigate('ranks'); }}>
+                {nextRank.icon} {nextRank.name}
+              </button>
             </div>
             <div className="cp-congrats-progress-track">
               <div className="cp-congrats-progress-fill" style={{ width: `${pct}%` }} />
@@ -1240,7 +1249,8 @@ export default function CasePage({ caseData: initialData, navigate }) {
                     {!isReadOnly && ev.merchant_name && (
                       <div className="cp-step-actions">
                         <p className="cp-solve-hint">
-                          If this is the correct merchant, click <strong>Accept &amp; Solve</strong> to lock it in and claim points towards your next promotion.
+                          If this is the correct merchant, click <strong>Accept &amp; Solve</strong> to lock it in and claim points towards your{' '}
+                          <button className="cp-rank-link" onClick={() => navigate('ranks')}>next promotion</button>.
                           If this doesn&rsquo;t look right, you can provide your own merchant details below.
                         </p>
                         <div className="cp-step-actions-row">

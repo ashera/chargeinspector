@@ -194,6 +194,12 @@ const CSS = `
   .sp-rank-icon { font-size: 1rem; margin-right: .3rem; }
   .sp-rank-next { font-size: .68rem; color: var(--text-muted); }
   .sp-rank-next strong { color: var(--accent); }
+  .sp-rank-link {
+    color: var(--accent); background: none; border: none; font-family: inherit;
+    font-size: inherit; padding: 0; cursor: pointer;
+    text-decoration: underline; text-underline-offset: 2px;
+  }
+  .sp-rank-link:hover { opacity: .75; }
   .sp-rank-track {
     height: 4px; background: var(--border); border-radius: 2px; overflow: hidden;
   }
@@ -507,7 +513,10 @@ export default function SearchPage({ navigate }) {
                 <span className="sp-rank-icon">{rank.icon}</span>{rank.name}
               </span>
               {nextRank
-                ? <span className="sp-rank-next"><strong>{nextRank.threshold - pts} pts</strong> to {nextRank.icon} {nextRank.name}</span>
+                ? <span className="sp-rank-next">
+                    <strong>{nextRank.threshold - pts} pts</strong> to{' '}
+                    <button className="sp-rank-link" onClick={() => navigate('ranks')}>{nextRank.icon} {nextRank.name}</button>
+                  </span>
                 : <span className="sp-rank-maxed">Max rank reached</span>
               }
             </div>

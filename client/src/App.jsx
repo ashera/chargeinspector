@@ -10,6 +10,7 @@ import MerchantDetailsPage from './components/MerchantDetailsPage.jsx';
 import PointsHistoryPage from './components/PointsHistoryPage.jsx';
 import DescriptorDetailsPage from './components/DescriptorDetailsPage.jsx';
 import CasePage from './components/CasePage.jsx';
+import RanksPage from './components/RanksPage.jsx';
 import Nav from './components/Nav.jsx';
 
 function Router() {
@@ -56,6 +57,7 @@ function Router() {
         {page === 'points'      && <PointsHistoryPage totalPoints={user?.total_points} />}
         {page === 'leaderboard' && <LeaderboardPage />}
         {page === 'case'        && <CasePage caseData={pageState.caseData} navigate={navigate} />}
+        {page === 'ranks'         && <RanksPage navigate={navigate} />}
         {page === 'admin'         && user?.role === 'admin' && <AdminPage navigate={navigate} />}
       </main>
       <footer style={{ borderTop: '1px solid var(--border)', padding: '1.25rem 1.5rem', textAlign: 'center', fontSize: '.65rem', color: 'var(--text-dim)', fontFamily: 'var(--font-ui)', letterSpacing: '.08em' }}>

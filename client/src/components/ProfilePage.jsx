@@ -100,6 +100,12 @@ const CSS = `
   .prof-rank-bar-wrap { height: 4px; background: var(--bg-hover); border-radius: 2px; overflow: hidden; margin-bottom: .45rem; }
   .prof-rank-bar-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width .4s; }
   .prof-rank-bar-labels { display: flex; justify-content: space-between; font-size: .62rem; color: var(--text-muted); }
+  .prof-rank-link {
+    color: inherit; background: none; border: none; font-family: inherit;
+    font-size: inherit; padding: 0; cursor: pointer;
+    text-decoration: underline; text-underline-offset: 2px;
+  }
+  .prof-rank-link:hover { color: var(--accent); }
   .prof-table { width: 100%; border-collapse: collapse; font-size: .75rem; }
   .prof-table th {
     text-align: left; font-size: .6rem; letter-spacing: .12em;
@@ -314,7 +320,10 @@ export default function ProfilePage({ navigate }) {
             <div className="prof-rank-bar-labels">
               <span>{user.total_points} pts</span>
               {nextRank
-                ? <span>{nextRank.points_threshold - user.total_points} pts to {nextRank.name}</span>
+                ? <span>
+                    {nextRank.points_threshold - user.total_points} pts to{' '}
+                    <button className="prof-rank-link" onClick={() => navigate('ranks')}>{nextRank.name}</button>
+                  </span>
                 : <span>Maximum rank achieved</span>
               }
             </div>
