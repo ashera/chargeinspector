@@ -86,13 +86,17 @@ async function collectEvidence(type, descriptor, { location_hint } = {}) {
   const response = await client.messages.create(
     {
       model: 'claude-sonnet-4-6',
-      max_tokens: 2048,
+      max_tokens: 8192,
       system,
       tools: [{ type: 'web_search_20250305', name: 'web_search' }],
       messages: [{ role: 'user', content: userMessage }],
     },
     { headers: { 'anthropic-beta': 'web-search-2025-03-05' } },
   );
+
+  if (response.stop_reason === 'max_tokens') {
+    console.warn('[collectEvidence] Response hit max_tokens — output may be truncated');
+  }
 
   // The model often emits a short preamble text block before searching, then a
   // final text block with the JSON.  Search all text blocks from last to first.
@@ -116,7 +120,7 @@ async function collectEvidence(type, descriptor, { location_hint } = {}) {
       response.stop_reason,
       JSON.stringify(response.content.map(b => ({ type: b.type, len: b.text?.length ?? 0 }))),
     );
-    throw new Error('Agent response did not contain JSON');
+    throw new Error('Agent response did not contain valid JSON');
   }
 
   // Reject URLs from third-party logo aggregators — they are unreliable or shut down

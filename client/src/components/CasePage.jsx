@@ -841,7 +841,7 @@ export default function CasePage({ caseData: initialData, navigate }) {
         body: JSON.stringify({ type, ...extra }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Collection failed');
+      if (!res.ok) throw new Error(data.error || data.message || `Collection failed (${res.status})`);
       setEvidence(ev => ({ ...ev, [type]: data.evidence }));
     } catch (err) {
       setErrors(e => ({ ...e, [type]: err.message }));
