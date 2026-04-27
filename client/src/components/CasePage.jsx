@@ -896,13 +896,33 @@ export default function CasePage({ caseData: initialData, navigate }) {
     setCollecting(type);
     setErrors(e => ({ ...e, [type]: null }));
     try {
-      const res  = await apiFetch(`/api/cases/${initialData.id}/evidence/collect`, {
+      const res = await apiFetch(`/api/cases/${initialData.id}/evidence/collect`, {
         method: 'POST',
         body: JSON.stringify({ type, ...extra }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || data.message || `Collection failed (${res.status})`);
-      setEvidence(ev => ({ ...ev, [type]: data.evidence }));
+
+      if ((res.headers.get('content-type') || '').includes('text/event-stream')) {
+        const reader  = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() ?? '';
+          for (const line of lines) {
+            if (!line.startsWith('data: ')) continue;
+            const payload = JSON.parse(line.slice(6));
+            if (payload.error) throw new Error(payload.error);
+            if (payload.evidence) { setEvidence(ev => ({ ...ev, [type]: payload.evidence })); return; }
+          }
+        }
+      } else {
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || data.message || `Collection failed (${res.status})`);
+        setEvidence(ev => ({ ...ev, [type]: data.evidence }));
+      }
     } catch (err) {
       setErrors(e => ({ ...e, [type]: err.message }));
     } finally {

@@ -31,12 +31,32 @@ router.post('/:id/evidence/collect', requireAuth, async (req, res) => {
     return res.status(400).json({ error: 'Unknown evidence type' });
   }
 
+  // web_intelligence can take 60-120s; use SSE so the gateway doesn't time out
+  // before we send a single byte.
+  const sse = type === 'web_intelligence';
+  if (sse) {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.setHeader('Content-Encoding', 'identity');
+    res.flushHeaders();
+  }
+
+  const ping = sse ? setInterval(() => res.write(': ping\n\n'), 20000) : null;
+  if (sse) req.on('close', () => clearInterval(ping));
+
+  const sseError = (msg) => { clearInterval(ping); res.write(`data: ${JSON.stringify({ error: msg })}\n\n`); res.end(); };
+  const sseDone  = (ev)  => { clearInterval(ping); res.write(`data: ${JSON.stringify({ evidence: ev })}\n\n`); res.end(); };
+
   try {
     const { rows: [caseRow] } = await db.query(
       'SELECT * FROM cases WHERE id = $1',
       [req.params.id]
     );
-    if (!caseRow) return res.status(404).json({ error: 'Case not found' });
+    if (!caseRow) {
+      if (sse) return sseError('Case not found');
+      return res.status(404).json({ error: 'Case not found' });
+    }
 
     // Enforce sequential order
     const stepIdx = STEP_ORDER.indexOf(type);
@@ -47,6 +67,7 @@ router.post('/:id/evidence/collect', requireAuth, async (req, res) => {
         [req.params.id, prevType]
       );
       if (rows.length === 0) {
+        if (sse) return sseError(`Complete "${prevType}" first`);
         return res.status(400).json({ error: `Complete "${prevType}" first` });
       }
     }
@@ -82,13 +103,16 @@ router.post('/:id/evidence/collect', requireAuth, async (req, res) => {
       ]
     );
 
+    if (sse) return sseDone(evidence);
     return res.json({ evidence });
   } catch (err) {
+    if (ping) clearInterval(ping);
     console.error('[POST /api/cases/:id/evidence/collect]', err);
     const message = err?.message
       || err?.error?.message
       || (typeof err === 'string' ? err : null)
       || 'Internal server error';
+    if (sse) { res.write(`data: ${JSON.stringify({ error: message })}\n\n`); res.end(); return; }
     return res.status(500).json({ error: message });
   }
 });
