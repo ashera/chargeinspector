@@ -407,7 +407,7 @@ const CSS = `
     100% { opacity: 0; transform: translateY(-4px); }
   }
   .cp-loader-activity {
-    animation: cp-fade-activity 7s ease-in-out forwards;
+    animation: cp-fade-activity 5s ease-in-out forwards;
   }
 
   .cp-loader {
@@ -651,7 +651,7 @@ function LestradeLoader({ agent }) {
     const id = setInterval(() => {
       setIdx(i => (i + 1) % activities.length);
       setTick(t => t + 1);
-    }, 7000);
+    }, 5000);
     return () => clearInterval(id);
   }, [activities.length]);
 
