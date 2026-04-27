@@ -361,7 +361,7 @@ export default function SearchPage({ navigate }) {
               className="sp-input"
               placeholder="e.g. SQ *COFFEE NYC or TST* RESTAURANT"
               value={query}
-              onChange={e => setQuery(e.target.value)}
+              onChange={e => setQuery(e.target.value.toUpperCase())}
               onKeyDown={handleKeyDown}
               onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
               autoFocus
