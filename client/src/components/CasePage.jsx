@@ -1244,20 +1244,32 @@ export default function CasePage({ caseData: initialData, navigate }) {
                       <EvidenceResults ev={ev} />
                       {!isReadOnly && (
                         <div className="cp-step-actions">
-                          <p className="cp-solve-hint">If this is the correct merchant, click <strong>Accept &amp; Solve</strong> to lock it in and claim points towards your next promotion. If this doesn't look correct, continue to the next step in the investigation.</p>
-                          <div className="cp-step-actions-row">
-                            <button className="cp-solve-btn" onClick={() => openConfirm(step.key)}>
-                              {step.key === 'local_knowledge' ? 'Send for review →' : 'Accept & solve case →'}
-                            </button>
-                            {isNext && activeStepIdx === idx && (
-                              <>
-                                <span style={{ fontSize: '.65rem', color: 'var(--text-dim)' }}>or</span>
+                          {(step.key !== 'web_intelligence' || ev.merchant_name) ? (
+                            <>
+                              <p className="cp-solve-hint">If this is the correct merchant, click <strong>Accept &amp; Solve</strong> to lock it in and claim points towards your next promotion. If this doesn't look correct, continue to the next step in the investigation.</p>
+                              <div className="cp-step-actions-row">
+                                <button className="cp-solve-btn" onClick={() => openConfirm(step.key)}>
+                                  {step.key === 'local_knowledge' ? 'Send for review →' : 'Accept & solve case →'}
+                                </button>
+                                {isNext && activeStepIdx === idx && (
+                                  <>
+                                    <span style={{ fontSize: '.65rem', color: 'var(--text-dim)' }}>or</span>
+                                    <button className="cp-next-btn" onClick={() => setActiveStepIdx(idx + 1)}>
+                                      Continue to {STEPS[idx + 1].label} ↓
+                                    </button>
+                                  </>
+                                )}
+                              </div>
+                            </>
+                          ) : (
+                            isNext && activeStepIdx === idx && (
+                              <div className="cp-step-actions-row">
                                 <button className="cp-next-btn" onClick={() => setActiveStepIdx(idx + 1)}>
                                   Continue to {STEPS[idx + 1].label} ↓
                                 </button>
-                              </>
-                            )}
-                          </div>
+                              </div>
+                            )
+                          )}
                         </div>
                       )}
                     </>
