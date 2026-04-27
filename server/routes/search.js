@@ -20,7 +20,21 @@ router.get('/', async (req, res) => {
          m.website,
          m.logo_url,
          s.id              AS submission_id,
-         s.upvote_count
+         s.upvote_count,
+         (
+           SELECT e.confidence
+           FROM   evidence e
+           JOIN   cases c ON c.id = e.case_id
+           WHERE  lower(c.descriptor) = lower(d.text)
+             AND  e.confidence IS NOT NULL
+           ORDER BY CASE e.confidence
+                      WHEN 'high'   THEN 3
+                      WHEN 'medium' THEN 2
+                      WHEN 'low'    THEN 1
+                      ELSE 0
+                    END DESC
+           LIMIT 1
+         ) AS confidence
        FROM descriptors d
        JOIN submissions  s ON s.id = d.canonical_submission_id
        JOIN merchants    m ON m.id = s.merchant_id

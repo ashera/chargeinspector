@@ -104,7 +104,14 @@ const CSS = `
   }
   .sp-meta a { color: var(--accent); text-decoration: none; }
   .sp-meta a:hover { text-decoration: underline; }
-  .sp-votes { font-size: .65rem; color: var(--text-muted); margin-top: .5rem; }
+  .sp-votes { font-size: .65rem; color: var(--text-muted); margin-top: .5rem; display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
+  .sp-confidence {
+    display: inline-block; font-size: .55rem; letter-spacing: .1em; text-transform: uppercase;
+    padding: .15rem .5rem; border-radius: 2px;
+  }
+  .sp-confidence.high   { color: #4ade80; border: 1px solid #1e3a2a; background: #0d1a0f; }
+  .sp-confidence.medium { color: #fbbf24; border: 1px solid #3a3010; background: #1a1608; }
+  .sp-confidence.low    { color: var(--text-dim); border: 1px solid var(--border); }
   .sp-card-action { margin-left: auto; flex-shrink: 0; align-self: center; }
   .sp-details-btn {
     padding: .55rem 1rem; border: 1px solid var(--border); border-radius: 2px;
@@ -413,7 +420,12 @@ export default function SearchPage({ navigate }) {
                       {r.location && <span>📍 {r.location}</span>}
                       {r.website  && <a href={r.website} target="_blank" rel="noreferrer">🌐 {r.website}</a>}
                     </div>
-                    <div className="sp-votes">{r.upvote_count} confirmation{r.upvote_count !== 1 ? 's' : ''}</div>
+                    <div className="sp-votes">
+                      <span>{r.upvote_count} confirmation{r.upvote_count !== 1 ? 's' : ''}</span>
+                      {r.confidence && (
+                        <span className={`sp-confidence ${r.confidence}`}>{r.confidence} confidence</span>
+                      )}
+                    </div>
                   </div>
                   <div className="sp-card-action">
                     <button
