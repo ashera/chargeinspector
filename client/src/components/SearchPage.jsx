@@ -165,6 +165,7 @@ const CSS = `
     background: var(--bg-card); border: 1px solid var(--border); border-radius: 3px;
     padding: 1rem 1.25rem; display: flex; flex-direction: column; gap: .65rem;
   }
+  .sp-rank-tagline { font-size: .72rem; color: var(--text-muted); }
   .sp-rank-row { display: flex; justify-content: space-between; align-items: baseline; gap: .5rem; }
   .sp-rank-name { font-size: .8rem; color: var(--text); }
   .sp-rank-icon { font-size: 1rem; margin-right: .3rem; }
@@ -461,6 +462,7 @@ export default function SearchPage({ navigate }) {
           : 100;
         return (
           <div className="sp-rank-bar">
+            <div className="sp-rank-tagline">Identify merchants to earn points and increase your rank!</div>
             <div className="sp-rank-row">
               <span className="sp-rank-name">
                 <span className="sp-rank-icon">{rank.icon}</span>{rank.name}
