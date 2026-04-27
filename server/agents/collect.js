@@ -13,6 +13,12 @@ Search the web broadly for this descriptor. Look for:
 - Official company pages, press mentions, or any web presence matching the descriptor
 - Any confirmed associations reported online
 
+Cast the net wide — also search:
+- GitHub repositories, READMEs, and issues where developers mention this descriptor in billing or payment contexts
+- Reddit threads (r/personalfinance, r/cscareerquestions, r/webdev, etc.) where users discuss or question this charge
+- Consumer complaint boards and review sites (Trustpilot, BBB, Yelp, Trustpilot) where the descriptor appears
+- Developer documentation, pricing pages, and API billing guides that reference this descriptor
+
 Write your description in Lestrade's voice: formal, methodical, confident in the legwork. First person ("My investigation confirms...", "I've traced this descriptor to...", "Scotland Yard's inquiry has established..."). 2-3 sentences. If nothing was found, Lestrade reports the dead end with characteristic bluntness.
 
 Respond with ONLY a valid JSON object — no markdown fences, no other text:
