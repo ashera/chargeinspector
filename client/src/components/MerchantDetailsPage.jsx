@@ -89,6 +89,33 @@ const CSS = `
   .md-confidence.medium { color: #fbbf24;  border: 1px solid #3a3010; background: #1a1608; }
   .md-confidence.low    { color: var(--text-dim); border: 1px solid var(--border); }
   .md-location-sub { font-size: .78rem; color: var(--text-muted); margin-top: .35rem; }
+
+  .md-case-card {
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 3px;
+    padding: 1.25rem;
+  }
+  .md-case-quote {
+    font-size: .8rem; line-height: 1.75; color: var(--text);
+    border-left: 3px solid var(--accent); padding-left: 1rem;
+    font-style: italic; margin: 0 0 1.1rem;
+  }
+  .md-case-meta { display: flex; flex-wrap: wrap; gap: .35rem 2rem; margin-bottom: .9rem; }
+  .md-case-meta-item { font-size: .7rem; color: var(--text-muted); }
+  .md-case-meta-item strong { color: var(--text); font-weight: 500; }
+  .md-case-hint {
+    font-size: .72rem; color: var(--text-muted); margin-bottom: .9rem;
+    padding: .5rem .75rem; border: 1px solid var(--border); border-radius: 2px;
+    background: var(--bg-page);
+  }
+  .md-case-hint em { color: var(--text); font-style: normal; }
+  .md-case-sources-label {
+    font-size: .58rem; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--text-dim); margin-bottom: .4rem;
+  }
+  .md-case-source { font-size: .72rem; color: var(--text-muted); padding: .15rem 0; }
+  .md-case-source a { color: var(--accent); text-decoration: none; }
+  .md-case-source a:hover { text-decoration: underline; }
+
   @media (max-width: 500px) {
     .md-header { gap: 1rem; }
     .md-name { font-size: 1.5rem; }
@@ -110,6 +137,8 @@ export default function MerchantDetailsPage({ merchant, navigate }) {
   const [msg, setMsg]             = useState(null);
   const [descriptors, setDescriptors] = useState([]);
   const [confidence, setConfidence]   = useState(null);
+  const [caseData, setCaseData]       = useState(null);
+  const [evidenceRows, setEvidenceRows] = useState([]);
 
   useEffect(() => {
     fetch(`/api/merchants/${merchant.merchant_id}/descriptors`)
@@ -123,9 +152,11 @@ export default function MerchantDetailsPage({ merchant, navigate }) {
       .then(r => r.json())
       .then(async ({ case: c }) => {
         if (!c) return;
+        setCaseData(c);
         const evRes  = await fetch(`/api/cases/${c.id}/evidence`);
         const evData = await evRes.json();
         const rows   = evData.evidence || [];
+        setEvidenceRows(rows);
         const order  = { high: 3, medium: 2, low: 1 };
         const best   = rows.reduce((acc, e) => {
           if (e.confidence && (order[e.confidence] ?? 0) > (order[acc] ?? 0)) return e.confidence;
@@ -222,6 +253,66 @@ export default function MerchantDetailsPage({ merchant, navigate }) {
           </div>
         )}
       </div>
+
+      {(() => {
+        const webIntel = evidenceRows.find(e => e.type === 'web_intelligence');
+        const local    = evidenceRows.find(e => e.type === 'local_knowledge');
+        if (!webIntel && !local && !caseData) return null;
+
+        const description  = webIntel?.description || local?.description || null;
+        const businessType = webIntel?.business_type || local?.business_type || null;
+        const sources      = (webIntel?.sources || local?.sources || []).slice(0, 4);
+        const solvedBy     = caseData?.solved_by;
+        const locationHint = caseData?.location_hint;
+
+        const fmtDate = (iso) => iso
+          ? new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })
+          : null;
+
+        return (
+          <div className="md-section">
+            <div className="md-section-title">Investigation</div>
+            <div className="md-case-card">
+              {description && (
+                <p className="md-case-quote">{description}</p>
+              )}
+              <div className="md-case-meta">
+                {caseData?.created_at && (
+                  <span className="md-case-meta-item">
+                    Case opened <strong>{fmtDate(caseData.created_at)}</strong>
+                  </span>
+                )}
+                {solvedBy && (
+                  <span className="md-case-meta-item">
+                    Solved by <strong>Det. {solvedBy.last_name || solvedBy.username}</strong>
+                    {solvedBy.solved_at && <> on <strong>{fmtDate(solvedBy.solved_at)}</strong></>}
+                  </span>
+                )}
+                {businessType && (
+                  <span className="md-case-meta-item">
+                    Business type <strong>{businessType}</strong>
+                  </span>
+                )}
+              </div>
+              {locationHint && (
+                <div className="md-case-hint">
+                  Location clue: <em>"{locationHint}"</em>
+                </div>
+              )}
+              {sources.length > 0 && (
+                <div>
+                  <div className="md-case-sources-label">Sources</div>
+                  {sources.map((s, i) => (
+                    <div key={i} className="md-case-source">
+                      <a href={s.url} target="_blank" rel="noreferrer">{s.title || s.url}</a>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })()}
 
       {descriptors.length > 0 && (
         <div className="md-section">
