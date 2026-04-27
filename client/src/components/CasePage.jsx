@@ -58,8 +58,19 @@ const STEPS = [
     agent: {
       name: 'Inspector Lestrade',
       division: 'Web Intelligence Division',
-      loadingLabel: 'Inspector Lestrade is on the case…',
-      loadingSub: 'Combing through official records and web intelligence',
+      activities: [
+        'Searching the open web for intelligence…',
+        'Cross-referencing public company records…',
+        'Investigating GitHub repositories…',
+        'Scouring Reddit for community reports…',
+        'Consulting consumer complaint boards…',
+        'Checking Trustpilot and review sites…',
+        'Searching press archives and news mentions…',
+        'Examining developer billing documentation…',
+        'Tracing the descriptor through business registries…',
+        'Analysing web presence and domain records…',
+        'Piecing together the evidence…',
+      ],
     },
   },
   { key: 'local_knowledge', icon: '🗣️', label: 'Local Knowledge', manual: true,
@@ -379,6 +390,16 @@ const CSS = `
   @keyframes cp-blink {
     0%, 100% { opacity: 1; } 50% { opacity: .3; }
   }
+  @keyframes cp-fade-activity {
+    0%   { opacity: 0; transform: translateY(4px); }
+    15%  { opacity: 1; transform: translateY(0); }
+    80%  { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-4px); }
+  }
+  .cp-loader-activity {
+    animation: cp-fade-activity 2.8s ease-in-out forwards;
+  }
+
   .cp-loader {
     display: flex; align-items: center; gap: 1.25rem;
     padding: .75rem 0 .5rem;
@@ -608,6 +629,35 @@ function EvidenceResults({ ev }) {
         </div>
       )}
     </>
+  );
+}
+
+function LestradeLoader({ agent }) {
+  const activities = agent?.activities ?? ['Investigating…'];
+  const [idx, setIdx]     = useState(0);
+  const [tick, setTick]   = useState(0); // incremented to re-trigger animation
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setIdx(i => (i + 1) % activities.length);
+      setTick(t => t + 1);
+    }, 2800);
+    return () => clearInterval(id);
+  }, [activities.length]);
+
+  return (
+    <div className="cp-loader">
+      <div className="cp-loader-radar">
+        <div className="cp-loader-ring" />
+        <div className="cp-loader-ring" />
+        <div className="cp-loader-ring" />
+        <div className="cp-loader-dot" />
+      </div>
+      <div>
+        <div className="cp-loader-label">{agent ? `${agent.name} is on the case…` : 'Investigating…'}</div>
+        <div key={tick} className="cp-loader-sub cp-loader-activity">{activities[idx]}</div>
+      </div>
+    </div>
   );
 }
 
@@ -1190,18 +1240,7 @@ export default function CasePage({ caseData: initialData, navigate }) {
                             label={step.label}
                           />
                         ) : isCollecting ? (
-                          <div className="cp-loader">
-                            <div className="cp-loader-radar">
-                              <div className="cp-loader-ring" />
-                              <div className="cp-loader-ring" />
-                              <div className="cp-loader-ring" />
-                              <div className="cp-loader-dot" />
-                            </div>
-                            <div>
-                              <div className="cp-loader-label">{step.agent ? step.agent.loadingLabel : 'Searching the web…'}</div>
-                              <div className="cp-loader-sub">{step.agent ? step.agent.loadingSub : 'Agent is investigating — this may take a moment'}</div>
-                            </div>
-                          </div>
+                          <LestradeLoader agent={step.agent} />
                         ) : (
                           <button
                             className={`cp-collect-btn${isCta ? ' cta' : ''}`}
