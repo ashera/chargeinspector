@@ -392,12 +392,12 @@ const CSS = `
   }
   @keyframes cp-fade-activity {
     0%   { opacity: 0; transform: translateY(4px); }
-    15%  { opacity: 1; transform: translateY(0); }
-    80%  { opacity: 1; transform: translateY(0); }
+    8%   { opacity: 1; transform: translateY(0); }
+    88%  { opacity: 1; transform: translateY(0); }
     100% { opacity: 0; transform: translateY(-4px); }
   }
   .cp-loader-activity {
-    animation: cp-fade-activity 2.8s ease-in-out forwards;
+    animation: cp-fade-activity 7s ease-in-out forwards;
   }
 
   .cp-loader {
@@ -641,7 +641,7 @@ function LestradeLoader({ agent }) {
     const id = setInterval(() => {
       setIdx(i => (i + 1) % activities.length);
       setTick(t => t + 1);
-    }, 2800);
+    }, 7000);
     return () => clearInterval(id);
   }, [activities.length]);
 
