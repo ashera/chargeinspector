@@ -2,6 +2,40 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth.jsx';
 import { RANKS, getCurrentRank } from '../constants/ranks.js';
 
+const LESTRADE_SVG = `<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="40" cy="40" r="40" fill="#0f1f0f"/>
+  <!-- coat/shoulders -->
+  <ellipse cx="40" cy="76" rx="26" ry="18" fill="#1a2e1a"/>
+  <ellipse cx="40" cy="68" rx="16" ry="12" fill="#162614"/>
+  <!-- cravat -->
+  <polygon points="40,50 36,60 40,57 44,60" fill="#e8e0d0"/>
+  <!-- neck -->
+  <rect x="36" y="48" width="8" height="7" fill="#c8a882"/>
+  <!-- head -->
+  <ellipse cx="40" cy="40" rx="15" ry="16" fill="#c8a882"/>
+  <!-- hat brim -->
+  <ellipse cx="40" cy="26" rx="19" ry="4" fill="#111"/>
+  <!-- hat crown -->
+  <rect x="24" y="10" width="32" height="17" rx="3" fill="#1a1a1a"/>
+  <!-- hat highlight -->
+  <rect x="26" y="11" width="4" height="15" rx="2" fill="#2a2a2a" opacity="0.5"/>
+  <!-- hat band -->
+  <rect x="24" y="24" width="32" height="3" fill="#0d0d0d"/>
+  <!-- eyes -->
+  <ellipse cx="34" cy="40" rx="2.5" ry="2" fill="#fff"/>
+  <circle cx="34" cy="40" r="1.2" fill="#2a1a08"/>
+  <ellipse cx="46" cy="40" rx="2.5" ry="2" fill="#fff"/>
+  <circle cx="46" cy="40" r="1.2" fill="#2a1a08"/>
+  <!-- eyebrows -->
+  <path d="M31,36 Q34,34 37,36" stroke="#5a3a1a" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <path d="M43,36 Q46,34 49,36" stroke="#5a3a1a" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <!-- nose -->
+  <ellipse cx="40" cy="44" rx="2" ry="1.5" fill="#b8906a"/>
+  <!-- mustache -->
+  <path d="M33,48 Q37,45 40,47 Q43,45 47,48" stroke="#3a2010" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M35,48 Q38,50 40,49 Q42,50 45,48" stroke="#3a2010" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+</svg>`;
+
 const PRESET_MAP = {
   'preset:detective':  { emoji: '🕵️', bg: '#0f1f3a' },
   'preset:magnifier':  { emoji: '🔍', bg: '#1a3a2a' },
@@ -208,10 +242,49 @@ const CSS = `
     font-size: .55rem; letter-spacing: .08em; color: var(--text-dim); line-height: 1;
   }
   .cp-agent-filed {
-    display: inline-block; margin-top: .65rem;
-    font-size: .58rem; letter-spacing: .1em; text-transform: uppercase;
-    color: var(--text-dim); border-top: 1px solid var(--bg-card); padding-top: .5rem; width: 100%;
+    display: flex; align-items: center; gap: .6rem; margin-top: .65rem;
+    border-top: 1px solid var(--bg-card); padding-top: .65rem; width: 100%;
   }
+  .cp-agent-avatar {
+    width: 32px; height: 32px; border-radius: 50%; cursor: pointer; flex-shrink: 0;
+    border: 1px solid var(--border); transition: border-color .2s;
+  }
+  .cp-agent-avatar:hover { border-color: var(--accent); }
+  .cp-agent-filed-text {
+    font-size: .58rem; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim);
+  }
+  .cp-agent-filed-text button {
+    background: none; border: none; font-family: var(--font-ui);
+    font-size: .58rem; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--text-dim); cursor: pointer; padding: 0; text-decoration: underline;
+    text-decoration-style: dotted;
+  }
+  .cp-agent-filed-text button:hover { color: var(--accent); }
+
+  /* Lestrade info modal */
+  .cp-lestrade-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,.65); z-index: 400;
+    display: flex; align-items: center; justify-content: center; padding: 1.5rem;
+  }
+  .cp-lestrade-modal {
+    background: var(--bg-page); border: 1px solid var(--border); border-radius: 4px;
+    max-width: 420px; width: 100%; padding: 1.75rem;
+  }
+  .cp-lestrade-header { display: flex; gap: 1.25rem; align-items: flex-start; margin-bottom: 1.25rem; }
+  .cp-lestrade-avatar-lg { width: 72px; height: 72px; border-radius: 50%; border: 1px solid var(--border); flex-shrink: 0; }
+  .cp-lestrade-name { font-family: var(--font-display); font-size: 1.3rem; color: var(--text); margin-bottom: .2rem; }
+  .cp-lestrade-division { font-size: .6rem; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+  .cp-lestrade-body { font-size: .75rem; color: var(--text-muted); line-height: 1.7; margin-bottom: 1rem; }
+  .cp-lestrade-list { list-style: none; padding: 0; margin: 0 0 1.5rem; display: flex; flex-direction: column; gap: .4rem; }
+  .cp-lestrade-list li { font-size: .72rem; color: var(--text-muted); display: flex; gap: .5rem; }
+  .cp-lestrade-list li::before { content: "—"; color: var(--accent); flex-shrink: 0; }
+  .cp-lestrade-close {
+    width: 100%; padding: .6rem; border-radius: 2px;
+    background: none; border: 1px solid var(--border); color: var(--text-muted);
+    font-family: var(--font-ui); font-size: .65rem; letter-spacing: .1em; text-transform: uppercase;
+    cursor: pointer;
+  }
+  .cp-lestrade-close:hover { border-color: var(--text-muted); color: var(--text); }
 
   /* CTA step — the next action the user should take */
   .cp-step.is-cta { border-color: var(--accent); }
@@ -538,6 +611,35 @@ function EvidenceResults({ ev }) {
   );
 }
 
+function LestradeModal({ onClose }) {
+  const avatarSrc = `data:image/svg+xml;base64,${btoa(LESTRADE_SVG)}`;
+  return (
+    <div className="cp-lestrade-overlay" onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="cp-lestrade-modal">
+        <div className="cp-lestrade-header">
+          <img className="cp-lestrade-avatar-lg" src={avatarSrc} alt="Inspector Lestrade" />
+          <div>
+            <div className="cp-lestrade-name">Inspector Lestrade</div>
+            <div className="cp-lestrade-division">Web Intelligence Division</div>
+          </div>
+        </div>
+        <p className="cp-lestrade-body">
+          Inspector Lestrade is an artificial intelligence agent powered by Claude. When a new descriptor case is opened, Lestrade is dispatched to carry out a methodical open-source investigation across the web.
+        </p>
+        <ul className="cp-lestrade-list">
+          <li>Searches the open web and official company pages for the merchant behind the descriptor</li>
+          <li>Investigates GitHub repositories, READMEs, and developer discussions for billing references</li>
+          <li>Scours Reddit, consumer forums, and complaint boards for community reports of the charge</li>
+          <li>Consults business registries, press mentions, and review sites for corroborating evidence</li>
+          <li>Locates the merchant's official logo from their own website</li>
+          <li>Files a confidence-rated report with sources for the community to review</li>
+        </ul>
+        <button className="cp-lestrade-close" onClick={onClose}>Close</button>
+      </div>
+    </div>
+  );
+}
+
 function ConfirmModal({ modal, onConfirm, onCancel, confirming, error }) {
   const d = modal.data;
   return (
@@ -690,6 +792,7 @@ export default function CasePage({ caseData: initialData, navigate }) {
   const [errors, setErrors]     = useState({});
   const [activeStepIdx, setActiveStepIdx] = useState(0);
   const [confirmModal, setConfirmModal] = useState(null); // { data, formData|null }
+  const [lestradeOpen, setLestradeOpen] = useState(false);
   const [solveError, setSolveError]   = useState(null);
   const [solving, setSolving]         = useState(false);
   const [solveSuccess, setSolveSuccess] = useState(false);
@@ -1043,7 +1146,19 @@ export default function CasePage({ caseData: initialData, navigate }) {
                     <>
                       <EvidenceResults ev={ev} />
                       {step.agent && (
-                        <span className="cp-agent-filed">Filed by {step.agent.name}, {step.agent.division}</span>
+                        <div className="cp-agent-filed">
+                          <img
+                            className="cp-agent-avatar"
+                            src={`data:image/svg+xml;base64,${btoa(LESTRADE_SVG)}`}
+                            alt={step.agent.name}
+                            onClick={() => setLestradeOpen(true)}
+                          />
+                          <span className="cp-agent-filed-text">
+                            Filed by{' '}
+                            <button onClick={() => setLestradeOpen(true)}>{step.agent.name}</button>
+                            , {step.agent.division}
+                          </span>
+                        </div>
                       )}
                       {!isReadOnly && (
                         <div className="cp-step-actions">
@@ -1116,6 +1231,7 @@ export default function CasePage({ caseData: initialData, navigate }) {
         </div>
       </div>
 
+      {lestradeOpen && <LestradeModal onClose={() => setLestradeOpen(false)} />}
       {confirmModal && (
         <ConfirmModal
           modal={confirmModal}
