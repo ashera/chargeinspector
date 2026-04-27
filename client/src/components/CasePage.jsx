@@ -57,7 +57,7 @@ const STEPS = [
     desc: 'Inspector Lestrade will search the open web and public records for intelligence on this descriptor.',
     agent: {
       name: 'Inspector Lestrade',
-      division: 'Task Force Division',
+      division: 'Web Intelligence Division',
       activities: [
         'Searching the open web for intelligence…',
         'Persuading Holmes to put down the violin and focus…',
@@ -681,7 +681,7 @@ function LestradeModal({ onClose }) {
           <img className="cp-lestrade-avatar-lg" src={avatarSrc} alt="Inspector Lestrade" />
           <div>
             <div className="cp-lestrade-name">Inspector Lestrade</div>
-            <div className="cp-lestrade-division">Task Force Division</div>
+            <div className="cp-lestrade-division">Web Intelligence Division</div>
           </div>
         </div>
         <p className="cp-lestrade-body">
