@@ -166,6 +166,22 @@ const CSS = `
     padding: 1rem 1.25rem; display: flex; flex-direction: column; gap: .65rem;
   }
   .sp-rank-tagline { font-size: .72rem; color: var(--text-muted); }
+
+  .sp-cta-card {
+    max-width: 600px; margin: 2.5rem auto 0;
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 3px;
+    padding: 1.25rem; display: flex; flex-direction: column; gap: .75rem;
+  }
+  .sp-cta-title { font-family: var(--font-display); font-size: 1.1rem; color: var(--text); }
+  .sp-cta-body  { font-size: .75rem; color: var(--text-muted); line-height: 1.6; }
+  .sp-cta-btn {
+    align-self: flex-start;
+    padding: .65rem 1.5rem; background: var(--accent); border: none; border-radius: 2px;
+    font-family: var(--font-ui); font-size: .65rem; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--bg-page); font-weight: 500;
+    cursor: pointer; transition: opacity .2s;
+  }
+  .sp-cta-btn:hover { opacity: .85; }
   .sp-rank-row { display: flex; justify-content: space-between; align-items: baseline; gap: .5rem; }
   .sp-rank-name { font-size: .8rem; color: var(--text); }
   .sp-rank-icon { font-size: 1rem; margin-right: .3rem; }
@@ -450,6 +466,17 @@ export default function SearchPage({ navigate }) {
               Dismiss
             </button>
           </div>
+        </div>
+      )}
+
+      {!isAuthenticated && (
+        <div className="sp-cta-card">
+          <div className="sp-cta-title">Join the investigation</div>
+          <div className="sp-cta-body">
+            Create a free account to help identify mystery charges, earn points, and climb the ranks.
+            Every merchant you crack helps the whole community.
+          </div>
+          <button className="sp-cta-btn" onClick={() => navigate('register')}>Create free account →</button>
         </div>
       )}
 
