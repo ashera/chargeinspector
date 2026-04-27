@@ -1133,7 +1133,7 @@ export default function CasePage({ caseData: initialData, navigate }) {
           ) : (
             <>
               The billing descriptor &ldquo;{data.descriptor}&rdquo; hasn&rsquo;t been identified yet.
-              Run the Web Intelligence search to let Inspector Lestrade identify the merchant. If the results don&rsquo;t match, you can contribute your own local knowledge to help solve the case.
+              Start by adding any location clues you think may help in the section below, then brief Inspector Lestrade using the button in the Web Intelligence section to begin the search.
             </>
           )}
         </div>
