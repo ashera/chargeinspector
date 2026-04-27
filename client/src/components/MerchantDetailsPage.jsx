@@ -176,6 +176,22 @@ export default function MerchantDetailsPage({ merchant, navigate }) {
       </div>
 
       <div className="md-section">
+        <div className="md-section-title">Community confirmations</div>
+        <div className="md-votes">
+          <div>
+            <div className="md-votes-count">{votes}</div>
+            <div className="md-votes-label">confirmation{votes !== 1 ? 's' : ''} from the community</div>
+          </div>
+          {isAuthenticated && (
+            <button className="md-vote-btn" onClick={vote} disabled={busy}>
+              {busy ? '…' : 'Confirm this match'}
+            </button>
+          )}
+        </div>
+        {msg && <p className={`md-msg ${msg.ok ? 'ok' : 'err'}`}>{msg.text}</p>}
+      </div>
+
+      <div className="md-section">
         <div className="md-section-title">Merchant details</div>
         {merchant.location && (
           <div className="md-row">
@@ -241,21 +257,6 @@ export default function MerchantDetailsPage({ merchant, navigate }) {
         </div>
       )}
 
-      <div className="md-section">
-        <div className="md-section-title">Community confirmations</div>
-        <div className="md-votes">
-          <div>
-            <div className="md-votes-count">{votes}</div>
-            <div className="md-votes-label">confirmation{votes !== 1 ? 's' : ''} from the community</div>
-          </div>
-          {isAuthenticated && (
-            <button className="md-vote-btn" onClick={vote} disabled={busy}>
-              {busy ? '…' : 'Confirm this match'}
-            </button>
-          )}
-        </div>
-        {msg && <p className={`md-msg ${msg.ok ? 'ok' : 'err'}`}>{msg.text}</p>}
-      </div>
     </>
   );
 }
