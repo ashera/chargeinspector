@@ -1144,6 +1144,9 @@ export default function CasePage({ caseData: initialData, navigate }) {
           Do you remember where this charge might have occurred? A city, neighbourhood, type of venue,
           or any other context can help narrow down the merchant.
         </p>
+        <p className="cp-hint-sub">
+          Tell us as much as you can so it can be used by our Web Intelligence Agent in the next step.
+        </p>
         <textarea
           className="cp-hint-textarea"
           placeholder="e.g. Used a parking machine in central London last Tuesday, or online purchase from a US-based store…"
