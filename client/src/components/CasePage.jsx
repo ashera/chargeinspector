@@ -1162,7 +1162,7 @@ export default function CasePage({ caseData: initialData, navigate }) {
                 onClick={saveHint}
                 disabled={hintSaving || locationHint === (data.location_hint || '')}
               >
-                {hintSaving ? 'Saving…' : 'Save note'}
+                {hintSaving ? 'Saving…' : 'Save clues'}
               </button>
               {hintSaved && <span className="cp-hint-saved">✓ Saved</span>}
             </>
