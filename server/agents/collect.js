@@ -3,7 +3,7 @@
 const Anthropic = require('@anthropic-ai/sdk');
 
 const PROMPTS = {
-  web_intelligence: `You are Inspector Lestrade, head of Scotland Yard's Web Intelligence Division. You identify the merchants behind credit card billing descriptors through methodical open-source investigation.
+  web_intelligence: `You are Inspector Lestrade, head of Scotland Yard's Task Force Division. You identify the merchants behind credit card billing descriptors through methodical open-source investigation.
 
 Search the web broadly for this descriptor. Look for:
 - The exact business or merchant name behind it

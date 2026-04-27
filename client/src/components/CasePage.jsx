@@ -53,11 +53,11 @@ const PRESET_MAP = {
 
 const STEPS = [
   {
-    key: 'web_intelligence', icon: '🌐', label: 'Web Intelligence', manual: false,
+    key: 'web_intelligence', icon: '🌐', label: 'Task Force', manual: false,
     desc: 'Inspector Lestrade will search the open web and public records for intelligence on this descriptor.',
     agent: {
       name: 'Inspector Lestrade',
-      division: 'Web Intelligence Division',
+      division: 'Task Force Division',
       activities: [
         'Searching the open web for intelligence…',
         'Persuading Holmes to put down the violin and focus…',
@@ -681,7 +681,7 @@ function LestradeModal({ onClose }) {
           <img className="cp-lestrade-avatar-lg" src={avatarSrc} alt="Inspector Lestrade" />
           <div>
             <div className="cp-lestrade-name">Inspector Lestrade</div>
-            <div className="cp-lestrade-division">Web Intelligence Division</div>
+            <div className="cp-lestrade-division">Task Force Division</div>
           </div>
         </div>
         <p className="cp-lestrade-body">
@@ -1136,7 +1136,7 @@ export default function CasePage({ caseData: initialData, navigate }) {
           ) : (
             <>
               The billing descriptor &ldquo;{data.descriptor}&rdquo; hasn&rsquo;t been identified yet.
-              Start by adding any location clues you think may help in the section below, then brief Inspector Lestrade using the button in the Web Intelligence section to begin the search.
+              Start by adding any location clues you think may help in the section below, then brief Inspector Lestrade using the button in the Task Force section to begin the search.
             </>
           )}
         </div>
@@ -1149,7 +1149,7 @@ export default function CasePage({ caseData: initialData, navigate }) {
           or any other context can help narrow down the merchant.
         </p>
         <p className="cp-hint-sub">
-          Tell us as much as you can so it can be used by our Web Intelligence Agent in the next step.
+          Tell us as much as you can so it can be used by our Task Force Agent in the next step.
         </p>
         <textarea
           className="cp-hint-textarea"
@@ -1172,7 +1172,7 @@ export default function CasePage({ caseData: initialData, navigate }) {
 
       <div className="cp-steps">
 
-        {/* ── Web Intelligence ─────────────────────────────── */}
+        {/* ── Task Force ─────────────────────────────── */}
         {(() => {
           const step        = STEPS[0];
           const ev          = evidence[step.key];
