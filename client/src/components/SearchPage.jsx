@@ -435,9 +435,9 @@ export default function SearchPage({ navigate }) {
                 Not the right match?{' '}
                 <span
                   style={{ color: 'var(--accent)', cursor: 'pointer' }}
-                  onClick={() => navigate('submit', { descriptor: query })}
+                  onClick={handleInvestigate}
                 >
-                  Submit a new one →
+                  Start an investigation →
                 </span>
               </p>
             </>
