@@ -1142,24 +1142,24 @@ export default function CasePage({ caseData: initialData, navigate }) {
 
                 {isOpen && <div className="cp-step-body">
                   {step.intro && <p className="cp-step-intro">{step.intro}</p>}
+                  {step.agent && (
+                    <div className="cp-agent-filed">
+                      <img
+                        className="cp-agent-avatar"
+                        src={`data:image/svg+xml;base64,${btoa(LESTRADE_SVG)}`}
+                        alt={step.agent.name}
+                        onClick={() => setLestradeOpen(true)}
+                      />
+                      <span className="cp-agent-filed-text">
+                        {hasData ? 'Filed by ' : 'Assigned to '}
+                        <button onClick={() => setLestradeOpen(true)}>{step.agent.name}</button>
+                        , {step.agent.division}
+                      </span>
+                    </div>
+                  )}
                   {hasData ? (
                     <>
                       <EvidenceResults ev={ev} />
-                      {step.agent && (
-                        <div className="cp-agent-filed">
-                          <img
-                            className="cp-agent-avatar"
-                            src={`data:image/svg+xml;base64,${btoa(LESTRADE_SVG)}`}
-                            alt={step.agent.name}
-                            onClick={() => setLestradeOpen(true)}
-                          />
-                          <span className="cp-agent-filed-text">
-                            Filed by{' '}
-                            <button onClick={() => setLestradeOpen(true)}>{step.agent.name}</button>
-                            , {step.agent.division}
-                          </span>
-                        </div>
-                      )}
                       {!isReadOnly && (
                         <div className="cp-step-actions">
                           <p className="cp-solve-hint">If this is the correct merchant, click <strong>Accept &amp; Solve</strong> to lock it in and claim points towards your next promotion. If this doesn't look correct, continue to the next step in the investigation.</p>
