@@ -21,7 +21,9 @@ function Router() {
   if (loading) return <div style={{ color: 'var(--text)', padding: '2rem' }}>Loading…</div>;
 
   if (page === 'login' || page === 'register') {
-    return <AuthPage onAuth={() => setPage('search')} />;
+    const returnTo    = pageState.returnTo ?? 'search';
+    const returnState = pageState.returnState ?? {};
+    return <AuthPage onAuth={() => { setPage(returnTo); setPageState(returnState); }} />;
   }
 
   const navigate = (p, state = {}) => {

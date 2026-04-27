@@ -192,6 +192,13 @@ const CSS = `
   .cp-hint-save:disabled { opacity: .45; cursor: default; }
   .cp-hint-saved { font-size: .65rem; color: var(--accent); letter-spacing: .04em; }
   .cp-hint-note { font-size: .62rem; color: var(--text-dim); font-style: italic; }
+  .cp-sign-in-btn {
+    font-style: normal; margin-left: .5rem;
+    padding: .2rem .65rem; font-size: .58rem; letter-spacing: .1em; text-transform: uppercase;
+    border: 1px solid var(--border); border-radius: 2px; background: none;
+    color: var(--text-muted); font-family: var(--font-ui); cursor: pointer;
+  }
+  .cp-sign-in-btn:hover { border-color: var(--accent); color: var(--accent); }
 
   /* Investigation Steps */
   .cp-steps-header {
@@ -867,6 +874,8 @@ export default function CasePage({ caseData: initialData, navigate }) {
   const [resetting, setResetting]       = useState(false);
   const [solveModal, setSolveModal]     = useState(null);
 
+  const goToSignIn = () => navigate('login', { returnTo: 'case', returnState: { caseData: initialData } });
+
   useEffect(() => {
     fetch(`/api/cases/${initialData.id}`)
       .then(r => r.json())
@@ -1160,7 +1169,7 @@ export default function CasePage({ caseData: initialData, navigate }) {
         />
         <div className="cp-hint-footer">
           {!isAuthenticated && !isSolved
-            ? <span className="cp-hint-note">Sign in to add location clues</span>
+            ? <span className="cp-hint-note">Sign in to add location clues<button className="cp-sign-in-btn" onClick={goToSignIn}>Sign in →</button></span>
             : hintSaving
               ? <span className="cp-hint-saved">Saving…</span>
               : hintSaved
@@ -1259,7 +1268,7 @@ export default function CasePage({ caseData: initialData, navigate }) {
                         </button>
                       )
                     ) : (
-                      <span className="cp-sign-in-note">Sign in to run this investigation</span>
+                      <span className="cp-sign-in-note">Sign in to run this investigation<button className="cp-sign-in-btn" onClick={goToSignIn}>Sign in →</button></span>
                     )}
                   </>
                 )}
@@ -1316,7 +1325,7 @@ export default function CasePage({ caseData: initialData, navigate }) {
                       submitting={isCollecting}
                     />
                   ) : (
-                    <span className="cp-sign-in-note">Sign in to contribute</span>
+                    <span className="cp-sign-in-note">Sign in to contribute<button className="cp-sign-in-btn" onClick={goToSignIn}>Sign in →</button></span>
                   )
                 )}
                 {errors[step.key] && <span className="cp-step-error">{errors[step.key]}</span>}
