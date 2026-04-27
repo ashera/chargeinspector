@@ -437,7 +437,7 @@ export default function SearchPage({ navigate }) {
                   style={{ color: 'var(--accent)', cursor: 'pointer' }}
                   onClick={handleInvestigate}
                 >
-                  Start an investigation →
+                  Check the case file →
                 </span>
               </p>
             </>
