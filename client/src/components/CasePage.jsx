@@ -766,7 +766,7 @@ function LocalKnowledgeForm({ onSubmit, submitting, label }) {
         onClick={() => onSubmit(form)}
         disabled={submitting || !form.merchant_name.trim()}
       >
-        {submitting ? 'Collecting…' : 'Accept & solve case →'}
+        {submitting ? 'Submitting…' : 'Submit for review →'}
       </button>
     </div>
   );
@@ -852,7 +852,7 @@ export default function CasePage({ caseData: initialData, navigate }) {
   const [evidence, setEvidence] = useState({});   // { type: most-recent-row }
   const [collecting, setCollecting] = useState(null);
   const [errors, setErrors]     = useState({});
-  const [activeStepIdx, setActiveStepIdx] = useState(0);
+  const [showLocalKnowledge, setShowLocalKnowledge] = useState(false);
   const [confirmModal, setConfirmModal] = useState(null); // { data, formData|null }
   const [lestradeOpen, setLestradeOpen] = useState(false);
   const [solveError, setSolveError]   = useState(null);
@@ -887,9 +887,10 @@ export default function CasePage({ caseData: initialData, navigate }) {
           if (!map[row.type]) map[row.type] = row; // already DESC, first = newest
         }
         setEvidence(map);
-        // Open up to the last step that already has evidence
-        const lastDone = STEPS.reduce((acc, s, i) => (map[s.key] ? i : acc), 0);
-        setActiveStepIdx(lastDone);
+        // Auto-reveal local knowledge if it already has data or web intel found nothing
+        if (map.local_knowledge || (map.web_intelligence && !map.web_intelligence.merchant_name)) {
+          setShowLocalKnowledge(true);
+        }
       })
       .catch(() => {});
   }, [initialData.id]);
@@ -1005,7 +1006,7 @@ export default function CasePage({ caseData: initialData, navigate }) {
     try {
       await apiFetch(`/api/cases/${initialData.id}/evidence`, { method: 'DELETE' });
       setEvidence({});
-      setActiveStepIdx(0);
+      setShowLocalKnowledge(false);
       setPendingModeration(false);
       setSolveSuccess(false);
       setResetConfirm(false);
@@ -1132,7 +1133,7 @@ export default function CasePage({ caseData: initialData, navigate }) {
           ) : (
             <>
               The billing descriptor &ldquo;{data.descriptor}&rdquo; hasn&rsquo;t been identified yet.
-              Work through each investigation step below and accept the evidence to solve the case.
+              Run the Web Intelligence search to let Inspector Lestrade identify the merchant. If the results don&rsquo;t match, you can contribute your own local knowledge to help solve the case.
             </>
           )}
         </div>
@@ -1172,150 +1173,166 @@ export default function CasePage({ caseData: initialData, navigate }) {
         </div>
       </div>
 
-      <div>
-        <div className="cp-steps-header">
-          <span className="cp-steps-title">Investigation</span>
-          {isAuthenticated && !isSolved && Object.keys(evidence).length > 0 && (
-            resetConfirm ? (
-              <div className="cp-reset-confirm">
-                <span className="cp-reset-confirm-text">Clear all evidence?</span>
-                <button className="cp-reset-confirm-yes" onClick={resetInvestigation} disabled={resetting}>
-                  {resetting ? 'Resetting…' : 'Yes, start again'}
-                </button>
-                <button className="cp-reset-confirm-no" onClick={() => setResetConfirm(false)} disabled={resetting}>
-                  Cancel
-                </button>
-              </div>
-            ) : (
-              <button className="cp-reset-btn" onClick={() => setResetConfirm(true)}>
-                ↺ Start again
-              </button>
-            )
-          )}
-        </div>
-        <div className="cp-steps">
-          {STEPS.map((step, idx) => {
-            const ev           = evidence[step.key];
-            const hasData      = !!ev;
-            const isReadOnly   = isSolved || isPendingModeration;
-            const prevDone     = idx === 0 || !!evidence[STEPS[idx - 1].key];
-            const isLocked     = !prevDone;
-            const isOpen       = idx <= activeStepIdx || (isPendingModeration && step.key === 'local_knowledge');
-            const isNext       = idx < STEPS.length - 1;
-            const isCollecting = collecting === step.key;
-            const isCta        = !hasData && !isLocked && !isReadOnly && idx === activeStepIdx;
+      <div className="cp-steps">
 
-            // Solved case: hide steps that produced no evidence
-            if (isSolved && !hasData) return null;
+        {/* ── Web Intelligence ─────────────────────────────── */}
+        {(() => {
+          const step        = STEPS[0];
+          const ev          = evidence[step.key];
+          const hasData     = !!ev;
+          const isReadOnly  = isSolved || isPendingModeration;
+          const isCollecting = collecting === step.key;
 
-            return (
-              <div key={step.key} className={`cp-step${hasData ? ' has-data' : ''}${isLocked && !isReadOnly ? ' locked' : ''}${isCta ? ' is-cta' : ''}`}>
-                <div className="cp-step-header">
-                  <div className="cp-step-num">{idx + 1}</div>
-                  <span className="cp-step-icon">{step.icon}</span>
-                  {step.agent ? (
-                    <div className="cp-step-label-wrap">
-                      <span className="cp-step-label">{step.label}</span>
-                      <span className="cp-step-sublabel">{step.agent.name} · {step.agent.division}</span>
+          if (isSolved && !hasData) return null;
+
+          return (
+            <div key={step.key} className={`cp-step${hasData ? ' has-data' : ''}`}>
+              <div className="cp-step-header">
+                <span className="cp-step-icon">{step.icon}</span>
+                <div className="cp-step-label-wrap">
+                  <span className="cp-step-label">{step.label}</span>
+                  <span className="cp-step-sublabel">{step.agent.name} · {step.agent.division}</span>
+                </div>
+                {hasData && <span className="cp-step-done">✓ Done</span>}
+                {isAuthenticated && !isReadOnly && hasData && (
+                  resetConfirm ? (
+                    <div className="cp-reset-confirm">
+                      <span className="cp-reset-confirm-text">Clear all evidence?</span>
+                      <button className="cp-reset-confirm-yes" onClick={resetInvestigation} disabled={resetting}>
+                        {resetting ? 'Resetting…' : 'Yes, start again'}
+                      </button>
+                      <button className="cp-reset-confirm-no" onClick={() => setResetConfirm(false)} disabled={resetting}>
+                        Cancel
+                      </button>
                     </div>
                   ) : (
-                    <span className="cp-step-label">{step.label}</span>
-                  )}
-                  {isCta && <span className="cp-start-badge">→ Start here</span>}
-                  {!isReadOnly && isLocked && <span className="cp-step-lock">Locked</span>}
-                  {hasData && <span className="cp-step-done">✓ Done</span>}
+                    <button className="cp-reset-btn" onClick={() => setResetConfirm(true)}>
+                      ↺ Start again
+                    </button>
+                  )
+                )}
+              </div>
+
+              <div className="cp-step-body">
+                <div className="cp-agent-filed">
+                  <img
+                    className="cp-agent-avatar"
+                    src={`data:image/svg+xml;base64,${btoa(LESTRADE_SVG)}`}
+                    alt={step.agent.name}
+                    onClick={() => setLestradeOpen(true)}
+                  />
+                  <span className="cp-agent-filed-text">
+                    {hasData ? 'Filed by ' : 'Assigned to '}
+                    <button onClick={() => setLestradeOpen(true)}>{step.agent.name}</button>
+                    , {step.agent.division}
+                  </span>
                 </div>
 
-                {isOpen && <div className="cp-step-body">
-                  {step.intro && <p className="cp-step-intro">{step.intro}</p>}
-                  {step.agent && (
-                    <div className="cp-agent-filed">
-                      <img
-                        className="cp-agent-avatar"
-                        src={`data:image/svg+xml;base64,${btoa(LESTRADE_SVG)}`}
-                        alt={step.agent.name}
-                        onClick={() => setLestradeOpen(true)}
-                      />
-                      <span className="cp-agent-filed-text">
-                        {hasData ? 'Filed by ' : 'Assigned to '}
-                        <button onClick={() => setLestradeOpen(true)}>{step.agent.name}</button>
-                        , {step.agent.division}
-                      </span>
-                    </div>
-                  )}
-                  {hasData ? (
-                    <>
-                      <EvidenceResults ev={ev} />
-                      {!isReadOnly && (
-                        <div className="cp-step-actions">
-                          {(step.key !== 'web_intelligence' || ev.merchant_name) ? (
-                            <>
-                              <p className="cp-solve-hint">If this is the correct merchant, click <strong>Accept &amp; Solve</strong> to lock it in and claim points towards your next promotion. If this doesn't look correct, continue to the next step in the investigation.</p>
-                              <div className="cp-step-actions-row">
-                                <button className="cp-solve-btn" onClick={() => openConfirm(step.key)}>
-                                  {step.key === 'local_knowledge' ? 'Send for review →' : 'Accept & solve case →'}
-                                </button>
-                                {isNext && activeStepIdx === idx && (
-                                  <>
-                                    <span style={{ fontSize: '.65rem', color: 'var(--text-dim)' }}>or</span>
-                                    <button className="cp-next-btn" onClick={() => setActiveStepIdx(idx + 1)}>
-                                      Continue to {STEPS[idx + 1].label} ↓
-                                    </button>
-                                  </>
-                                )}
-                              </div>
-                            </>
-                          ) : (
-                            isNext && activeStepIdx === idx && (
-                              <div className="cp-step-actions-row">
-                                <button className="cp-next-btn" onClick={() => setActiveStepIdx(idx + 1)}>
-                                  Continue to {STEPS[idx + 1].label} ↓
-                                </button>
-                              </div>
-                            )
+                {hasData ? (
+                  <>
+                    <EvidenceResults ev={ev} />
+                    {!isReadOnly && ev.merchant_name && (
+                      <div className="cp-step-actions">
+                        <p className="cp-solve-hint">
+                          If this is the correct merchant, click <strong>Accept &amp; Solve</strong> to lock it in and claim points towards your next promotion.
+                          If this doesn&rsquo;t look right, you can provide your own merchant details below.
+                        </p>
+                        <div className="cp-step-actions-row">
+                          <button className="cp-solve-btn" onClick={() => openConfirm(step.key)}>
+                            Accept &amp; solve case →
+                          </button>
+                          {!showLocalKnowledge && (
+                            <button className="cp-next-btn" onClick={() => setShowLocalKnowledge(true)}>
+                              This isn&rsquo;t my merchant →
+                            </button>
                           )}
                         </div>
-                      )}
-                    </>
-                  ) : (
-                    <>
-                      <p className="cp-step-desc">{step.desc}</p>
-                      {isAuthenticated ? (
-                        step.manual ? (
-                          <LocalKnowledgeForm
-                            onSubmit={form => openConfirm(step.key, form)}
-                            submitting={isCollecting}
-                            label={step.label}
-                          />
-                        ) : isCollecting ? (
-                          <LestradeLoader agent={step.agent} />
-                        ) : (
-                          <button
-                            className={`cp-collect-btn${isCta ? ' cta' : ''}`}
-                            onClick={() => collect(step.key)}
-                            disabled={isLocked}
-                          >
-                            {step.agent ? `Brief ${step.agent.name}` : `Run ${step.label}`}
-                          </button>
-                        )
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <p className="cp-step-desc">{step.desc}</p>
+                    {isAuthenticated ? (
+                      isCollecting ? (
+                        <LestradeLoader agent={step.agent} />
                       ) : (
-                        <span className="cp-sign-in-note">Sign in to run this investigation</span>
-                      )}
-                    </>
-                  )}
-                  {errors[step.key] && (
-                    <span className="cp-step-error">{errors[step.key]}</span>
-                  )}
-                  {isPendingModeration && step.key === 'local_knowledge' && (
-                    <div className="cp-pending-msg">
-                      ⏳ Your identification is pending review by our moderation team. Once approved, the case will be marked as solved and will appear in search results.
-                    </div>
-                  )}
-                </div>}
+                        <button className="cp-collect-btn" onClick={() => collect(step.key)}>
+                          Brief {step.agent.name}
+                        </button>
+                      )
+                    ) : (
+                      <span className="cp-sign-in-note">Sign in to run this investigation</span>
+                    )}
+                  </>
+                )}
+                {errors[step.key] && <span className="cp-step-error">{errors[step.key]}</span>}
               </div>
-            );
-          })}
-        </div>
+            </div>
+          );
+        })()}
+
+        {/* ── Local Knowledge ───────────────────────────────── */}
+        {(() => {
+          const step        = STEPS[1];
+          const webIntelEv  = evidence[STEPS[0].key];
+          const ev          = evidence[step.key];
+          const hasData     = !!ev;
+          const isReadOnly  = isSolved || isPendingModeration;
+          const isCollecting = collecting === step.key;
+
+          // Show when evidence already exists, user opted in, web intel found no merchant,
+          // or a submission is pending moderation.
+          const show = !!ev || isPendingModeration
+            || (webIntelEv && (!webIntelEv.merchant_name || showLocalKnowledge) && !isSolved);
+
+          if (!show) return null;
+          if (isSolved && !hasData) return null;
+
+          return (
+            <div key={step.key} className={`cp-step${hasData ? ' has-data' : ''}`}>
+              <div className="cp-step-header">
+                <span className="cp-step-icon">{step.icon}</span>
+                <span className="cp-step-label">{step.label}</span>
+                {hasData && <span className="cp-step-done">✓ Done</span>}
+              </div>
+
+              <div className="cp-step-body">
+                {step.intro && <p className="cp-step-intro">{step.intro}</p>}
+                {hasData ? (
+                  <>
+                    <EvidenceResults ev={ev} />
+                    {!isReadOnly && (
+                      <div className="cp-step-actions">
+                        <div className="cp-step-actions-row">
+                          <button className="cp-solve-btn" onClick={() => openConfirm(step.key)}>
+                            Send for review →
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  isAuthenticated ? (
+                    <LocalKnowledgeForm
+                      onSubmit={form => openConfirm(step.key, form)}
+                      submitting={isCollecting}
+                    />
+                  ) : (
+                    <span className="cp-sign-in-note">Sign in to contribute</span>
+                  )
+                )}
+                {errors[step.key] && <span className="cp-step-error">{errors[step.key]}</span>}
+                {isPendingModeration && (
+                  <div className="cp-pending-msg">
+                    ⏳ Your identification is pending review by our moderation team. Once approved, the case will be marked as solved and will appear in search results.
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })()}
+
       </div>
 
       {lestradeOpen && <LestradeModal onClose={() => setLestradeOpen(false)} />}
