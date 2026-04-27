@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../hooks/useAuth.jsx';
 import { RANKS, getCurrentRank } from '../constants/ranks.js';
 
@@ -862,6 +862,7 @@ export default function CasePage({ caseData: initialData, navigate }) {
   const [locationHint, setLocationHint] = useState(initialData.location_hint || '');
   const [hintSaving, setHintSaving]     = useState(false);
   const [hintSaved, setHintSaved]       = useState(false);
+  const hintDebounceRef                 = useRef(null);
   const [resetConfirm, setResetConfirm] = useState(false);
   const [resetting, setResetting]       = useState(false);
   const [solveModal, setSolveModal]     = useState(null);
@@ -1020,20 +1021,21 @@ export default function CasePage({ caseData: initialData, navigate }) {
     }
   }
 
-  async function saveHint() {
-    setHintSaving(true);
-    try {
-      await apiFetch(`/api/cases/${initialData.id}/hint`, {
+  function handleHintChange(e) {
+    const val = e.target.value;
+    setLocationHint(val);
+    if (!isAuthenticated || isSolved) return;
+    clearTimeout(hintDebounceRef.current);
+    hintDebounceRef.current = setTimeout(() => {
+      setHintSaving(true);
+      apiFetch(`/api/cases/${initialData.id}/hint`, {
         method: 'PATCH',
-        body: JSON.stringify({ location_hint: locationHint }),
-      });
-      setHintSaved(true);
-      setTimeout(() => setHintSaved(false), 2500);
-    } catch {
-      // silently fail — non-critical
-    } finally {
-      setHintSaving(false);
-    }
+        body: JSON.stringify({ location_hint: val }),
+      })
+        .then(() => { setHintSaved(true); setTimeout(() => setHintSaved(false), 2500); })
+        .catch(() => {})
+        .finally(() => setHintSaving(false));
+    }, 1500);
   }
 
   const status              = data.computed_status || 'open';
@@ -1152,24 +1154,18 @@ export default function CasePage({ caseData: initialData, navigate }) {
           className="cp-hint-textarea"
           placeholder="e.g. Used a parking machine in central London last Tuesday, or online purchase from a US-based store…"
           value={locationHint}
-          onChange={e => setLocationHint(e.target.value)}
-          disabled={!isAuthenticated || hintSaving || isSolved}
+          onChange={handleHintChange}
+          disabled={!isAuthenticated || isSolved}
         />
         <div className="cp-hint-footer">
-          {isAuthenticated && !isSolved ? (
-            <>
-              <button
-                className="cp-hint-save"
-                onClick={saveHint}
-                disabled={hintSaving || locationHint === (data.location_hint || '')}
-              >
-                {hintSaving ? 'Saving…' : 'Save clues'}
-              </button>
-              {hintSaved && <span className="cp-hint-saved">✓ Saved</span>}
-            </>
-          ) : (!isAuthenticated && !isSolved) ? (
-            <span className="cp-hint-note">Sign in to add location notes</span>
-          ) : null}
+          {!isAuthenticated && !isSolved
+            ? <span className="cp-hint-note">Sign in to add location clues</span>
+            : hintSaving
+              ? <span className="cp-hint-saved">Saving…</span>
+              : hintSaved
+                ? <span className="cp-hint-saved">✓ Saved</span>
+                : null
+          }
         </div>
       </div>
 
