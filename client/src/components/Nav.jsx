@@ -50,16 +50,27 @@ const CSS = `
     font-family: var(--font-ui); padding: 0;
   }
   .nav-pts:hover { text-decoration: underline; }
+  .nav-user {
+    display: flex; align-items: center; gap: .65rem;
+    cursor: pointer; padding: .35rem 0;
+  }
   .nav-identity {
-    display: flex; flex-direction: column; gap: .1rem;
-    cursor: pointer; align-items: flex-end;
+    display: flex; flex-direction: column; gap: .1rem; align-items: flex-end;
   }
   .nav-rank {
     font-size: .65rem; color: var(--text); letter-spacing: .06em; white-space: nowrap;
     transition: color .2s;
   }
-  .nav-identity:hover .nav-rank { color: var(--accent); }
+  .nav-user:hover .nav-rank { color: var(--accent); }
   .nav-email { font-size: .6rem; color: var(--text-muted); letter-spacing: .06em; }
+  .nav-avatar {
+    width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+    border: 1px solid var(--border); background: var(--bg-card);
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; font-size: 1rem; line-height: 1;
+  }
+  .nav-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+  .nav-avatar-initials { font-size: .6rem; font-weight: 600; color: var(--text); letter-spacing: 0; }
   .nav-logout {
     font-size: .6rem; letter-spacing: .1em; text-transform: uppercase;
     color: var(--text-muted); cursor: pointer; background: none; border: none;
@@ -124,6 +135,45 @@ const CSS = `
   }
 `;
 
+const PRESET_MAP = {
+  'preset:detective':  { emoji: '🕵️', bg: '#0f1f3a' },
+  'preset:magnifier':  { emoji: '🔍', bg: '#1a3a2a' },
+  'preset:fedora':     { emoji: '🎩', bg: '#1a1a2a' },
+  'preset:dagger':     { emoji: '🗡️', bg: '#3a1010' },
+  'preset:file':       { emoji: '📋', bg: '#0a2a3a' },
+  'preset:candle':     { emoji: '🕯️', bg: '#2a1a08' },
+  'preset:lock':       { emoji: '🔐', bg: '#1a2a1a' },
+  'preset:map':        { emoji: '🗺️', bg: '#2a2010' },
+  'preset:phone':      { emoji: '📞', bg: '#0a2a2a' },
+  'preset:briefcase':  { emoji: '💼', bg: '#2a152a' },
+  'preset:flashlight': { emoji: '🔦', bg: '#0a0f2a' },
+  'preset:skull':      { emoji: '💀', bg: '#2a0a0a' },
+};
+
+function NavAvatar({ user }) {
+  const [imgErr, setImgErr] = useState(false);
+  const preset = user.avatar_url && PRESET_MAP[user.avatar_url];
+  if (preset) {
+    return (
+      <div className="nav-avatar" style={{ background: preset.bg, border: 'none' }}>
+        {preset.emoji}
+      </div>
+    );
+  }
+  if (user.avatar_url && !imgErr) {
+    return (
+      <div className="nav-avatar">
+        <img src={user.avatar_url} alt="" onError={() => setImgErr(true)} />
+      </div>
+    );
+  }
+  if (user.first_name) {
+    const initials = user.first_name[0].toUpperCase() + (user.last_name?.[0]?.toUpperCase() ?? '');
+    return <div className="nav-avatar"><span className="nav-avatar-initials">{initials}</span></div>;
+  }
+  return <div className="nav-avatar">👤</div>;
+}
+
 export default function Nav({ page, navigate, isAuthenticated, user, onPointsClick }) {
   const { logout, apiFetch } = useAuth();
   const [open, setOpen]         = useState(false);
@@ -177,11 +227,14 @@ export default function Nav({ page, navigate, isAuthenticated, user, onPointsCli
         <div className="nav-right">
           {isAuthenticated && user && (
             <>
-              <div className="nav-identity" onClick={() => { navigate('profile'); setOpen(false); }}>
-                <span className="nav-rank">
-                  {rank.icon} {rank.name}{user.last_name ? ` ${user.last_name}` : ''}
-                </span>
-                <span className="nav-email">{user.email}</span>
+              <div className="nav-user" onClick={() => { navigate('profile'); setOpen(false); }}>
+                <div className="nav-identity">
+                  <span className="nav-rank">
+                    {rank.icon} {rank.name}{user.last_name ? ` ${user.last_name}` : ''}
+                  </span>
+                  <span className="nav-email">{user.email}</span>
+                </div>
+                <NavAvatar user={user} />
               </div>
               <button className="nav-pts" onClick={onPointsClick}>{user.total_points ?? 0} pts</button>
             </>
