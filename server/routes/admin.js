@@ -82,4 +82,46 @@ router.post('/generate-logo/:id', requireAuth, requireRole('admin', 'moderator')
   }
 });
 
+// POST /api/admin/cases/:id/reopen
+// Deletes all submissions for the descriptor and all evidence for the case,
+// returning it to 'open' status so it can be investigated again.
+router.post('/cases/:id/reopen', requireAuth, requireRole('admin', 'moderator'), async (req, res) => {
+  const client = await db.connect();
+  try {
+    await client.query('BEGIN');
+
+    const { rows: [caseRow] } = await client.query(
+      'SELECT descriptor FROM cases WHERE id = $1',
+      [req.params.id]
+    );
+    if (!caseRow) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ error: 'Case not found' });
+    }
+
+    // Remove all submissions for this descriptor (approved + pending).
+    // The FK on descriptors.canonical_submission_id is ON DELETE SET NULL,
+    // so it clears automatically.
+    await client.query(
+      `DELETE FROM submissions
+       WHERE descriptor_id IN (
+         SELECT id FROM descriptors WHERE lower(text) = lower($1)
+       )`,
+      [caseRow.descriptor]
+    );
+
+    // Remove all investigation evidence so the steps are fresh.
+    await client.query('DELETE FROM evidence WHERE case_id = $1', [req.params.id]);
+
+    await client.query('COMMIT');
+    return res.json({ ok: true });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('[POST /api/admin/cases/:id/reopen]', err);
+    return res.status(500).json({ error: err.message || 'Internal server error' });
+  } finally {
+    client.release();
+  }
+});
+
 module.exports = router;

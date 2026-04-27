@@ -64,6 +64,26 @@ const CSS = `
   .ca-state.error   { color: var(--error); }
   .ca-state.empty   { color: var(--text-muted); }
 
+  .ca-actions { white-space: nowrap; }
+  .ca-reopen-btn {
+    padding: .3rem .75rem; border-radius: 2px; border: 1px solid var(--border);
+    background: none; color: var(--text-muted); font-family: var(--font-ui);
+    font-size: .58rem; letter-spacing: .1em; text-transform: uppercase; cursor: pointer;
+  }
+  .ca-reopen-btn:hover { border-color: var(--warning); color: var(--warning); }
+  .ca-reopen-confirm {
+    padding: .3rem .65rem; border-radius: 2px; border: 1px solid var(--warning);
+    background: none; color: var(--warning); font-family: var(--font-ui);
+    font-size: .58rem; letter-spacing: .1em; text-transform: uppercase; cursor: pointer;
+    margin-right: .4rem;
+  }
+  .ca-reopen-confirm:disabled { opacity: .45; cursor: default; }
+  .ca-reopen-cancel {
+    padding: .3rem .65rem; border-radius: 2px; border: 1px solid var(--border);
+    background: none; color: var(--text-muted); font-family: var(--font-ui);
+    font-size: .58rem; letter-spacing: .1em; text-transform: uppercase; cursor: pointer;
+  }
+
   @media (max-width: 640px) {
     .ca-controls { flex-direction: column; align-items: stretch; }
     .ca-tabs { justify-content: center; }
@@ -79,7 +99,8 @@ const STATUS_TABS = [
 ];
 
 export default function CaseArchivePage({ navigate }) {
-  const { apiFetch }            = useAuth();
+  const { apiFetch, user }      = useAuth();
+  const isAdmin                 = user?.role === 'admin' || user?.role === 'moderator';
   const [cases, setCases]       = useState([]);
   const [loading, setLoading]   = useState(true);
   const [error, setError]       = useState(null);
@@ -87,6 +108,8 @@ export default function CaseArchivePage({ navigate }) {
   const [status, setStatus]     = useState('');
   const [sortKey, setSortKey]   = useState('created_at');
   const [sortDir, setSortDir]   = useState('desc');
+  const [reopening, setReopening] = useState(null);   // case id awaiting confirmation
+  const [reopenBusy, setReopenBusy] = useState(false);
   const debounceRef             = useRef(null);
 
   useEffect(() => {
@@ -162,6 +185,25 @@ export default function CaseArchivePage({ navigate }) {
     }
   };
 
+  const confirmReopen = async (caseId) => {
+    setReopenBusy(true);
+    try {
+      const res  = await apiFetch(`/api/admin/cases/${caseId}/reopen`, { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to reopen case');
+      setCases(prev => prev.map(c =>
+        c.id === caseId
+          ? { ...c, computed_status: 'open', solved_merchant_name: null }
+          : c
+      ));
+      setReopening(null);
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setReopenBusy(false);
+    }
+  };
+
   return (
     <>
       <style>{CSS}</style>
@@ -217,6 +259,7 @@ export default function CaseArchivePage({ navigate }) {
                   <th className={`ca-th ${sortKey === 'created_at' ? 'sorted' : ''}`} onClick={() => toggleSort('created_at')}>
                     Created{sortIcon('created_at')}
                   </th>
+                  {isAdmin && <th className="ca-th">Actions</th>}
                 </tr>
               </thead>
               <tbody>
@@ -240,6 +283,37 @@ export default function CaseArchivePage({ navigate }) {
                         {new Date(c.created_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
                       </span>
                     </td>
+                    {isAdmin && (
+                      <td className="ca-td ca-actions" onClick={e => e.stopPropagation()}>
+                        {c.computed_status === 'solved' && (
+                          reopening === c.id ? (
+                            <>
+                              <button
+                                className="ca-reopen-confirm"
+                                onClick={() => confirmReopen(c.id)}
+                                disabled={reopenBusy}
+                              >
+                                {reopenBusy ? '…' : 'Confirm'}
+                              </button>
+                              <button
+                                className="ca-reopen-cancel"
+                                onClick={() => setReopening(null)}
+                                disabled={reopenBusy}
+                              >
+                                Cancel
+                              </button>
+                            </>
+                          ) : (
+                            <button
+                              className="ca-reopen-btn"
+                              onClick={() => setReopening(c.id)}
+                            >
+                              Reopen
+                            </button>
+                          )
+                        )}
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>
