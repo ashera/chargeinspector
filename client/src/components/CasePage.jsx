@@ -29,7 +29,8 @@ const STEPS = [
     },
   },
   { key: 'local_knowledge', icon: '🗣️', label: 'Local Knowledge', manual: true,
-    desc: 'Enter what you know about this merchant directly.' },
+    desc: 'Enter what you know about this merchant directly.',
+    intro: 'Our detectives have not yet been able to identify the merchant with confidence. You can either submit your best guess here for review by our moderators, or leave this case for another community member to solve.' },
 ];
 
 const CSS = `
@@ -280,7 +281,8 @@ const CSS = `
 
   .cp-step-actions { display: flex; flex-direction: column; align-items: flex-start; gap: .75rem; margin-top: .85rem; padding-top: .85rem; border-top: 1px solid var(--border); }
   .cp-step-actions-row { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; }
-  .cp-solve-hint { font-size: .72rem; color: var(--text-muted); line-height: 1.6; margin: 0; }
+  .cp-solve-hint  { font-size: .72rem; color: var(--text-muted); line-height: 1.6; margin: 0; }
+  .cp-step-intro  { font-size: .75rem; color: var(--text-muted); line-height: 1.7; margin: 0 0 1rem; }
   .cp-solve-btn {
     padding: .6rem 1.25rem; background: var(--accent); border: none; border-radius: 2px;
     font-family: var(--font-ui); font-size: .65rem; letter-spacing: .12em;
@@ -1036,6 +1038,7 @@ export default function CasePage({ caseData: initialData, navigate }) {
                 </div>
 
                 {isOpen && <div className="cp-step-body">
+                  {step.intro && <p className="cp-step-intro">{step.intro}</p>}
                   {hasData ? (
                     <>
                       <EvidenceResults ev={ev} />
@@ -1047,7 +1050,7 @@ export default function CasePage({ caseData: initialData, navigate }) {
                           <p className="cp-solve-hint">If this is the correct merchant, click <strong>Accept &amp; Solve</strong> to lock it in and claim points towards your next promotion. If this doesn't look correct, continue to the next step in the investigation.</p>
                           <div className="cp-step-actions-row">
                             <button className="cp-solve-btn" onClick={() => openConfirm(step.key)}>
-                              Accept &amp; solve case →
+                              {step.key === 'local_knowledge' ? 'Send for review →' : 'Accept & solve case →'}
                             </button>
                             {isNext && activeStepIdx === idx && (
                               <>
