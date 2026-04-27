@@ -91,7 +91,7 @@ async function collectEvidence(type, descriptor, { location_hint } = {}) {
       tools: [{ type: 'web_search_20250305', name: 'web_search' }],
       messages: [{ role: 'user', content: userMessage }],
     },
-    { headers: { 'anthropic-beta': 'web-search-2025-03-05' } },
+    { headers: { 'anthropic-beta': 'web-search-2025-03-05' }, timeout: 90_000 },
   );
 
   if (response.stop_reason === 'max_tokens') {

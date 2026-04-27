@@ -920,6 +920,7 @@ export default function CasePage({ caseData: initialData, navigate }) {
             if (payload.evidence) { setEvidence(ev => ({ ...ev, [type]: payload.evidence })); return; }
           }
         }
+        throw new Error('Investigation timed out — please try again.');
       } else {
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || data.message || `Collection failed (${res.status})`);

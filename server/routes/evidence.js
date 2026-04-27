@@ -39,10 +39,12 @@ router.post('/:id/evidence/collect', requireAuth, async (req, res) => {
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
     res.setHeader('Content-Encoding', 'identity');
+    res.setHeader('X-Accel-Buffering', 'no'); // prevent nginx proxy buffering
+    res.socket?.setNoDelay(true);             // disable Nagle's algorithm
     res.flushHeaders();
   }
 
-  const ping = sse ? setInterval(() => res.write(': ping\n\n'), 20000) : null;
+  const ping = sse ? setInterval(() => res.write(': ping\n\n'), 15000) : null;
   if (sse) req.on('close', () => clearInterval(ping));
 
   const sseError = (msg) => { clearInterval(ping); res.write(`data: ${JSON.stringify({ error: msg })}\n\n`); res.end(); };
