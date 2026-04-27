@@ -397,6 +397,14 @@ const CSS = `
     text-transform: uppercase; color: var(--text-muted); cursor: pointer;
   }
   .cp-next-btn:hover { border-color: var(--text-muted); color: var(--text); }
+  .cp-view-merchant-wrap { margin-top: 1.25rem; }
+  .cp-view-merchant-btn {
+    padding: .6rem 1.25rem; border: 1px solid var(--accent); border-radius: 2px;
+    background: none; color: var(--accent); font-family: var(--font-ui);
+    font-size: .65rem; letter-spacing: .12em; text-transform: uppercase; cursor: pointer;
+    transition: background .2s, color .2s;
+  }
+  .cp-view-merchant-btn:hover { background: var(--accent); color: var(--bg-page); }
 .cp-step-error { font-size: .65rem; color: #e05; margin-top: .4rem; display: block; }
   .cp-sign-in-note { font-size: .65rem; color: var(--text-dim); font-style: italic; }
 
@@ -882,6 +890,7 @@ export default function CasePage({ caseData: initialData, navigate }) {
   const [resetConfirm, setResetConfirm] = useState(false);
   const [resetting, setResetting]       = useState(false);
   const [solveModal, setSolveModal]     = useState(null);
+  const [solvedMerchant, setSolvedMerchant] = useState(null);
 
   const goToSignIn = () => navigate('login', { returnTo: 'case', returnState: { caseData: initialData } });
 
@@ -893,6 +902,17 @@ export default function CasePage({ caseData: initialData, navigate }) {
           setData(d.case);
           if (d.case.pending_submission_id) setPendingModeration(true);
           if (d.case.location_hint) setLocationHint(d.case.location_hint);
+          if (d.case.computed_status === 'solved') {
+            fetch(`/api/search?q=${encodeURIComponent(d.case.descriptor)}`)
+              .then(r2 => r2.json())
+              .then(sd => {
+                const exact = (sd.results || []).find(
+                  r => r.descriptor.toLowerCase() === d.case.descriptor.toLowerCase()
+                );
+                if (exact) setSolvedMerchant(exact);
+              })
+              .catch(() => {});
+          }
         }
       })
       .catch(() => {});
@@ -1246,6 +1266,16 @@ export default function CasePage({ caseData: initialData, navigate }) {
                 {hasData ? (
                   <>
                     <EvidenceResults ev={ev} />
+                    {isSolved && solvedMerchant && (
+                      <div className="cp-view-merchant-wrap">
+                        <button
+                          className="cp-view-merchant-btn"
+                          onClick={() => navigate('merchant', { merchant: solvedMerchant })}
+                        >
+                          View {solvedMerchant.name} →
+                        </button>
+                      </div>
+                    )}
                     {!isReadOnly && ev.merchant_name && (
                       <div className="cp-step-actions">
                         <p className="cp-solve-hint">
@@ -1318,6 +1348,16 @@ export default function CasePage({ caseData: initialData, navigate }) {
                 {hasData ? (
                   <>
                     <EvidenceResults ev={ev} />
+                    {isSolved && solvedMerchant && !evidence[STEPS[0].key] && (
+                      <div className="cp-view-merchant-wrap">
+                        <button
+                          className="cp-view-merchant-btn"
+                          onClick={() => navigate('merchant', { merchant: solvedMerchant })}
+                        >
+                          View {solvedMerchant.name} →
+                        </button>
+                      </div>
+                    )}
                     {!isReadOnly && (
                       <div className="cp-step-actions">
                         <div className="cp-step-actions-row">
