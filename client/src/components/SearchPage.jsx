@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useAuth } from '../hooks/useAuth.jsx';
 import { useMeta } from '../hooks/useMeta.js';
+import { RANKS, getCurrentRank } from '../constants/ranks.js';
 
 const CSS = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&display=swap');
@@ -159,6 +160,25 @@ const CSS = `
     color: var(--text-muted); cursor: pointer; text-align: center; padding: .5rem 0;
   }
   .sp-modal-dismiss:hover { color: var(--text); }
+  .sp-rank-bar {
+    max-width: 600px; margin: 2.5rem auto 0;
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 3px;
+    padding: 1rem 1.25rem; display: flex; flex-direction: column; gap: .65rem;
+  }
+  .sp-rank-row { display: flex; justify-content: space-between; align-items: baseline; gap: .5rem; }
+  .sp-rank-name { font-size: .8rem; color: var(--text); }
+  .sp-rank-icon { font-size: 1rem; margin-right: .3rem; }
+  .sp-rank-next { font-size: .68rem; color: var(--text-muted); }
+  .sp-rank-next strong { color: var(--accent); }
+  .sp-rank-track {
+    height: 4px; background: var(--border); border-radius: 2px; overflow: hidden;
+  }
+  .sp-rank-fill {
+    height: 100%; background: var(--accent); border-radius: 2px;
+    transition: width .4s ease;
+  }
+  .sp-rank-maxed { font-size: .7rem; color: var(--accent); }
+
   @keyframes cotd-pulse {
     0%, 100% { box-shadow: 0 0 0 0 rgba(240,180,41,.18), 0 0 18px 0 rgba(240,180,41,.06); }
     50%       { box-shadow: 0 0 0 4px rgba(240,180,41,.06), 0 0 32px 4px rgba(240,180,41,.14); }
@@ -195,7 +215,7 @@ const CSS = `
 
 export default function SearchPage({ navigate }) {
   useMeta({ title: 'Identify Any Credit Card Charge', description: 'Unknown charge on your bank statement? Search our community database of billing descriptors to find out who really charged you.' });
-  const { apiFetch } = useAuth();
+  const { apiFetch, isAuthenticated, user } = useAuth();
   const [query, setQuery]           = useState('');
   const [results, setResults]       = useState(null);
   const [busy, setBusy]             = useState(false);
@@ -431,6 +451,31 @@ export default function SearchPage({ navigate }) {
           </div>
         </div>
       )}
+
+      {isAuthenticated && user && (() => {
+        const pts      = user.total_points ?? 0;
+        const rank     = getCurrentRank(pts);
+        const nextRank = RANKS.find(r => r.threshold > pts) ?? null;
+        const pct      = nextRank
+          ? Math.min(100, Math.round(((pts - rank.threshold) / (nextRank.threshold - rank.threshold)) * 100))
+          : 100;
+        return (
+          <div className="sp-rank-bar">
+            <div className="sp-rank-row">
+              <span className="sp-rank-name">
+                <span className="sp-rank-icon">{rank.icon}</span>{rank.name}
+              </span>
+              {nextRank
+                ? <span className="sp-rank-next"><strong>{nextRank.threshold - pts} pts</strong> to {nextRank.icon} {nextRank.name}</span>
+                : <span className="sp-rank-maxed">Max rank reached</span>
+              }
+            </div>
+            <div className="sp-rank-track">
+              <div className="sp-rank-fill" style={{ width: `${pct}%` }} />
+            </div>
+          </div>
+        );
+      })()}
     </>
   );
 }
