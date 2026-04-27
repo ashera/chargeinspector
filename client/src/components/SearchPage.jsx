@@ -178,11 +178,11 @@ const CSS = `
     max-width: 600px; margin: 2.5rem auto 0;
     background: var(--bg-card); border: 1px solid var(--border); border-radius: 3px;
     padding: 1.25rem; display: flex; flex-direction: column; gap: .75rem;
+    text-align: center; align-items: center;
   }
   .sp-cta-title { font-family: var(--font-display); font-size: 1.1rem; color: var(--text); }
   .sp-cta-body  { font-size: .75rem; color: var(--text-muted); line-height: 1.6; }
   .sp-cta-btn {
-    align-self: flex-start;
     padding: .65rem 1.5rem; background: var(--accent); border: none; border-radius: 2px;
     font-family: var(--font-ui); font-size: .65rem; letter-spacing: .12em;
     text-transform: uppercase; color: var(--bg-page); font-weight: 500;
