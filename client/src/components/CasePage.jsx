@@ -693,6 +693,7 @@ function LestradeModal({ onClose }) {
           <li>Consults business registries, press mentions, and review sites for corroborating evidence</li>
           <li>Locates the merchant's official logo from their own website</li>
           <li>Files a confidence-rated report with sources for the community to review</li>
+          <li>Remembers, when possible, to wax his moustache</li>
         </ul>
         <button className="cp-lestrade-close" onClick={onClose}>Close</button>
       </div>
