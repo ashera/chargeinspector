@@ -413,7 +413,7 @@ export default function SearchPage({ navigate }) {
                   The following merchant{results.length !== 1 ? 's match' : ' matches'} that descriptor. Click <strong style={{ color: 'var(--text)' }}>View Details</strong> to see more information about the merchant.
                 </p>
               </div>
-              {results.map(r => (
+              {results.slice(0, 3).map(r => (
                 <div key={r.descriptor_id} className="sp-card">
                   {r.logo_url
                     ? <img className="sp-logo" src={r.logo_url} alt={r.name} />
